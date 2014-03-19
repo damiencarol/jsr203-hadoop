@@ -37,4 +37,19 @@ public class HadoopFileSystemTest extends TestCase {
 		Files.createDirectory(path);
 		assertTrue(Files.exists(path));
 	}
+
+	public void testCreateDeleteTemp() throws URISyntaxException, IOException {
+		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/toto");
+		Path path = Paths.get(uri);
+		Files.createDirectory(path);
+		assertTrue(Files.exists(path));
+		Files.delete(path);
+		assertFalse(Files.exists(path));
+	}
+	
+	public void testDefaults() throws URISyntaxException, IOException {
+		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/toto");
+		Path path = Paths.get(uri);
+		Files.deleteIfExists(path);
+	}
 }
