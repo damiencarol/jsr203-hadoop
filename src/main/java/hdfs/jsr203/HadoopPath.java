@@ -6,10 +6,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.attribute.FileAttribute;
@@ -17,6 +19,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Iterator;
 
+import com.github.marschall.com.sun.nio.zipfs.ZipDirectoryStream;
 import com.github.marschall.com.sun.nio.zipfs.ZipFileAttributes;
 
 public class HadoopPath implements Path {
@@ -33,6 +36,10 @@ public class HadoopPath implements Path {
 	/*public HadoopPath(HadoopFileSystem hdfs, URI uri) {
 		this(hdfs, uri.getPath());
 	}*/
+
+	public HadoopPath(HadoopFileSystem hdfs2, org.apache.hadoop.fs.Path path) throws URISyntaxException {
+		this(hdfs2, path.toUri().getPath());
+	}
 
 	public HadoopPath(HadoopFileSystem hdfs, String path) throws URISyntaxException
 	{
@@ -76,7 +83,7 @@ public class HadoopPath implements Path {
 	}
 
 	@Override
-	public FileSystem getFileSystem() {
+	public HadoopFileSystem getFileSystem() {
 		return this.hdfs;
 	}
 
@@ -249,5 +256,32 @@ public class HadoopPath implements Path {
 	void createDirectory(FileAttribute<?>... attrs) throws IOException
     {
         this.hdfs.createDirectory(this.hadoopPath, attrs);
+    }
+
+	@Override
+	public String toString() {
+		return this.hadoopPath.toString();
+	}
+	
+	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
+	        throws IOException
+	    {
+	        return new HadoopDirectoryStream(this, filter);
+	    }
+
+	/**
+	 * Helper to get the raw interface of HDFS path.
+	 * @return
+	 */
+	public org.apache.hadoop.fs.Path getRawPath() {
+		return this.hadoopPath;
+	}
+	
+	void delete() throws IOException {
+		this.hdfs.deleteFile(this.hadoopPath, true);
+    }
+
+    void deleteIfExists() throws IOException {
+		this.hdfs.deleteFile(this.hadoopPath, false);
     }
 }

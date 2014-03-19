@@ -28,8 +28,7 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public boolean isDirectory() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.fileStatus.isDir();
 	}
 
 	@Override
@@ -57,13 +56,17 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public FileTime lastModifiedTime() {
-		// TODO Auto-generated method stub
-		return null;
+		return FileTime.from(this.fileStatus.getModificationTime(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public long size() {
 		return this.fileStatus.getLen();
+	}
+
+	@Override
+	public String toString() {
+		return "[IS DIR : " + this.fileStatus.isDir() + "]";
 	}
 
 }

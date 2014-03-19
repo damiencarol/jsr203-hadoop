@@ -57,8 +57,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public void delete(Path path) throws IOException {
-		// TODO Auto-generated method stub
-		
+		toHadoopPath(path).delete();
 	}
 
 	@Override
@@ -124,8 +123,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public DirectoryStream<Path> newDirectoryStream(Path dir,
 			Filter<? super Path> filter) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return toHadoopPath(dir).newDirectoryStream(filter);
 	}
 
 	@Override
