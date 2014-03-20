@@ -3,7 +3,6 @@ package hdfs.jsr203;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
@@ -28,6 +27,7 @@ import java.util.Set;
 
 public class HadoopPath implements Path {
 
+	private byte[] path;
 	private String internalPath;
 	private HadoopFileSystem hdfs;
 	private org.apache.hadoop.fs.Path hadoopPath;
@@ -42,32 +42,25 @@ public class HadoopPath implements Path {
 	 * uri.getPath()); }
 	 */
 
-	public HadoopPath(HadoopFileSystem hdfs2) {
-		this(hdfs2, (String)null);
-	}
+	/*public HadoopPath(HadoopFileSystem hdfs2) {
+		this(hdfs2, "/");
+	}*/
 	
 	public HadoopPath(HadoopFileSystem hdfs2, org.apache.hadoop.fs.Path path) {
 		this(hdfs2, path.toUri().getPath());
 	}
 
 	public HadoopPath(HadoopFileSystem hdfs, String path) {
-		if (path == null)
-			path = "/";
-		if (path == null)
-			path = "/";
-		
+
+		this.path = path.getBytes();
 		this.hdfs = hdfs;
 		this.hadoopPath = new org.apache.hadoop.fs.Path("hdfs://"
 				+ hdfs.getHost() + ":" + hdfs.getPort() + path);
 		this.internalPath = path;
 	}
 
-	private String buildPathHadoop(String[] path) {
-		StringBuilder st = new StringBuilder();
-		for (String str : path) {
-			st.append("/");
-		}
-		return st.toString();
+	public HadoopPath(HadoopFileSystem hdfs2, byte[] resolved) {
+		this(hdfs2, new String(resolved));
 	}
 
 	HadoopFileAttributes getAttributes() throws IOException {
@@ -136,7 +129,7 @@ public class HadoopPath implements Path {
 	@Override
 	public Path getRoot() {
 		if (this.isAbsolute())
-            return new HadoopPath(this.hdfs);
+            return new HadoopPath(this.hdfs, "/");
         else
             return null;
 	}
@@ -180,14 +173,26 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path resolve(Path other) {
-		// TODO Auto-generated method stub
-		return null;
+		final HadoopPath o = checkPath(other);
+        if (o.isAbsolute())
+            return o;
+        byte[] resolved = null;
+        if (this.path[path.length - 1] == '/') {
+            resolved = new byte[path.length + o.path.length];
+            System.arraycopy(path, 0, resolved, 0, path.length);
+            System.arraycopy(o.path, 0, resolved, path.length, o.path.length);
+        } else {
+            resolved = new byte[path.length + 1 + o.path.length];
+            System.arraycopy(path, 0, resolved, 0, path.length);
+            resolved[path.length] = '/';
+            System.arraycopy(o.path, 0, resolved, path.length + 1, o.path.length);
+        }
+        return new HadoopPath(hdfs, resolved);
 	}
 
 	@Override
 	public Path resolve(String other) {
-		//this.hadoopPath.makeQualified(toUri(), arg1)// TODO Auto-generated method stub
-		return null;
+		return resolve(getFileSystem().getPath(other));
 	}
 
 	@Override

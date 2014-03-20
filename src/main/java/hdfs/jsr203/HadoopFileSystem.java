@@ -84,7 +84,7 @@ public class HadoopFileSystem extends FileSystem {
 	@Override
 	public Iterable<FileStore> getFileStores() {
 		ArrayList<FileStore> list = new ArrayList<>(1);
-        list.add(new HadoopFileStore(new HadoopPath(this)));
+        list.add(new HadoopFileStore(new HadoopPath(this, "/")));
         return list;
 	}
 
