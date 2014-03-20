@@ -33,19 +33,16 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public boolean isOther() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isRegularFile() {
-		// TODO Auto-generated method stub
-		return false;
+		return !this.fileStatus.isDir();
 	}
 
 	@Override
 	public boolean isSymbolicLink() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

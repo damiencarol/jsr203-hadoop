@@ -4,65 +4,75 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.AccessMode;
+import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.ProviderMismatchException;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.FileAttribute;
 import java.util.Iterator;
-
-import com.github.marschall.com.sun.nio.zipfs.ZipDirectoryStream;
-import com.github.marschall.com.sun.nio.zipfs.ZipFileAttributes;
+import java.util.Set;
 
 public class HadoopPath implements Path {
-	
+
 	private String internalPath;
 	private HadoopFileSystem hdfs;
 	private org.apache.hadoop.fs.Path hadoopPath;
 
-	/*public HadoopPath(HadoopFileSystem hdfs, String path)
-	{
-		this(hdfs, new org.apache.hadoop.fs.Path(path));
-	}*/
-	
-	/*public HadoopPath(HadoopFileSystem hdfs, URI uri) {
-		this(hdfs, uri.getPath());
-	}*/
+	/*
+	 * public HadoopPath(HadoopFileSystem hdfs, String path) { this(hdfs, new
+	 * org.apache.hadoop.fs.Path(path)); }
+	 */
 
-	public HadoopPath(HadoopFileSystem hdfs2, org.apache.hadoop.fs.Path path) throws URISyntaxException {
+	/*
+	 * public HadoopPath(HadoopFileSystem hdfs, URI uri) { this(hdfs,
+	 * uri.getPath()); }
+	 */
+
+	public HadoopPath(HadoopFileSystem hdfs2, org.apache.hadoop.fs.Path path) {
 		this(hdfs2, path.toUri().getPath());
 	}
 
-	public HadoopPath(HadoopFileSystem hdfs, String path) throws URISyntaxException
-	{
+	public HadoopPath(HadoopFileSystem hdfs, String path) {
 		this.hdfs = hdfs;
-		this.hadoopPath = new org.apache.hadoop.fs.Path("hdfs://" +
-				hdfs.getHost() + ":" + hdfs.getPort() + path);
+		this.hadoopPath = new org.apache.hadoop.fs.Path("hdfs://"
+				+ hdfs.getHost() + ":" + hdfs.getPort() + path);
 		this.internalPath = path;
 	}
 
-	HadoopFileAttributes getAttributes() throws IOException
-    {
-		//this.hdfs.fs.getFileAttributes(this);//getResolvedPath());
-    
-		HadoopFileAttributes hfas = new HadoopFileAttributes(this.hdfs.getHDFS().getFileStatus(hadoopPath));
-		/*if (hfas == null)
-            throw new NoSuchFileException(toString());*/
-        return hfas;
-    }
+	HadoopFileAttributes getAttributes() throws IOException {
+		// this.hdfs.fs.getFileAttributes(this);//getResolvedPath());
+
+		HadoopFileAttributes hfas = new HadoopFileAttributes(this.hdfs
+				.getHDFS().getFileStatus(hadoopPath));
+		/*
+		 * if (hfas == null) throw new NoSuchFileException(toString());
+		 */
+		return hfas;
+	}
 	
+	private HadoopPath checkPath(Path path) {
+        if (path == null)
+            throw new NullPointerException();
+        if (!(path instanceof HadoopPath))
+            throw new ProviderMismatchException();
+        return (HadoopPath) path;
+    }
+
 	@Override
 	public int compareTo(Path other) {
-		// TODO Auto-generated method stub
-		return 0;
+		final HadoopPath o = checkPath(other);
+        return this.hadoopPath.compareTo(o.hadoopPath);
 	}
 
 	@Override
@@ -101,8 +111,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path getParent() {
-		// TODO Auto-generated method stub
-		return null;
+		return new HadoopPath(this.hdfs, this.hadoopPath.getParent());
 	}
 
 	@Override
@@ -213,8 +222,7 @@ public class HadoopPath implements Path {
 	public URI toUri() {
 		try {
 			return new URI(HadoopFileSystemProvider.SCHEME,
-					this.hdfs.getHost(),
-					this.internalPath);
+					this.hdfs.getHost(), this.internalPath);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -222,66 +230,84 @@ public class HadoopPath implements Path {
 		return null;
 	}
 
-	void checkAccess(AccessMode... modes) throws IOException
-	{
+	void checkAccess(AccessMode... modes) throws IOException {
 		boolean w = false;
-        boolean x = false;
-        for (AccessMode mode : modes) {
-            switch (mode) {
-                case READ:
-                    break;
-                case WRITE:
-                    w = true;
-                    break;
-                case EXECUTE:
-                    x = true;
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
-        org.apache.hadoop.fs.Path hdfs_path = this.hadoopPath;
-		//ZipFileAttributes attrs = zfs.getFileAttributes(getResolvedPath());
-        //if (attrs == null && (path.length != 1 || path[0] != '/'))
-        if (!this.hdfs.getHDFS().exists(hdfs_path))
-            throw new NoSuchFileException(toString());
-        if (w) {
-            //if (zfs.isReadOnly())
-                throw new AccessDeniedException(toString());
-        }
-        if (x)
-            throw new AccessDeniedException(toString());
+		boolean x = false;
+		for (AccessMode mode : modes) {
+			switch (mode) {
+			case READ:
+				break;
+			case WRITE:
+				w = true;
+				break;
+			case EXECUTE:
+				x = true;
+				break;
+			default:
+				throw new UnsupportedOperationException();
+			}
+		}
+		org.apache.hadoop.fs.Path hdfs_path = this.hadoopPath;
+		// ZipFileAttributes attrs = zfs.getFileAttributes(getResolvedPath());
+		// if (attrs == null && (path.length != 1 || path[0] != '/'))
+		if (!this.hdfs.getHDFS().exists(hdfs_path))
+			throw new NoSuchFileException(toString());
+		if (w) {
+			// if (zfs.isReadOnly())
+			throw new AccessDeniedException(toString());
+		}
+		if (x)
+			throw new AccessDeniedException(toString());
 	}
-	
-	void createDirectory(FileAttribute<?>... attrs) throws IOException
-    {
-        this.hdfs.createDirectory(this.hadoopPath, attrs);
-    }
+
+	void createDirectory(FileAttribute<?>... attrs) throws IOException {
+		this.hdfs.createDirectory(this.hadoopPath, attrs);
+	}
 
 	@Override
 	public String toString() {
 		return this.hadoopPath.toString();
 	}
-	
+
 	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
-	        throws IOException
-	    {
-	        return new HadoopDirectoryStream(this, filter);
-	    }
+			throws IOException {
+		return new HadoopDirectoryStream(this, filter);
+	}
 
 	/**
 	 * Helper to get the raw interface of HDFS path.
+	 * 
 	 * @return
 	 */
 	public org.apache.hadoop.fs.Path getRawPath() {
 		return this.hadoopPath;
 	}
-	
+
 	void delete() throws IOException {
 		this.hdfs.deleteFile(this.hadoopPath, true);
-    }
+	}
 
-    void deleteIfExists() throws IOException {
+	void deleteIfExists() throws IOException {
 		this.hdfs.deleteFile(this.hadoopPath, false);
-    }
+	}
+
+	void move(HadoopPath target, CopyOption... options) throws IOException {
+		/*
+		 * if (Files.isSameFile(this.zfs.getZipFile(), target.zfs.getZipFile()))
+		 * { zfs.copyFile(true, getResolvedPath(), target.getResolvedPath(),
+		 * options); } else { copyToTarget(target, options); delete(); }
+		 */
+		// this.hdfs.getHDFS().rename(arg0, arg1);
+		// TODO: Fix this
+		throw new IOException();
+	}
+
+	SeekableByteChannel newByteChannel(Set<? extends OpenOption> options,
+			FileAttribute<?>... attrs) throws IOException {
+		return this.hdfs.newByteChannel(this.hadoopPath, options, attrs);
+	}
+
+	/*private HadoopPath getResolvedPath() {
+		return this;
+	}*/
 }

@@ -108,16 +108,14 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public void move(Path source, Path target, CopyOption... options)
 			throws IOException {
-		// TODO Auto-generated method stub
-		
+		toHadoopPath(source).move(toHadoopPath(target), options);
 	}
 
 	@Override
 	public SeekableByteChannel newByteChannel(Path path,
 			Set<? extends OpenOption> options, FileAttribute<?>... attrs)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return toHadoopPath(path).newByteChannel(options, attrs);
 	}
 
 	@Override
