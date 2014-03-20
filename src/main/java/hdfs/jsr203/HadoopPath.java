@@ -26,8 +26,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.marschall.com.sun.nio.zipfs.ZipFileAttributeView;
-
 public class HadoopPath implements Path {
 
 	private String internalPath;
@@ -44,22 +42,39 @@ public class HadoopPath implements Path {
 	 * uri.getPath()); }
 	 */
 
+	public HadoopPath(HadoopFileSystem hdfs2) {
+		this(hdfs2, (String)null);
+	}
+	
 	public HadoopPath(HadoopFileSystem hdfs2, org.apache.hadoop.fs.Path path) {
 		this(hdfs2, path.toUri().getPath());
 	}
 
 	public HadoopPath(HadoopFileSystem hdfs, String path) {
+		if (path == null)
+			path = "/";
+		if (path == null)
+			path = "/";
+		
 		this.hdfs = hdfs;
 		this.hadoopPath = new org.apache.hadoop.fs.Path("hdfs://"
 				+ hdfs.getHost() + ":" + hdfs.getPort() + path);
 		this.internalPath = path;
 	}
 
+	private String buildPathHadoop(String[] path) {
+		StringBuilder st = new StringBuilder();
+		for (String str : path) {
+			st.append("/");
+		}
+		return st.toString();
+	}
+
 	HadoopFileAttributes getAttributes() throws IOException {
 		// this.hdfs.fs.getFileAttributes(this);//getResolvedPath());
 
 		HadoopFileAttributes hfas = new HadoopFileAttributes(this.hdfs
-				.getHDFS().getFileStatus(hadoopPath));
+				.getHDFS().getFileStatus(this.getRawPath()));
 		/*
 		 * if (hfas == null) throw new NoSuchFileException(toString());
 		 */
@@ -110,8 +125,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public int getNameCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.hadoopPath.depth();
 	}
 
 	@Override
@@ -121,14 +135,15 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path getRoot() {
-		// TODO Auto-generated method stub
-		return null;
+		if (this.isAbsolute())
+            return new HadoopPath(this.hdfs);
+        else
+            return null;
 	}
 
 	@Override
 	public boolean isAbsolute() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.hadoopPath.isAbsolute();
 	}
 
 	@Override
@@ -171,7 +186,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path resolve(String other) {
-		// TODO Auto-generated method stub
+		//this.hadoopPath.makeQualified(toUri(), arg1)// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -225,13 +240,13 @@ public class HadoopPath implements Path {
 
 	@Override
 	public URI toUri() {
-		try {
+		/*try {
 			return new URI(HadoopFileSystemProvider.SCHEME,
 					this.hdfs.getHost(), this.internalPath);
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return null;
 	}
 
@@ -345,7 +360,7 @@ public class HadoopPath implements Path {
         // each ZipFileSystem only has one root (as requested for now)
         if (exists())
             return hdfs.getFileStore(this);
-        throw new NoSuchFileException(this.internalPath);
+        throw new NoSuchFileException(this.hadoopPath.toUri().toString());
     }
 	
 	boolean exists() {

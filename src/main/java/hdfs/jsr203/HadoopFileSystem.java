@@ -16,6 +16,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.ClosedFileSystemException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.NoSuchFileException;
@@ -86,18 +87,28 @@ public class HadoopFileSystem extends FileSystem {
 	@Override
 	public Iterable<FileStore> getFileStores() {
 		ArrayList<FileStore> list = new ArrayList<>(1);
-        list.add(new HadoopFileStore(new HadoopPath(this, "/")));
+        list.add(new HadoopFileStore(new HadoopPath(this)));
         return list;
 	}
 
 	@Override
 	public Path getPath(String first, String... more) {
-		StringBuilder str = new StringBuilder(first);
-		for (String more_item : more) {
-			str.append(getSeparator());
-			str.append(more_item);
-		}
-		return new HadoopPath(this, str.toString());
+		String path;
+        if (more.length == 0) {
+            path = first;
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append(first);
+            for (String segment: more) {
+                if (segment.length() > 0) {
+                    if (sb.length() > 0)
+                        sb.append('/');
+                    sb.append(segment);
+                }
+            }
+            path = sb.toString();
+        }
+		return new HadoopPath(this, path);
 	}
 
 	@Override
@@ -201,10 +212,26 @@ public class HadoopFileSystem extends FileSystem {
 	public void deleteFile(org.apache.hadoop.fs.Path hadoopPath, boolean failIfNotExists)
         throws IOException
     {
-		// TODO : manage read only
-        //checkWritable();
-
-		this.fs.delete(hadoopPath, failIfNotExists);
+		checkWritable();
+		
+		// If no exist
+		if (!this.fs.exists(hadoopPath))
+		{
+			if (failIfNotExists)
+				throw new NoSuchFileException(hadoopPath.toString());
+		}
+		else
+		{
+			FileStatus stat = this.fs.getFileStatus(hadoopPath);
+			if (stat.isDir()) {
+				FileStatus[] stats = this.fs.listStatus(hadoopPath);
+				if (stats.length > 0)
+					throw new DirectoryNotEmptyException(hadoopPath.toString());
+			}
+			// Try to delete with no recursion
+			this.fs.delete(hadoopPath, false);
+		}
+		
         /*IndexNode inode = getInode(hadoopPath);
         if (inode == null) {
             if (hadoopPath != null && hadoopPath.length == 0)

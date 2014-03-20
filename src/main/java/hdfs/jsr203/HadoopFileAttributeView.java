@@ -7,6 +7,8 @@ import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.hadoop.fs.FileStatus;
+
 public class HadoopFileAttributeView implements BasicFileAttributeView
 {
     private static enum AttrID {
@@ -59,7 +61,8 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
 
     public HadoopFileAttributes readAttributes() throws IOException
     {
-        return path.getAttributes();
+        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawPath());
+		return new HadoopFileAttributes(fileStatus );
     }
 
     @Override

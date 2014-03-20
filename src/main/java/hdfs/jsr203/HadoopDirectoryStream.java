@@ -9,6 +9,8 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.hadoop.fs.FileStatus;
+
 public class HadoopDirectoryStream implements DirectoryStream<Path> 
 {
     private final HadoopFileSystem hadoopfs;
@@ -26,8 +28,10 @@ public class HadoopDirectoryStream implements DirectoryStream<Path>
         //this.path = hadoopPath.getResolvedPath();
     	this.path = hadoopPath;
         this.filter = filter;
+        
         // sanity check
-        if (!hadoopPath.getAttributes().isDirectory())
+        FileStatus stat = hadoopPath.getFileSystem().getHDFS().getFileStatus(hadoopPath.getRawPath());
+        if (!stat.isDir())
             throw new NotDirectoryException(hadoopPath.toString());
     }
 
@@ -46,7 +50,7 @@ public class HadoopDirectoryStream implements DirectoryStream<Path>
             throw new IllegalStateException(e);
 		}
         return new Iterator<Path>() {
-            private Path next;
+            //private Path next;
             @Override
             public boolean hasNext() {
                 if (isClosed)

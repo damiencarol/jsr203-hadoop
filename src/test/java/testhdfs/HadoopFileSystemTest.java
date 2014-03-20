@@ -75,7 +75,15 @@ public class HadoopFileSystemTest extends TestCase {
 	public void testFileStore() throws URISyntaxException, IOException {
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/test_file");
 		Path path = Paths.get(uri);
+		if (Files.exists(path))
+			Files.delete(path);
+		assertFalse(Files.exists(path));
+		Files.createFile(path);
+		assertTrue(Files.exists(path));
 		FileStore st = Files.getFileStore(path);
 		assertNotNull(st);
 	}
+	
+	
+	
 }

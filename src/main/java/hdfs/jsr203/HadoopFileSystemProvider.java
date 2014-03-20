@@ -75,7 +75,11 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public FileSystem getFileSystem(URI uri) {
 		try {
-			return new HadoopFileSystem(this, uri.getHost(), uri.getPort());
+			int port = uri.getPort();
+			if (port == -1)
+				port = 8020; // Default hadoop port
+			
+			return new HadoopFileSystem(this, uri.getHost(), port);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
