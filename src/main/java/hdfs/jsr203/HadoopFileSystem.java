@@ -29,12 +29,18 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+
+import com.github.marschall.com.sun.nio.zipfs.ZipFileStore;
+import com.github.marschall.com.sun.nio.zipfs.ZipPath;
 
 public class HadoopFileSystem extends FileSystem {
 	
@@ -79,8 +85,9 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public Iterable<FileStore> getFileStores() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<FileStore> list = new ArrayList<>(1);
+        list.add(new HadoopFileStore(new HadoopPath(this, "/")));
+        return list;
 	}
 
 	@Override
@@ -140,11 +147,14 @@ public class HadoopFileSystem extends FileSystem {
 		return this.provider;
 	}
 
-	@Override
-	public Set<String> supportedFileAttributeViews() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private static final Set<String> supportedFileAttributeViews =
+            Collections.unmodifiableSet(
+                new HashSet<String>(Arrays.asList("basic", "hadoop")));
+
+    @Override
+    public Set<String> supportedFileAttributeViews() {
+        return supportedFileAttributeViews;
+    }
 	
 	public String getHost()
 	{
@@ -475,5 +485,21 @@ public class HadoopFileSystem extends FileSystem {
     private void ensureOpen() throws IOException {
         if (!isOpen)
             throw new ClosedFileSystemException();
+    }
+    
+    boolean exists(org.apache.hadoop.fs.Path path)
+            throws IOException
+        {
+            beginRead();
+            try {
+                ensureOpen();
+                return this.fs.exists(path);
+            } finally {
+                endRead();
+            }
+        }
+    
+    FileStore getFileStore(HadoopPath path) {
+        return new HadoopFileStore(path);
     }
 }

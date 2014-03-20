@@ -10,6 +10,7 @@ import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileStore;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
@@ -20,8 +21,12 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+
+import com.github.marschall.com.sun.nio.zipfs.ZipFileAttributeView;
 
 public class HadoopPath implements Path {
 
@@ -307,7 +312,49 @@ public class HadoopPath implements Path {
 		return this.hdfs.newByteChannel(this.hadoopPath, options, attrs);
 	}
 
-	/*private HadoopPath getResolvedPath() {
-		return this;
-	}*/
+	public Map<String, Object> readAttributes(String attributes,
+			LinkOption[] options) throws IOException {
+		String view = null;
+        String attrs = null;
+        int colonPos = attributes.indexOf(':');
+        if (colonPos == -1) {
+            view = "basic";
+            attrs = attributes;
+        } else {
+            view = attributes.substring(0, colonPos++);
+            attrs = attributes.substring(colonPos);
+        }
+        HadoopFileAttributeView hfv = HadoopFileAttributeView.get(this, view);
+        if (hfv == null) {
+            throw new UnsupportedOperationException("view not supported");
+        }
+        return hfv.readAttributes(attrs);
+	}
+
+	private org.apache.hadoop.fs.Path getResolvedPath() {
+		return this.hadoopPath;
+	}
+	
+	void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
+	        throws IOException
+	{
+		this.hdfs.getHDFS().setTimes(this.hadoopPath, mtime.toMillis(), atime.toMillis());
+	}
+	
+	FileStore getFileStore() throws IOException {
+        // each ZipFileSystem only has one root (as requested for now)
+        if (exists())
+            return hdfs.getFileStore(this);
+        throw new NoSuchFileException(this.internalPath);
+    }
+	
+	boolean exists() {
+		// Root case
+        if ("/".equals(internalPath))
+            return true;
+        try {
+            return hdfs.exists(getResolvedPath());
+        } catch (IOException x) {}
+        return false;
+    }
 }

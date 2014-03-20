@@ -69,8 +69,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public FileStore getFileStore(Path path) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return toHadoopPath(path).getFileStore();
 	}
 
 	@Override
@@ -143,9 +142,9 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public Map<String, Object> readAttributes(Path path, String attributes,
-			LinkOption... options) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+			LinkOption... options) throws IOException
+	{
+		return toHadoopPath(path).readAttributes(attributes, options);
 	}
 
 	@Override

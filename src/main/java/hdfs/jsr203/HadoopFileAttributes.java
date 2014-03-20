@@ -15,6 +15,14 @@ public class HadoopFileAttributes implements BasicFileAttributes
 		this.fileStatus = fileStatus;
 	}
 
+	public FileStatus getFileStatus() {
+		return fileStatus;
+	}
+
+	public void setFileStatus(FileStatus fileStatus) {
+		this.fileStatus = fileStatus;
+	}
+
 	@Override
 	public FileTime creationTime() {
 		return FileTime.from(this.fileStatus.getModificationTime(), TimeUnit.MILLISECONDS);

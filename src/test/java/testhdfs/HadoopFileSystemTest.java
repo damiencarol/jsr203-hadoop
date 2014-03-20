@@ -5,6 +5,7 @@ import hdfs.jsr203.HadoopFileSystemProvider;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,5 +70,12 @@ public class HadoopFileSystemTest extends TestCase {
 		assertFalse(Files.exists(path));
 		Files.createFile(path);
 		assertTrue(Files.exists(path));
+	}
+	
+	public void testFileStore() throws URISyntaxException, IOException {
+		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/test_file");
+		Path path = Paths.get(uri);
+		FileStore st = Files.getFileStore(path);
+		assertNotNull(st);
 	}
 }
