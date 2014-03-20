@@ -40,9 +40,6 @@ import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 
-import com.github.marschall.com.sun.nio.zipfs.ZipFileStore;
-import com.github.marschall.com.sun.nio.zipfs.ZipPath;
-
 public class HadoopFileSystem extends FileSystem {
 	
 	private org.apache.hadoop.fs.FileSystem fs;

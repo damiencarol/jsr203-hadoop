@@ -20,10 +20,6 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.marschall.com.sun.nio.zipfs.ZipFileAttributes;
-import com.github.marschall.com.sun.nio.zipfs.ZipPath;
-
-
 public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	public static final String SCHEME = "hdfs";
