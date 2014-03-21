@@ -4,7 +4,7 @@ jsr203-hadoop
 JSR 203 Implementation for Hadoop Distributed File System
 
 
-[![Build Status](https://travis-ci.org/damiencarol/jsr203-hadoop.png)](https://travis-ci.org/damiencarol/jsr203-hadoop)
+[![Build Status](https://travis-ci.org/damiencarol/jsr203-hadoop.svg?branch=master)](https://travis-ci.org/damiencarol/jsr203-hadoop)
 
 Prerequisites
 =============
