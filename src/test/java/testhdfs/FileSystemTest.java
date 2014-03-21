@@ -3,7 +3,9 @@ package testhdfs;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import hdfs.jsr203.HadoopFileSystemProvider;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,9 +16,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.spi.FileSystemProvider;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileUtil;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.apache.hadoop.hdfs.MiniDFSCluster;
 
 public class FileSystemTest {
 
@@ -28,26 +35,66 @@ public class FileSystemTest {
 		port = 8020;
 		host = "nc-h04";
 	}
+	
+	private MiniDFSCluster startMini(String testName) throws IOException {
+		File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+		FileUtil.fullyDelete(baseDir);
+		/*conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+		MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+		MiniDFSCluster hdfsCluster = builder.build();
+		String hdfsURI = "hdfs://localhost:"+ hdfsCluster.getNameNodePort() + "/";*/
+		MiniDFSCluster cluster = new MiniDFSCluster();
+		return cluster;
+	}
 
+	/**
+	 * Check that a FileSystemProvider handle <code>hdfs</code> scheme.
+	 */
+	@Test
+	public void testAutoRegister() {
+
+		boolean found = false;
+		for (FileSystemProvider fp : FileSystemProvider.installedProviders())
+			if (fp.getScheme().equals(HadoopFileSystemProvider.SCHEME))
+				found = true;
+		// Check auto register of the provider
+		assertTrue(found);
+	}
+	
 	@Test
 	public void testProvider() throws URISyntaxException {
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/test_file");
 		Path path = Paths.get(uri);
+		assertNotNull(path.getFileSystem());
 		assertNotNull(path.getFileSystem().provider());
 	}
 
 	@Test(expected = NoSuchFileException.class)
 	public void testNoSuchFileExceptionOnDelete() throws URISyntaxException,
 			IOException {
+		// start the demo cluster
+		//MiniDFSCluster cluster = startMini("testNoSuchFileExceptionOnDelete");
+		//URI uri = new URI("hdfs://" + host + ":" + cluster.getNameNodePort() + "/tmp/test_file");
+		
+		
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/test_file");
 		Path path = Paths.get(uri);
+		
+		Assume.assumeTrue(!Files.exists(path));
+		
 		Files.createFile(path);
 		assertTrue(Files.exists(path));
 		Files.delete(path);
 		assertFalse(Files.exists(path));
 
-		Files.delete(path); // this one generate the exception
-
+		try 
+		{
+			Files.delete(path); // this one generate the exception
+		}
+		finally
+		{
+			//cluster.shutdown();
+		}
 	}
 
 	@Test(expected = DirectoryNotEmptyException.class)
@@ -87,5 +134,7 @@ public class FileSystemTest {
 		long currentTime = System.currentTimeMillis();
 		FileTime ft = FileTime.fromMillis(currentTime);
 		Files.setLastModifiedTime(file, ft);
+		
+		Files.delete(file);
 	}
 }

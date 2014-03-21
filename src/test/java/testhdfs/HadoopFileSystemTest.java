@@ -18,18 +18,6 @@ public class HadoopFileSystemTest extends TestCase {
 	private static final int port = 8020;
 	public static String host = "nc-h04";
 
-	/**
-	 * Check that a FileSystemProvider handle 'hdfs' scheme.
-	 */
-	public void testAutoRegister() {
-
-		boolean found = false;
-		for (FileSystemProvider fp : FileSystemProvider.installedProviders())
-			if (fp.getScheme().equals(HadoopFileSystemProvider.SCHEME))
-				found = true;
-		// Check auto register of the provider
-		assertTrue(found);
-	}
 
 	public void testCreateTemp() throws URISyntaxException, IOException {
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/toto");
