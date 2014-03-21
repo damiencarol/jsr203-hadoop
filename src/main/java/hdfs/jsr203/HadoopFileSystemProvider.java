@@ -41,8 +41,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public void copy(Path source, Path target, CopyOption... options)
 			throws IOException {
-		// TODO Auto-generated method stub
-		
+		toHadoopPath(source).copy(toHadoopPath(target), options);
 	}
 
 	@Override

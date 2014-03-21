@@ -586,4 +586,82 @@ public class HadoopPath implements Path {
             }
         }
     }
+    
+    void copy(HadoopPath target, CopyOption... options)
+            throws IOException
+        {
+            if (this.hdfs.sameCluster(target.hdfs))
+                this.hdfs.copyFile(false,
+                             getResolvedPath(), target.getResolvedPath(),
+                             options);
+            else
+                copyToTarget(target, options);
+        }
+
+        private void copyToTarget(HadoopPath target, CopyOption... options)
+            throws IOException
+        {
+        	throw new IOException("Copy beetween cluster is not implemented");
+        	/*
+            boolean replaceExisting = false;
+            boolean copyAttrs = false;
+            for (CopyOption opt : options) {
+                if (opt == REPLACE_EXISTING)
+                    replaceExisting = true;
+                else if (opt == COPY_ATTRIBUTES)
+                    copyAttrs = true;
+            }
+            // attributes of source file
+            HadoopFileAttributes zfas = getAttributes();
+            // check if target exists
+            boolean exists;
+            if (replaceExisting) {
+                try {
+                    target.deleteIfExists();
+                    exists = false;
+                } catch (DirectoryNotEmptyException x) {
+                    exists = true;
+                }
+            } else {
+                exists = target.exists();
+            }
+            if (exists)
+                throw new FileAlreadyExistsException(target.toString());
+
+            if (zfas.isDirectory()) {
+                // create directory or file
+                target.createDirectory();
+            } else {
+                InputStream is = hdfs.newInputStream(getResolvedPath());
+                try {
+                    OutputStream os = target.newOutputStream();
+                    try {
+                        byte[] buf = new byte[8192];
+                        int n = 0;
+                        while ((n = is.read(buf)) != -1) {
+                            os.write(buf, 0, n);
+                        }
+                    } finally {
+                        os.close();
+                    }
+                } finally {
+                    is.close();
+                }
+            }
+            if (copyAttrs) {
+                BasicFileAttributeView view =
+                    ZipFileAttributeView.get(target, BasicFileAttributeView.class);
+                try {
+                    view.setTimes(zfas.lastModifiedTime(),
+                                  zfas.lastAccessTime(),
+                                  zfas.creationTime());
+                } catch (IOException x) {
+                    // rollback?
+                    try {
+                        target.delete();
+                    } catch (IOException ignore) { }
+                    throw x;
+                }
+            }*/
+        }
 }
