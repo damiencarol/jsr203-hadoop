@@ -17,9 +17,11 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -84,7 +86,7 @@ public class HadoopFileSystem extends FileSystem {
 	@Override
 	public Iterable<FileStore> getFileStores() {
 		ArrayList<FileStore> list = new ArrayList<>(1);
-        list.add(new HadoopFileStore(new HadoopPath(this, "/")));
+        list.add(new HadoopFileStore(new HadoopPath(this, new byte[]{'/'})));
         return list;
 	}
 
@@ -105,7 +107,7 @@ public class HadoopFileSystem extends FileSystem {
             }
             path = sb.toString();
         }
-		return new HadoopPath(this, path);
+		return new HadoopPath(this, getBytes(path));
 	}
 
 	@Override
@@ -175,33 +177,52 @@ public class HadoopFileSystem extends FileSystem {
 		return this.fs;
 	}
 	
-	void createDirectory(org.apache.hadoop.fs.Path dir, FileAttribute<?>... attrs) throws IOException
-	{
-		//FsPermission permission = new FsPermission(mode);
-		if(!this.fs.mkdirs(dir))
-			throw new IOException();
+	void createDirectory(byte[] dir, FileAttribute<?>... attrs) throws IOException
+	{		
+		checkWritable();
+        dir = HadoopUtils.toDirectoryPath(dir);
+        beginWrite();
+        try {
+            ensureOpen();
+            if (dir.length == 0 || exists(dir))  // root dir, or exiting dir
+                throw new FileAlreadyExistsException(getString(dir));
+            //checkParents(dir);
+            this.fs.mkdirs(new HadoopPath(this, dir).getRawResolvedPath());
+        } finally {
+            endWrite();
+        }
 	}
 
 	public Iterator<Path> iteratorOf(HadoopPath path,
-			java.nio.file.DirectoryStream.Filter<? super Path> filter) throws IOException, URISyntaxException {
-		List<Path> list = new ArrayList<>();
-		// Get list of childs
-        FileStatus[] status = this.fs.listStatus(path.getRawPath());
-        for (int i=0;i<status.length;i++){
-                /*BufferedReader br=new BufferedReader(new InputStreamReader(fs.open(status[i].getPath())));
-                String line;
-                line=br.readLine();
-                while (line != null){
-                        System.out.println(line);
-                        line=br.readLine();
-                }*/
-       	 	//System.out.println(status[i].getPath() + " is dir ? " + status[i].isDir());
-        	HadoopPath zp = new HadoopPath(this, status[i].getPath());
-        	if (filter == null || filter.accept(zp))
-                list.add(zp);
+			java.nio.file.DirectoryStream.Filter<? super Path> filter) throws IOException, URISyntaxException 
+	{
+		beginWrite();
+        try {
+            ensureOpen();
+            FileStatus inode = this.fs.getFileStatus(path.getRawResolvedPath());
+            if (inode.isDir() == false)
+                throw new NotDirectoryException(getString(path.getResolvedPath()));
+            List<Path> list = new ArrayList<>();
+            for (FileStatus stat : this.fs.listStatus(path.getRawResolvedPath())) {
+                HadoopPath hp = new HadoopPath(this, stat.getPath().toUri().getPath().getBytes());
+                if (filter == null || filter.accept(hp))
+                    list.add(hp);
+            }
+            return list.iterator();
+        } finally {
+            endWrite();
         }
-		return list.iterator();
 	}
+	
+	final byte[] getBytes(String name) {
+		// TODO : add charset management
+        return name.getBytes();//zc.getBytes(name);
+    }
+	
+	final String getString(byte[] name) {
+		// TODO : add charset management
+        return new String(name);
+    }
 
 	public void deleteFile(org.apache.hadoop.fs.Path hadoopPath, boolean failIfNotExists)
         throws IOException
@@ -322,12 +343,12 @@ public class HadoopFileSystem extends FileSystem {
             beginRead();
             try {
                 ensureOpen();
-                HadoopFileAttributes e = new HadoopPath(this, path).getAttributes();
-                if (e == null || e.isDirectory())
+                FileStatus e = this.fs.getFileStatus(path);
+                if (e == null || e.isDir())
                     throw new NoSuchFileException(path.toString());
                 final ReadableByteChannel rbc =
                     Channels.newChannel(getInputStream(path));
-                final long size = e.size();
+                final long size = e.getLen();
                 return new SeekableByteChannel() {
                     long read = 0;
                     public boolean isOpen() {
@@ -518,6 +539,18 @@ public class HadoopFileSystem extends FileSystem {
             } finally {
                 endRead();
             }
+        }
+    
+    boolean exists(byte[] path)
+            throws IOException
+        {
+    	beginRead();
+        try {
+            ensureOpen();
+            return this.fs.exists(new HadoopPath(this, path).getRawResolvedPath());
+        } finally {
+            endRead();
+        }
         }
     
     FileStore getFileStore(HadoopPath path) {

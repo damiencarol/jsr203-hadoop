@@ -15,8 +15,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
-import junit.framework.Assert;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -55,9 +53,14 @@ public class FileSystemTest {
 	@Test(expected = DirectoryNotEmptyException.class)
 	public void testDirectoryNotEmptyExceptionOnDelete()
 			throws URISyntaxException, IOException {
-		// Create the dir
+		// Create the directory
 		URI uriDir = new URI("hdfs://" + host + ":" + port + "/tmp/test_dir");
 		Path pathDir = Paths.get(uriDir);
+		// Check that directory doesn't exists
+		if (Files.exists(pathDir))
+			Files.delete(pathDir);
+		
+		
 		Files.createDirectory(pathDir);
 		assertTrue(Files.exists(pathDir));
 		// Create the file
@@ -70,14 +73,6 @@ public class FileSystemTest {
 		Files.delete(pathDir); // this one generate the exception
 
 	}
-
-	/*
-	 * try { assert } catch (NoSuchFileException x) {
-	 * System.err.format("%s: no such" + " file or directory%n", path); } catch
-	 * (DirectoryNotEmptyException x) { System.err.format("%s not empty%n",
-	 * path); } catch (IOException x) { // File permission problems are caught
-	 * here. System.err.println(x); }
-	 */
 
 	@Test
 	public void testsetLastModifiedTime() throws URISyntaxException,
@@ -92,23 +87,5 @@ public class FileSystemTest {
 		long currentTime = System.currentTimeMillis();
 		FileTime ft = FileTime.fromMillis(currentTime);
 		Files.setLastModifiedTime(file, ft);
-		// TODO : fix that
-		//Assert.assertEquals(ft, Files.getLastModifiedTime(file));
 	}
-	
-	/*@Test
-	public void testsetLastModifiedTime() throws URISyntaxException,
-			IOException {
-		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/test_file");
-		Path file = Paths.get(uri);
-		Files.createFile(file);
-		assertTrue(Files.exists(file));
-		BasicFileAttributes attr = Files.readAttributes(file,
-				BasicFileAttributes.class);
-		assertNotNull(attr);
-		long currentTime = System.currentTimeMillis();
-		FileTime ft = FileTime.fromMillis(currentTime);
-		Files.setLastModifiedTime(file, ft);
-		Assert.assertEquals(ft, Files.getLastModifiedTime(file));
-	}*/
 }

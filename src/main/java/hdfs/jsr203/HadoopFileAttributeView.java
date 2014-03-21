@@ -61,7 +61,7 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
 
     public HadoopFileAttributes readAttributes() throws IOException
     {
-        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawPath());
+        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
 		return new HadoopFileAttributes(fileStatus );
     }
 

@@ -9,7 +9,6 @@ import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.spi.FileSystemProvider;
 
 import junit.framework.TestCase;
@@ -35,6 +34,9 @@ public class HadoopFileSystemTest extends TestCase {
 	public void testCreateTemp() throws URISyntaxException, IOException {
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/toto");
 		Path path = Paths.get(uri);
+		// Check that dir doesn't exists
+		if (Files.exists(path))
+			Files.delete(path);
 		Files.createDirectory(path);
 		assertTrue(Files.exists(path));
 	}
@@ -42,6 +44,10 @@ public class HadoopFileSystemTest extends TestCase {
 	public void testCreateDeleteTemp() throws URISyntaxException, IOException {
 		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/toto");
 		Path path = Paths.get(uri);
+		// Check that dir doesn't exists
+		if (Files.exists(path))
+			Files.delete(path);
+		
 		Files.createDirectory(path);
 		assertTrue(Files.exists(path));
 		Files.delete(path);
