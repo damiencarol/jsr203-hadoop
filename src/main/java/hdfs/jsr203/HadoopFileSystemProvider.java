@@ -59,8 +59,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public <V extends FileAttributeView> V getFileAttributeView(Path path,
 			Class<V> type, LinkOption... options) {
-		// TODO Auto-generated method stub
-		return null;
+		return HadoopFileAttributeView.get(toHadoopPath(path), type);
 	}
 
 	@Override

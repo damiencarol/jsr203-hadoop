@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hadoop.fs.FileStatus;
+
 public class HadoopPath implements Path {
 
 	private byte[] path;
@@ -278,8 +280,8 @@ public class HadoopPath implements Path {
 		if (!this.hdfs.getHDFS().exists(hdfs_path))
 			throw new NoSuchFileException(toString());
 		if (w) {
-			// if (zfs.isReadOnly())
-			throw new AccessDeniedException(toString());
+			if (this.hdfs.isReadOnly())
+				throw new AccessDeniedException(toString());
 		}
 		if (x)
 			throw new AccessDeniedException(toString());
@@ -358,6 +360,13 @@ public class HadoopPath implements Path {
 	void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
 	        throws IOException
 	{
+		// Get actual value
+		if (mtime == null || atime == null)
+		{
+			FileStatus stat = this.hdfs.getHDFS().getFileStatus(hadoopPath);
+			atime = FileTime.fromMillis(stat.getAccessTime());
+			mtime = FileTime.fromMillis(stat.getModificationTime());
+		}
 		this.hdfs.getHDFS().setTimes(this.hadoopPath, mtime.toMillis(), atime.toMillis());
 	}
 	

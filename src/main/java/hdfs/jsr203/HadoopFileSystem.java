@@ -122,8 +122,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public String getSeparator() {
-		// TODO Auto-generated method stub
-		return null;
+		return "/";
 	}
 
 	@Override
@@ -134,14 +133,12 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public boolean isOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return isOpen;
 	}
 
 	@Override
 	public boolean isReadOnly() {
-		// TODO Auto-generated method stub
-		return false;
+		return readOnly;
 	}
 
 	@Override
