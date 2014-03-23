@@ -32,6 +32,7 @@ import java.nio.file.ReadOnlyFileSystemException;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -625,4 +626,19 @@ public class HadoopFileSystem extends FileSystem {
             endWrite();
         }
     }
+
+	public void setTimes(byte[] bs, FileTime mtime, FileTime atime, FileTime ctime) throws IOException
+	{
+		HadoopPath hp = new HadoopPath(this, bs);
+		org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path("hdfs://"
+				+ this.getHost() + ":" + this.getPort() + new String(hp.getResolvedPath()));
+		// Get actual value
+		if (mtime == null || atime == null)
+		{
+			FileStatus stat = this.fs.getFileStatus(path);
+			atime = FileTime.fromMillis(stat.getAccessTime());
+			mtime = FileTime.fromMillis(stat.getModificationTime());
+		}
+		this.fs.setTimes(path, mtime.toMillis(), atime.toMillis());
+	}
 }

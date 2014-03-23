@@ -17,6 +17,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
 import java.nio.file.ReadOnlyFileSystemException;
+import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
@@ -28,8 +29,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import org.apache.hadoop.fs.FileStatus;
 
 public class HadoopPath implements Path {
 
@@ -79,14 +78,29 @@ public class HadoopPath implements Path {
 
 	@Override
 	public boolean endsWith(Path other) {
-		// TODO Auto-generated method stub
-		return false;
+		final HadoopPath o = checkPath(other);
+        int olast = o.path.length - 1;
+        if (olast > 0 && o.path[olast] == '/')
+            olast--;
+        int last = this.path.length - 1;
+        if (last > 0 && this.path[last] == '/')
+            last--;
+        if (olast == -1)    // o.path.length == 0
+            return last == -1;
+        if ((o.isAbsolute() &&(!this.isAbsolute() || olast != last)) ||
+            (last < olast))
+            return false;
+        for (; olast >= 0; olast--, last--) {
+            if (o.path[olast] != this.path[last])
+                return false;
+        }
+        return o.path[olast + 1] == '/' ||
+               last == -1 || this.path[last] == '/';
 	}
 
 	@Override
 	public boolean endsWith(String other) {
-		// TODO Auto-generated method stub
-		return false;
+		return endsWith(getFileSystem().getPath(other));
 	}
 
 	@Override
@@ -234,21 +248,79 @@ public class HadoopPath implements Path {
 	@Override
 	public WatchKey register(WatchService watcher, Kind<?>... events)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return register(watcher, events, new WatchEvent.Modifier[0]);
 	}
 
 	@Override
 	public WatchKey register(WatchService watcher, Kind<?>[] events,
 			Modifier... modifiers) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		if (watcher == null || events == null || modifiers == null) {
+            throw new NullPointerException();
+        }
+        throw new UnsupportedOperationException();
 	}
+	
+	private boolean equalsNameAt(HadoopPath other, int index) {
+        int mbegin = offsets[index];
+        int mlen = 0;
+        if (index == (offsets.length-1))
+            mlen = path.length - mbegin;
+        else
+            mlen = offsets[index + 1] - mbegin - 1;
+        int obegin = other.offsets[index];
+        int olen = 0;
+        if (index == (other.offsets.length - 1))
+            olen = other.path.length - obegin;
+        else
+            olen = other.offsets[index + 1] - obegin - 1;
+        if (mlen != olen)
+            return false;
+        int n = 0;
+        while(n < mlen) {
+            if (path[mbegin + n] != other.path[obegin + n])
+                return false;
+            n++;
+        }
+        return true;
+    }
 
 	@Override
 	public Path relativize(Path other) {
-		// TODO Auto-generated method stub
-		return null;
+		final HadoopPath o = checkPath(other);
+        if (o.equals(this))
+            return new HadoopPath(getFileSystem(), new byte[0], true);
+        if (/* this.getFileSystem() != o.getFileSystem() || */
+            this.isAbsolute() != o.isAbsolute()) {
+            throw new IllegalArgumentException();
+        }
+        int mc = this.getNameCount();
+        int oc = o.getNameCount();
+        int n = Math.min(mc, oc);
+        int i = 0;
+        while (i < n) {
+            if (!equalsNameAt(o, i))
+                break;
+            i++;
+        }
+        int dotdots = mc - i;
+        int len = dotdots * 3 - 1;
+        if (i < oc)
+            len += (o.path.length - o.offsets[i] + 1);
+        byte[] result = new byte[len];
+
+        int pos = 0;
+        while (dotdots > 0) {
+            result[pos++] = (byte)'.';
+            result[pos++] = (byte)'.';
+            if (pos < len)       // no tailing slash at the end
+                result[pos++] = (byte)'/';
+            dotdots--;
+        }
+        if (i < oc)
+            System.arraycopy(o.path, o.offsets[i],
+                             result, pos,
+                             o.path.length - o.offsets[i]);
+        return new HadoopPath(getFileSystem(), result);
 	}
 
 	@Override
@@ -277,32 +349,59 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path resolveSibling(Path other) {
-		// TODO Auto-generated method stub
-		return null;
+		if (other == null)
+            throw new NullPointerException();
+        Path parent = getParent();
+        return (parent == null) ? other : parent.resolve(other);
 	}
 
 	@Override
 	public Path resolveSibling(String other) {
-		// TODO Auto-generated method stub
-		return null;
+		return resolveSibling(getFileSystem().getPath(other));
 	}
 
 	@Override
-	public boolean startsWith(Path other) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public boolean startsWith(Path other) {
+        final HadoopPath o = checkPath(other);
+        if (o.isAbsolute() != this.isAbsolute() ||
+            o.path.length > this.path.length)
+            return false;
+        int olast = o.path.length;
+        for (int i = 0; i < olast; i++) {
+            if (o.path[i] != this.path[i])
+                return false;
+        }
+        olast--;
+        return o.path.length == this.path.length ||
+               o.path[olast] == '/' ||
+               this.path[olast + 1] == '/';
+    }
 
 	@Override
 	public boolean startsWith(String other) {
-		// TODO Auto-generated method stub
-		return false;
+		return startsWith(getFileSystem().getPath(other));
 	}
 
 	@Override
 	public HadoopPath subpath(int beginIndex, int endIndex) {
-		// TODO Auto-generated method stub
-		return null;
+		initOffsets();
+        if (beginIndex < 0 ||
+            beginIndex >=  offsets.length ||
+            endIndex > offsets.length ||
+            beginIndex >= endIndex)
+            throw new IllegalArgumentException();
+
+        // starting offset and length
+        int begin = offsets[beginIndex];
+        int len;
+        if (endIndex == offsets.length)
+            len = path.length - begin;
+        else
+            len = offsets[endIndex] - begin - 1;
+        // construct result
+        byte[] result = new byte[len];
+        System.arraycopy(path, begin, result, 0, len);
+        return new HadoopPath(this.hdfs, result);
 	}
 
 	@Override
@@ -329,26 +428,23 @@ public class HadoopPath implements Path {
 
 	@Override
 	public File toFile() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Path toRealPath(LinkOption... options) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		HadoopPath realPath = new HadoopPath(this.hdfs, getResolvedPath()).toAbsolutePath();
+        realPath.checkAccess();
+        return realPath;
 	}
 
 	@Override
 	public URI toUri() {
-		/*try {
-			return new URI(HadoopFileSystemProvider.SCHEME,
-					this.hdfs.getHost(), this.internalPath);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		return null;
+		try {
+            return getRawResolvedPath().toUri();
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
 	}
 
 	void checkAccess(AccessMode... modes) throws IOException {
@@ -524,14 +620,7 @@ public class HadoopPath implements Path {
 	void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
 	        throws IOException
 	{
-		// Get actual value
-		if (mtime == null || atime == null)
-		{
-			FileStatus stat = this.hdfs.getHDFS().getFileStatus(getRawResolvedPath());
-			atime = FileTime.fromMillis(stat.getAccessTime());
-			mtime = FileTime.fromMillis(stat.getModificationTime());
-		}
-		this.hdfs.getHDFS().setTimes(getRawResolvedPath(), mtime.toMillis(), atime.toMillis());
+		this.hdfs.setTimes(getResolvedPath(), mtime, atime, ctime);
 	}
 	
 	FileStore getFileStore() throws IOException {
