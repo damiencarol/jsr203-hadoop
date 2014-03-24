@@ -69,6 +69,7 @@ public class HadoopFileSystem extends FileSystem {
 	private FileSystemProvider provider;
 	private boolean readOnly;
 	private volatile boolean isOpen = true;
+	private UserPrincipalLookupService userPrincipalLookupService;
 
 	public HadoopFileSystem(FileSystemProvider provider, String host, int port) throws IOException {
 		
@@ -81,6 +82,8 @@ public class HadoopFileSystem extends FileSystem {
         //conf.set("hadoop.job.ugi", "hbase");
 
         this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
+        
+        this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
 	}
 
 	 private final void beginWrite() {
@@ -150,8 +153,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public UserPrincipalLookupService getUserPrincipalLookupService() {
-		// TODO Auto-generated method stub
-		return null;
+		return userPrincipalLookupService;
 	}
 
 	@Override

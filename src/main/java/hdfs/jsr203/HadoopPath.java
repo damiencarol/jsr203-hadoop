@@ -634,6 +634,25 @@ public class HadoopPath implements Path {
         return (m == to.length)? to : Arrays.copyOf(to, m);
     }
 
+    void setAttribute(String attribute, Object value, LinkOption... options)
+            throws IOException
+	{
+	    String type = null;
+	    String attr = null;
+	    int colonPos = attribute.indexOf(':');
+	    if (colonPos == -1) {
+	        type = "basic";
+	        attr = attribute;
+	    } else {
+	        type = attribute.substring(0, colonPos++);
+	        attr = attribute.substring(colonPos);
+	    }
+	    HadoopFileAttributeView view = HadoopFileAttributeView.get(this, type);
+	    if (view == null)
+	        throw new UnsupportedOperationException("view <" + view + "> is not supported");
+	    view.setAttribute(attr, value);
+	}
+    
 	void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
 	        throws IOException
 	{

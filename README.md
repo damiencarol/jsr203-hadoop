@@ -44,8 +44,11 @@ The following features are complete.
 * Basic Path support (build from string/URI, resolve)
 * Directory stream (provide ability to list files in directory, get status, ...)
 * Create/delete file/directory
+* Basic Input/Output
 
-More feature will come
+More feature will come :
+
+* Security and permissions
 
 For more details, see the <a href="REFERENCE.md">Reference guide</a>.
 
@@ -53,7 +56,7 @@ For more details, see the <a href="REFERENCE.md">Reference guide</a>.
 
 * License: <a href="LICENSE">Apache License, Version 2.0.</a>
 * Author: <a href="https://github.com/damiencarol">Damien Carol</a>
-* Source code: http://github.com/damiencarol/jsr203-hadoop
+* Source code:<a href="http://github.com/damiencarol/jsr203-hadoop">http://github.com/damiencarol/jsr203-hadoop</a>
 
 ### Ressources
 

@@ -165,8 +165,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public void setAttribute(Path path, String attribute, Object value,
 			LinkOption... options) throws IOException {
-		// TODO Auto-generated method stub
-		
+		toHadoopPath(path).setAttribute(attribute, value, options);
 	}
 
 }

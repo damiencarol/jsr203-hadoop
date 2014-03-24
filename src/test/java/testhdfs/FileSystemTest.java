@@ -174,6 +174,15 @@ public class FileSystemTest {
 		byte[] buf2 = new byte[50];
 		in.read(buf2, 0, buf.length);
 		
-		assertTrue("OutputStream!=InputStream", new String(buf2).equals(string_test));
+		assertTrue("OutputStream(" + new String(buf2) + ")!=InputStream(" + string_test +")", new String(buf2).equals(string_test));
+	}
+	
+	@Test
+	public void testTempFile() throws URISyntaxException, IOException
+	{
+		URI uri = new URI("hdfs://" + host + ":" + port + "/tmp/");
+		Path path = Paths.get(uri);
+		Path tempFile = Files.createTempFile(path, null, ".myapp");
+	    Files.delete(tempFile);
 	}
 }
