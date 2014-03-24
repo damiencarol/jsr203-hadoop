@@ -33,6 +33,7 @@ import java.nio.file.ProviderMismatchException;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Map;
 import java.util.Set;
@@ -152,6 +153,9 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		if (type == BasicFileAttributes.class || type == HadoopFileAttributes.class)
             return (A)toHadoopPath(path).getAttributes();
         
+		if (type == PosixFileAttributes.class)
+			return (A)toHadoopPath(path).getPosixAttributes();
+		
 		throw new UnsupportedOperationException();
 	}
 

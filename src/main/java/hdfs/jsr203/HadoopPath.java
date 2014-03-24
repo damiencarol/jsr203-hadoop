@@ -27,6 +27,7 @@ import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileStore;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
@@ -41,6 +42,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -77,6 +79,10 @@ public class HadoopPath implements Path {
 		 * if (hfas == null) throw new NoSuchFileException(toString());
 		 */
 		return hfas;
+	}
+	
+	PosixFileAttributes getPosixAttributes() throws IOException {
+		return this.hdfs.getPosixFileAttributes(getResolved());
 	}
 	
 	private HadoopPath checkPath(Path path) {
@@ -527,14 +533,15 @@ public class HadoopPath implements Path {
 	}
 
 	void move(HadoopPath target, CopyOption... options) throws IOException {
-		/*
-		 * if (Files.isSameFile(this.zfs.getZipFile(), target.zfs.getZipFile()))
-		 * { zfs.copyFile(true, getResolvedPath(), target.getResolvedPath(),
-		 * options); } else { copyToTarget(target, options); delete(); }
-		 */
-		// this.hdfs.getHDFS().rename(arg0, arg1);
-		// TODO: Fix this
-		throw new IOException();
+		if (this.hdfs.sameCluster(target.hdfs))
+        {
+            this.hdfs.copyFile(true,
+                         getResolvedPath(), target.getResolvedPath(),
+                         options);
+        } else {
+            copyToTarget(target, options);
+            delete();
+        }
 	}
 
 	SeekableByteChannel newByteChannel(Set<? extends OpenOption> options,

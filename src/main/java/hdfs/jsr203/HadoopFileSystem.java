@@ -17,6 +17,7 @@
 */
 package hdfs.jsr203;
 
+import static hdfs.jsr203.HadoopUtils.toRegexPattern;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.APPEND;
@@ -27,6 +28,7 @@ import static java.nio.file.StandardOpenOption.READ;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -50,6 +52,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -59,6 +62,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -85,8 +89,8 @@ public class HadoopFileSystem extends FileSystem {
         
         this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
 	}
-
-	 private final void beginWrite() {
+	
+	private final void beginWrite() {
 	        //rwlock.writeLock().lock();
 	    }
 
@@ -134,16 +138,43 @@ public class HadoopFileSystem extends FileSystem {
 		return new HadoopPath(this, getBytes(path));
 	}
 
+    private static final String GLOB_SYNTAX = "glob";
+    private static final String REGEX_SYNTAX = "regex";
+
 	@Override
 	public PathMatcher getPathMatcher(String syntaxAndPattern) {
-		// TODO Auto-generated method stub
-		return null;
+		int pos = syntaxAndPattern.indexOf(':');
+        if (pos <= 0 || pos == syntaxAndPattern.length()) {
+            throw new IllegalArgumentException();
+        }
+        String syntax = syntaxAndPattern.substring(0, pos);
+        String input = syntaxAndPattern.substring(pos + 1);
+        String expr;
+        if (syntax.equals(GLOB_SYNTAX)) {
+            expr = toRegexPattern(input);
+        } else {
+            if (syntax.equals(REGEX_SYNTAX)) {
+                expr = input;
+            } else {
+                throw new UnsupportedOperationException("Syntax '" + syntax +
+                    "' not recognized");
+            }
+        }
+        // return matcher
+        final Pattern pattern = Pattern.compile(expr);
+        return new PathMatcher() {
+            @Override
+            public boolean matches(Path path) {
+                return pattern.matcher(path.toString()).matches();
+            }
+        };
 	}
 
 	@Override
 	public Iterable<Path> getRootDirectories() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Path> pathArr = new ArrayList<>();
+        pathArr.add(new HadoopPath(this, new byte[]{'/'}));
+        return pathArr;
 	}
 
 	@Override
@@ -168,8 +199,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public WatchService newWatchService() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -179,7 +209,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	private static final Set<String> supportedFileAttributeViews =
             Collections.unmodifiableSet(
-                new HashSet<String>(Arrays.asList("basic", "hadoop")));
+                new HashSet<String>(Arrays.asList("basic", "hadoop", "posix")));
 
     @Override
     public Set<String> supportedFileAttributeViews() {
@@ -659,5 +689,23 @@ public class HadoopFileSystem extends FileSystem {
 			mtime = FileTime.fromMillis(stat.getModificationTime());
 		}
 		this.fs.setTimes(path, mtime.toMillis(), atime.toMillis());
+	}
+
+	PosixFileAttributes getPosixFileAttributes(byte[] path) throws IOException
+	{
+        beginRead();
+        try {
+            ensureOpen();
+            FileStatus stat = this.fs.getFileStatus(toHadoopPath(path));
+            return new HadoopPosixFileAttributes(this, stat);
+        } finally {
+            endRead();
+        }
+	}
+	
+	private org.apache.hadoop.fs.Path toHadoopPath(byte[] path) {
+		//HadoopPath hdp = new HadoopPath(this, path).normalize().toUri().getPath();
+		URI uri = this.fs.getUri().resolve(getString(path));
+		return new org.apache.hadoop.fs.Path(uri);
 	}
 }

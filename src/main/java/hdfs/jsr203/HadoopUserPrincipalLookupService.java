@@ -23,8 +23,7 @@ public class HadoopUserPrincipalLookupService extends UserPrincipalLookupService
 	@Override
 	public GroupPrincipal lookupPrincipalByGroupName(String group)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return new HadoopGroupPrincipal(this.hdfs, group);
 	}
 
 }
