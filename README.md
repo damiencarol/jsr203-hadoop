@@ -45,6 +45,7 @@ The following features are complete.
 * Directory stream (provide ability to list files in directory, get status, ...)
 * Create/delete file/directory
 * Basic Input/Output
+* Basic attribute views ("basic", "posix", "hadoop" for hadoop specific attributes)
 
 More feature will come :
 

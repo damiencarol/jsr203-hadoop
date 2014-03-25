@@ -146,6 +146,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <A extends BasicFileAttributes> A readAttributes(Path path,
 			Class<A> type, LinkOption... options) throws IOException {

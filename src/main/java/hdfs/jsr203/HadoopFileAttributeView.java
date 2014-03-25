@@ -51,7 +51,8 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
         this.isHadoopView = isHadoopView;
     }
 
-    static <V extends FileAttributeView> V get(HadoopPath path, Class<V> type) {
+    @SuppressWarnings("unchecked")
+	static <V extends FileAttributeView> V get(HadoopPath path, Class<V> type) {
         if (type == null)
             throw new NullPointerException();
         if (type == BasicFileAttributeView.class)
