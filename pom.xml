@@ -4,6 +4,11 @@
 	<groupId>jsr203-hadoop</groupId>
 	<artifactId>jsr203-hadoop</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	  </properties>
+	  
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -11,10 +16,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
