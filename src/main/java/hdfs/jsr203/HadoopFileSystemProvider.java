@@ -26,6 +26,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -35,12 +36,16 @@ import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-public class HadoopFileSystemProvider extends FileSystemProvider {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class HadoopFileSystemProvider extends FileSystemProvider {
 	public static final String SCHEME = "hdfs";
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	// Checks that the given file is a HadoopPath
     static final HadoopPath toHadoopPath(Path path) {
@@ -87,15 +92,11 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public FileSystem getFileSystem(URI uri) {
 		try {
-			int port = uri.getPort();
-			if (port == -1)
-				port = 8020; // Default hadoop port
-			
-			return new HadoopFileSystem(this, uri.getHost(), port);
+			return newFileSystem(uri, Collections.<String,Object>emptyMap());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Problem instantiating HadoopFileSystem: ", e);
+			throw new FileSystemNotFoundException(e.getMessage());
 		}
-		return null;
 	}
 
 	@Override
@@ -140,10 +141,12 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	}
 
 	@Override
-	public FileSystem newFileSystem(URI uri, Map<String, ?> env)
-			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public FileSystem newFileSystem(URI uri, Map<String, ?> env) throws IOException {
+		int port = uri.getPort();
+		if (port == -1)
+			port = 8020; // Default hadoop port
+		
+		return new HadoopFileSystem(this, uri.getHost(), port);
 	}
 
 	@SuppressWarnings("unchecked")
