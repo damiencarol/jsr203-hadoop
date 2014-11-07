@@ -117,8 +117,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public boolean isSameFile(Path path, Path path2) throws IOException {
-		// TODO Auto-generated method stub
-		return false;
+		return toHadoopPath(path).compareTo(toHadoopPath(path2)) == 0;
 	}
 
 	@Override
