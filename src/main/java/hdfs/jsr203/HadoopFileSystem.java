@@ -81,9 +81,7 @@ public class HadoopFileSystem extends FileSystem {
 		
 		// Create dynamic configuration
 		Configuration conf = new org.apache.hadoop.conf.Configuration();
-		conf.set("fs.default.name", "hdfs://" + host + ":" + port + "");
-		//conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
-        //conf.set("hadoop.job.ugi", "hbase");
+		conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
 
         this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
         
