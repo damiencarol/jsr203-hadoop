@@ -351,7 +351,12 @@ public class HadoopPath implements Path {
         if (o.isAbsolute())
             return o;
         byte[] resolved = null;
-        if (this.path[path.length - 1] == '/') {
+        if (this.path.length == 0) {
+            resolved = new byte[1 + o.path.length];
+            resolved[0] = '/';
+            System.arraycopy(o.path, 0, resolved, 1, o.path.length);
+        }
+        else if (this.path[path.length - 1] == '/') {
             resolved = new byte[path.length + o.path.length];
             System.arraycopy(path, 0, resolved, 0, path.length);
             System.arraycopy(o.path, 0, resolved, path.length, o.path.length);
