@@ -41,12 +41,12 @@ import static org.junit.Assert.*;
 public class TestFileSystem {
 
     private static MiniDFSCluster cluster;
-    private static URI cluster_uri;
+    private static URI clusterUri;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         cluster = startMini(TestFileSystem.class.getName());
-        cluster_uri = cluster.getFileSystem().getUri();
+        clusterUri = cluster.getFileSystem().getUri();
     }
 
     @AfterClass
@@ -84,7 +84,7 @@ public class TestFileSystem {
 
     @Test
     public void testProvider() throws URISyntaxException {
-        URI uri = cluster_uri.resolve("/tmp/testProvider");
+        URI uri = clusterUri.resolve("/tmp/testProvider");
         Path path = Paths.get(uri);
         assertNotNull(path.getFileSystem());
         assertNotNull(path.getFileSystem().provider());
@@ -98,7 +98,7 @@ public class TestFileSystem {
         //URI uri = new URI("hdfs://" + host + ":" + cluster.getNameNodePort() + "/tmp/test_file");
 
 
-        URI uri = cluster_uri.resolve("/tmp/testNoSuchFileExceptionOnDelete");
+        URI uri = clusterUri.resolve("/tmp/testNoSuchFileExceptionOnDelete");
         Path path = Paths.get(uri);
 
         Assume.assumeTrue(!Files.exists(path));
@@ -119,7 +119,7 @@ public class TestFileSystem {
     public void testDirectoryNotEmptyExceptionOnDelete()
             throws URISyntaxException, IOException {
         // Create the directory
-        URI uriDir = cluster_uri.resolve("/tmp/testDirectoryNotEmptyExceptionOnDelete");
+        URI uriDir = clusterUri.resolve("/tmp/testDirectoryNotEmptyExceptionOnDelete");
         Path pathDir = Paths.get(uriDir);
         // Check that directory doesn't exists
         if (Files.exists(pathDir)) {
@@ -142,7 +142,7 @@ public class TestFileSystem {
     @Test
     public void testSetLastModifiedTime() throws URISyntaxException,
             IOException {
-        URI uri = cluster_uri.resolve("/tmp/testSetLastModifiedTime");
+        URI uri = clusterUri.resolve("/tmp/testSetLastModifiedTime");
         Path file = Paths.get(uri);
         Files.createFile(file);
         assertTrue(Files.exists(file));
@@ -158,7 +158,7 @@ public class TestFileSystem {
 
     @Test
     public void testOutputInput() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testOutputInput");
+        URI uri = clusterUri.resolve("/tmp/testOutputInput");
         Path path = Paths.get(uri);
 
         String string_test = "Test !";
@@ -177,7 +177,7 @@ public class TestFileSystem {
 
     @Test
     public void testTempFile() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testTempFile");
+        URI uri = clusterUri.resolve("/tmp/testTempFile");
         Path path = Paths.get(uri);
         Path tempFile = Files.createTempFile(path, null, ".myapp");
         Files.delete(tempFile);
@@ -185,14 +185,14 @@ public class TestFileSystem {
 
     @Test
     public void testDefaults() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testDefaults");
+        URI uri = clusterUri.resolve("/tmp/testDefaults");
         Path path = Paths.get(uri);
         Files.deleteIfExists(path);
     }
 
     @Test
     public void testLastModifiedTime() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testLastModifiedTime");
+        URI uri = clusterUri.resolve("/tmp/testLastModifiedTime");
         Path path = Paths.get(uri);
         Files.createDirectory(path);
         assertTrue(Files.exists(path));
@@ -201,7 +201,7 @@ public class TestFileSystem {
 
     @Test
     public void testCheckRead() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testCheckRead");
+        URI uri = clusterUri.resolve("/tmp/testCheckRead");
         Path path = Paths.get(uri);
         if (Files.exists(path))
             Files.delete(path);
@@ -212,7 +212,7 @@ public class TestFileSystem {
 
     @Test
     public void testFileStore() throws URISyntaxException, IOException {
-        URI uri = cluster_uri.resolve("/tmp/testFileStore");
+        URI uri = clusterUri.resolve("/tmp/testFileStore");
         Path path = Paths.get(uri);
         if (Files.exists(path))
             Files.delete(path);
@@ -222,4 +222,15 @@ public class TestFileSystem {
         FileStore st = Files.getFileStore(path);
         assertNotNull(st);
     }
+
+    @Test(expected = NullPointerException.class)
+    public void testNullPath() {
+        HadoopFileSystemProvider.toHadoopPath(null);
+    }
+
+    @Test(expected = ProviderMismatchException.class)
+    public void testMismatchedPath() {
+        HadoopFileSystemProvider.toHadoopPath(Paths.get("my_file"));
+    }
+
 }
