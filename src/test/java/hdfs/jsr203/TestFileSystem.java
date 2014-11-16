@@ -1,0 +1,225 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package hdfs.jsr203;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.spi.FileSystemProvider;
+
+import static org.junit.Assert.*;
+
+public class TestFileSystem {
+
+    private static MiniDFSCluster cluster;
+    private static URI cluster_uri;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        cluster = startMini(TestFileSystem.class.getName());
+        cluster_uri = cluster.getFileSystem().getUri();
+    }
+
+    @AfterClass
+    public static void teardownClass() throws Exception {
+        if (cluster != null)
+        {
+            cluster.shutdown();
+        }
+    }
+
+    private static MiniDFSCluster startMini(String testName) throws IOException {
+        File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+        FileUtil.fullyDelete(baseDir);
+        Configuration conf = new Configuration();
+        conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+		MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+		MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+        hdfsCluster.waitActive();
+        return hdfsCluster;
+    }
+
+    /**
+     * Check that a FileSystemProvider handle <code>hdfs</code> scheme.
+     */
+    @Test
+    public void testAutoRegister() {
+
+        boolean found = false;
+        for (FileSystemProvider fp : FileSystemProvider.installedProviders())
+            if (fp.getScheme().equals(HadoopFileSystemProvider.SCHEME))
+                found = true;
+        // Check auto register of the provider
+        assertTrue(found);
+    }
+
+    @Test
+    public void testProvider() throws URISyntaxException {
+        URI uri = cluster_uri.resolve("/tmp/testProvider");
+        Path path = Paths.get(uri);
+        assertNotNull(path.getFileSystem());
+        assertNotNull(path.getFileSystem().provider());
+    }
+
+    @Test(expected = NoSuchFileException.class)
+    public void testNoSuchFileExceptionOnDelete() throws URISyntaxException,
+            IOException {
+        // start the demo cluster
+        //MiniDFSCluster cluster = startMini("testNoSuchFileExceptionOnDelete");
+        //URI uri = new URI("hdfs://" + host + ":" + cluster.getNameNodePort() + "/tmp/test_file");
+
+
+        URI uri = cluster_uri.resolve("/tmp/testNoSuchFileExceptionOnDelete");
+        Path path = Paths.get(uri);
+
+        Assume.assumeTrue(!Files.exists(path));
+
+        Files.createFile(path);
+        assertTrue(Files.exists(path));
+        Files.delete(path);
+        assertFalse(Files.exists(path));
+
+        try {
+            Files.delete(path); // this one generate the exception
+        } finally {
+            //cluster.shutdown();
+        }
+    }
+
+    @Test(expected = DirectoryNotEmptyException.class)
+    public void testDirectoryNotEmptyExceptionOnDelete()
+            throws URISyntaxException, IOException {
+        // Create the directory
+        URI uriDir = cluster_uri.resolve("/tmp/testDirectoryNotEmptyExceptionOnDelete");
+        Path pathDir = Paths.get(uriDir);
+        // Check that directory doesn't exists
+        if (Files.exists(pathDir)) {
+            Files.delete(pathDir);
+        }
+
+
+        Files.createDirectory(pathDir);
+        assertTrue(Files.exists(pathDir));
+        // Create the file
+        Path path = pathDir.resolve("test_file");
+        Files.createFile(path);
+        assertTrue(Files.exists(path));
+
+        Files.delete(pathDir); // this one generate the exception
+        assertFalse(Files.exists(path));
+
+    }
+
+    @Test
+    public void testSetLastModifiedTime() throws URISyntaxException,
+            IOException {
+        URI uri = cluster_uri.resolve("/tmp/testSetLastModifiedTime");
+        Path file = Paths.get(uri);
+        Files.createFile(file);
+        assertTrue(Files.exists(file));
+        BasicFileAttributes attr = Files.readAttributes(file,
+                BasicFileAttributes.class);
+        assertNotNull(attr);
+        long currentTime = System.currentTimeMillis();
+        FileTime ft = FileTime.fromMillis(currentTime);
+        Files.setLastModifiedTime(file, ft);
+
+        Files.delete(file);
+    }
+
+    @Test
+    public void testOutputInput() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testOutputInput");
+        Path path = Paths.get(uri);
+
+        String string_test = "Test !";
+        OutputStream out = Files.newOutputStream(path);
+        byte[] buf = string_test.getBytes();
+        out.write(buf);
+        out.flush();
+        out.close();
+
+        InputStream in = Files.newInputStream(path);
+        byte[] buf2 = new byte[50];
+        final int size = in.read(buf2, 0, buf.length);
+
+        assertEquals("Content read from file is not equal to content written.", string_test, new String(buf2, 0, size));
+    }
+
+    @Test
+    public void testTempFile() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testTempFile");
+        Path path = Paths.get(uri);
+        Path tempFile = Files.createTempFile(path, null, ".myapp");
+        Files.delete(tempFile);
+    }
+
+    @Test
+    public void testDefaults() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testDefaults");
+        Path path = Paths.get(uri);
+        Files.deleteIfExists(path);
+    }
+
+    @Test
+    public void testLastModifiedTime() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testLastModifiedTime");
+        Path path = Paths.get(uri);
+        Files.createDirectory(path);
+        assertTrue(Files.exists(path));
+        Files.getLastModifiedTime(path);
+    }
+
+    @Test
+    public void testCheckRead() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testCheckRead");
+        Path path = Paths.get(uri);
+        if (Files.exists(path))
+            Files.delete(path);
+        assertFalse(Files.exists(path));
+        Files.createFile(path);
+        assertTrue(Files.exists(path));
+    }
+
+    @Test
+    public void testFileStore() throws URISyntaxException, IOException {
+        URI uri = cluster_uri.resolve("/tmp/testFileStore");
+        Path path = Paths.get(uri);
+        if (Files.exists(path))
+            Files.delete(path);
+        assertFalse(Files.exists(path));
+        Files.createFile(path);
+        assertTrue(Files.exists(path));
+        FileStore st = Files.getFileStore(path);
+        assertNotNull(st);
+    }
+}

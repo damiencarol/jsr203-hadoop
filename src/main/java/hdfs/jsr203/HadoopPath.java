@@ -505,7 +505,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public String toString() {
-		return new String(this.path);
+		return hdfs.getHDFS().getUri().toString() + new String(this.path);
 	}
 
 	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
