@@ -20,6 +20,7 @@ package hdfs.jsr203;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class TestPath {
     private static MiniDFSCluster cluster;
@@ -83,6 +85,6 @@ public class TestPath {
         Path path1 = rootPath.resolve("file1.txt");
         Path path2 = rootPath.resolve("file2.txt");
 
-//        assertThat(path2, Matchers.lessThan(path1));
+        assertThat(path2, Matchers.greaterThan(path1));
     }
 }

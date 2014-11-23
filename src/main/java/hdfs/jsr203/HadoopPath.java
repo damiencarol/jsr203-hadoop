@@ -67,6 +67,8 @@ public class HadoopPath implements Path {
             this.path = path;
         else
             this.path = normalize(path);
+        // TODO : add charset management
+        this.internalPath = new String(path) ;
     }
 
 	HadoopFileAttributes getAttributes() throws IOException {
