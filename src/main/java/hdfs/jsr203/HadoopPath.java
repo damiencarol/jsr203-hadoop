@@ -352,9 +352,8 @@ public class HadoopPath implements Path {
             return o;
         byte[] resolved = null;
         if (this.path.length == 0) {
-            resolved = new byte[1 + o.path.length];
-            resolved[0] = '/';
-            System.arraycopy(o.path, 0, resolved, 1, o.path.length);
+            // this method contract explicitly specifies this behavior in the case of an empty path
+            return o;
         }
         else if (this.path[path.length - 1] == '/') {
             resolved = new byte[path.length + o.path.length];
