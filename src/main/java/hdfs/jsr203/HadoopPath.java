@@ -67,6 +67,8 @@ public class HadoopPath implements Path {
             this.path = path;
         else
             this.path = normalize(path);
+        // TODO : add charset management
+        this.internalPath = new String(path) ;
     }
 
 	HadoopFileAttributes getAttributes() throws IOException {
@@ -351,7 +353,11 @@ public class HadoopPath implements Path {
         if (o.isAbsolute())
             return o;
         byte[] resolved = null;
-        if (this.path[path.length - 1] == '/') {
+        if (this.path.length == 0) {
+            // this method contract explicitly specifies this behavior in the case of an empty path
+            return o;
+        }
+        else if (this.path[path.length - 1] == '/') {
             resolved = new byte[path.length + o.path.length];
             System.arraycopy(path, 0, resolved, 0, path.length);
             System.arraycopy(o.path, 0, resolved, path.length, o.path.length);
@@ -505,7 +511,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public String toString() {
-		return new String(this.path);
+		return hdfs.getHDFS().getUri().toString() + new String(this.path);
 	}
 
 	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
