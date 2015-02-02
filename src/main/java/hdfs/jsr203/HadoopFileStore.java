@@ -24,20 +24,20 @@ import java.nio.file.attribute.FileStoreAttributeView;
 
 public class HadoopFileStore extends FileStore {
 
+	private HadoopFileSystem system;
+
 	public HadoopFileStore(HadoopPath path) {
-		// TODO Auto-generated constructor stub
+		this.system = path.getFileSystem();
 	}
 
 	@Override
 	public String name() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.system.getHDFS().getCanonicalServiceName();
 	}
 
 	@Override
 	public String type() {
-		// TODO document this
-		return "HADOOP-1";
+		return "HDFS";
 	}
 
 	@Override
