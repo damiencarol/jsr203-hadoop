@@ -129,7 +129,17 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Path getFileName() {
-		return this;
+		initOffsets();
+        int count = offsets.length;
+        if (count == 0)
+            return null;  // no elements so no name
+        if (count == 1 && path[0] != '/')
+            return this;
+        int lastOffset = offsets[count-1];
+        int len = path.length - lastOffset;
+        byte[] result = new byte[len];
+        System.arraycopy(path, lastOffset, result, 0, len);
+        return new HadoopPath(this.hdfs, result);
 	}
 
 	@Override
@@ -511,7 +521,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public String toString() {
-		return hdfs.getHDFS().getUri().toString() + new String(this.path);
+		return new String(this.path);
 	}
 
 	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
