@@ -54,7 +54,8 @@ public class HadoopPath implements Path {
 	/** Store offsets of '/' chars */
 	private volatile int[] offsets;
     private String internalPath;
-	private HadoopFileSystem hdfs;
+	private final HadoopFileSystem hdfs;
+    private int hashcode = 0;  // cached hashcode (created lazily)
 
 	HadoopPath(HadoopFileSystem hdfs, byte[] path) {
         this(hdfs, path, false);
@@ -92,6 +93,22 @@ public class HadoopPath implements Path {
         if (!(path instanceof HadoopPath))
             throw new ProviderMismatchException();
         return (HadoopPath) path;
+    }
+
+    @Override
+    public int hashCode() {
+        int h = hashcode;
+        if (h == 0)
+            hashcode = h = Arrays.hashCode(path);
+        return h;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null &&
+               obj instanceof HadoopPath &&
+               this.hdfs == ((HadoopPath)obj).hdfs &&
+               compareTo((Path) obj) == 0;
     }
 
 	@Override
