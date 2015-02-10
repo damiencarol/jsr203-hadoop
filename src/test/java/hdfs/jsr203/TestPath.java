@@ -72,6 +72,18 @@ public class TestPath {
         assertEquals("Normalized path is incorrect.", expected.toString(), start.normalize().toString());
     }
 
+    /**
+     * Assertion to check that :
+     * <code>p.relativize(p.resolve(q)).equals(q)</code>
+     */
+    @Test
+    public void testRelativizeResolveCombination() {
+        Path p = Paths.get(clusterUri);
+        Path q = p.resolve("tmp/testNormalize/dir1/../file.txt");
+
+        assertEquals(q, p.relativize(p.resolve(q)));
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void testToFile() {
         Path rootPath = Paths.get(clusterUri);
