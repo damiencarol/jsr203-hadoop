@@ -15,7 +15,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package hdfs.jsr203;
+package hdfs.jsr203.attribute;
 
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -23,20 +23,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileStatus;
 
+/**
+ * Implementation of BasicFileAttributes.
+ */
 public class HadoopFileAttributes implements BasicFileAttributes
 {
-
-	private FileStatus fileStatus;
+	/** Internal implementation of file status */
+	private final FileStatus fileStatus;
 
 	public HadoopFileAttributes(FileStatus fileStatus) {
-		this.fileStatus = fileStatus;
-	}
-
-	public FileStatus getFileStatus() {
-		return fileStatus;
-	}
-
-	public void setFileStatus(FileStatus fileStatus) {
 		this.fileStatus = fileStatus;
 	}
 
@@ -53,7 +48,7 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public boolean isDirectory() {
-		return this.fileStatus.isDir();
+		return this.fileStatus.isDirectory();
 	}
 
 	@Override
@@ -63,12 +58,12 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public boolean isRegularFile() {
-		return !this.fileStatus.isDir();
+		return this.fileStatus.isFile();
 	}
 
 	@Override
 	public boolean isSymbolicLink() {
-		return false;
+		return this.fileStatus.isSymlink();
 	}
 
 	@Override
@@ -88,7 +83,11 @@ public class HadoopFileAttributes implements BasicFileAttributes
 
 	@Override
 	public String toString() {
-		return "[IS DIR : " + this.fileStatus.isDir() + "]";
+		return "[IS DIR : " + this.fileStatus.isDirectory() + "]";
+	}
+
+	protected FileStatus getFileStatus() {
+		return fileStatus;
 	}
 
 }

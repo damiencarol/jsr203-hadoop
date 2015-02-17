@@ -15,12 +15,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package hdfs.jsr203;
+package hdfs.jsr203.attribute;
+
+import hdfs.jsr203.HadoopPath;
 
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -46,20 +49,9 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
     private final HadoopPath path;
     private final boolean isHadoopView;
 
-    private HadoopFileAttributeView(HadoopPath path, boolean isHadoopView) {
+    public HadoopFileAttributeView(HadoopPath path, boolean isHadoopView) {
         this.path = path;
         this.isHadoopView = isHadoopView;
-    }
-
-    @SuppressWarnings("unchecked")
-	static <V extends FileAttributeView> V get(HadoopPath path, Class<V> type) {
-        if (type == null)
-            throw new NullPointerException();
-        if (type == BasicFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path, false);
-        if (type == HadoopFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path, true);
-        return null;
     }
 
     static HadoopFileAttributeView get(HadoopPath path, String type) {
@@ -92,7 +84,7 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
         path.setTimes(lastModifiedTime, lastAccessTime, createTime);
     }
 
-    void setAttribute(String attribute, Object value)
+    public void setAttribute(String attribute, Object value)
         throws IOException
     {
         try {
@@ -108,7 +100,7 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
             "' is unknown or read-only attribute");
     }
 
-    Map<String, Object> readAttributes(String attributes)
+    public Map<String, Object> readAttributes(String attributes)
         throws IOException
     {
         HadoopFileAttributes zfas = readAttributes();

@@ -17,6 +17,13 @@
 */
 package hdfs.jsr203;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import hdfs.jsr203.attribute.HadoopFileAttributeView;
+import hdfs.jsr203.attribute.HadoopFileAttributes;
+import hdfs.jsr203.attribute.HadoopPosixFileAttributeView;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
@@ -31,31 +38,32 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class HadoopFileSystemProvider extends FileSystemProvider {
-	public static final String SCHEME = "hdfs";
-	private Logger logger = LoggerFactory.getLogger(getClass());
+  public static final String SCHEME = "hdfs";
+  private Logger logger = LoggerFactory.getLogger(getClass());
 
-	// Checks that the given file is a HadoopPath
-    static final HadoopPath toHadoopPath(Path path) {
-        if (path == null)
-            throw new NullPointerException();
-        if (!(path instanceof HadoopPath))
-            throw new ProviderMismatchException();
-        return (HadoopPath)path;
+  // Checks that the given file is a HadoopPath
+  static final HadoopPath toHadoopPath(Path path) {
+    if (path == null) {
+      throw new NullPointerException();
     }
-	
+    if (!(path instanceof HadoopPath)) {
+      throw new ProviderMismatchException();
+    }
+    return (HadoopPath)path;
+  }
+
 	@Override
 	public void checkAccess(Path path, AccessMode... modes) throws IOException {
 		toHadoopPath(path).checkAccess(modes);
@@ -81,8 +89,39 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public <V extends FileAttributeView> V getFileAttributeView(Path path,
 			Class<V> type, LinkOption... options) {
-		return HadoopFileAttributeView.get(toHadoopPath(path), type);
+		return getView(toHadoopPath(path), type);
 	}
+	
+
+
+	public static HadoopFileAttributeView getView(HadoopPath path, String type) {
+		if (type == null)
+            throw new NullPointerException();
+		if (type.equals("basic"))
+            return new HadoopFileAttributeView(path, false);
+		if (type.equals("hadoop"))
+            return new HadoopFileAttributeView(path, false);
+		/*if (type.equals("posix"))
+            return new HadoopPosixFileAttributeView(path);*/
+        /*if (type == HadoopFileAttributeView.class)
+            return (V)new HadoopFileAttributeView(path, true);
+        if (type == PosixFileAttributeView.class)
+            return (V)new HadoopPosixFileAttributeView(path);*/
+        return null;
+	}
+
+    @SuppressWarnings("unchecked")
+	static <V extends FileAttributeView> V getView(HadoopPath path, Class<V> type) {
+        if (type == null)
+            throw new NullPointerException();
+        if (type == BasicFileAttributeView.class)
+            return (V)new HadoopFileAttributeView(path, false);
+        if (type == HadoopFileAttributeView.class)
+            return (V)new HadoopFileAttributeView(path, true);
+        if (type == PosixFileAttributeView.class)
+            return (V)new HadoopPosixFileAttributeView(path);
+        return null;
+    }
 
 	@Override
 	public FileStore getFileStore(Path path) throws IOException {
@@ -158,11 +197,11 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
         
 		if (type == PosixFileAttributes.class)
 			return (A)toHadoopPath(path).getPosixAttributes();
-		
-		throw new UnsupportedOperationException();
+
+		throw new UnsupportedOperationException("readAttributes:" + type.getName());
 	}
 
-	@Override
+    @Override
 	public Map<String, Object> readAttributes(Path path, String attributes,
 			LinkOption... options) throws IOException
 	{
@@ -174,5 +213,4 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 			LinkOption... options) throws IOException {
 		toHadoopPath(path).setAttribute(attribute, value, options);
 	}
-
 }

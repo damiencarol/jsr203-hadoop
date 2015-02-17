@@ -17,6 +17,9 @@
 */
 package hdfs.jsr203;
 
+import hdfs.jsr203.attribute.HadoopFileAttributeView;
+import hdfs.jsr203.attribute.HadoopFileAttributes;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -77,9 +80,7 @@ public class HadoopPath implements Path {
 
 		HadoopFileAttributes hfas = new HadoopFileAttributes(this.hdfs
 				.getHDFS().getFileStatus(this.getRawResolvedPath()));
-		/*
-		 * if (hfas == null) throw new NoSuchFileException(toString());
-		 */
+		// if (hfas == null) throw new NoSuchFileException(toString());
 		return hfas;
 	}
 	
@@ -593,7 +594,7 @@ public class HadoopPath implements Path {
             view = attributes.substring(0, colonPos++);
             attrs = attributes.substring(colonPos);
         }
-        HadoopFileAttributeView hfv = HadoopFileAttributeView.get(this, view);
+        HadoopFileAttributeView hfv = HadoopFileSystemProvider.getView(this, view);
         if (hfv == null) {
             throw new UnsupportedOperationException("view not supported");
         }
@@ -686,13 +687,13 @@ public class HadoopPath implements Path {
 	        type = attribute.substring(0, colonPos++);
 	        attr = attribute.substring(colonPos);
 	    }
-	    HadoopFileAttributeView view = HadoopFileAttributeView.get(this, type);
+	    HadoopFileAttributeView view = HadoopFileSystemProvider.getView(this, type);
 	    if (view == null)
 	        throw new UnsupportedOperationException("view <" + view + "> is not supported");
 	    view.setAttribute(attr, value);
 	}
     
-	void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
+	public void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
 	        throws IOException
 	{
 		this.hdfs.setTimes(getResolvedPath(), mtime, atime, ctime);
