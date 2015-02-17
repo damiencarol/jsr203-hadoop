@@ -18,6 +18,7 @@
 package hdfs.jsr203;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -72,5 +75,43 @@ public class TestFiles {
         
         assertNotNull(ft);
         
+    }
+
+    /**
+     * Test 'basic' file view support.
+     * @throws IOException
+     */
+    @Test
+    public void testGetBasicFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        
+        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("basic"));
+
+        // Get root view
+    	BasicFileAttributeView view = Files.getFileAttributeView(rootPath, 
+    			BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+    	
+    	assertNotNull(view);
+    	assertNotNull(view.readAttributes());
+    	assertNotNull(view.readAttributes().lastModifiedTime());
+    }
+
+    /**
+     * Test 'posix' file view support.
+     * @throws IOException
+     */
+    @Test
+    public void testGetPosixFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        
+        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("posix"));
+
+        // Get root view
+    	PosixFileAttributeView view = Files.getFileAttributeView(rootPath, 
+    			PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+    	
+    	assertNotNull(view);
+    	assertNotNull(view.readAttributes());
+    	assertNotNull(view.readAttributes().lastModifiedTime());
     }
 }
