@@ -17,11 +17,22 @@
 */
 package hdfs.jsr203.attribute;
 
+import hdfs.jsr203.HadoopPath;
+
 import java.io.IOException;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
+
+import org.apache.hadoop.fs.FileStatus;
 
 public class HadoopFileOwnerAttributeView implements FileOwnerAttributeView {
+	
+	private final HadoopPath path;
+
+	public HadoopFileOwnerAttributeView(HadoopPath path) {
+		this.path = path;
+	}
 
 	@Override
 	public String name() {
@@ -30,14 +41,20 @@ public class HadoopFileOwnerAttributeView implements FileOwnerAttributeView {
 
 	@Override
 	public UserPrincipal getOwner() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
+			FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
+			return ls.lookupPrincipalByName(fileStatus.getOwner());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
 	public void setOwner(UserPrincipal owner) throws IOException {
-		// TODO Auto-generated method stub
-
+		// TODO manage change of owner
+		throw new IOException("Not implemented");
 	}
 
 }
