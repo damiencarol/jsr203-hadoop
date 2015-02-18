@@ -100,7 +100,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		if (type.equals("basic"))
             return new HadoopFileAttributeView(path, false);
 		if (type.equals("hadoop"))
-            return new HadoopFileAttributeView(path, false);
+            return new HadoopFileAttributeView(path, true);
 		/*if (type.equals("posix"))
             return new HadoopPosixFileAttributeView(path);*/
         /*if (type == HadoopFileAttributeView.class)
