@@ -48,7 +48,7 @@ public class HadoopDirectoryStream implements DirectoryStream<Path>
         
         // sanity check
         FileStatus stat = hadoopPath.getFileSystem().getHDFS().getFileStatus(hadoopPath.getRawResolvedPath());
-        if (!stat.isDir())
+        if (!stat.isDirectory())
             throw new NotDirectoryException(hadoopPath.toString());
     }
 

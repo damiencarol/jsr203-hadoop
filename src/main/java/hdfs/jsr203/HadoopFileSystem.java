@@ -252,7 +252,7 @@ public class HadoopFileSystem extends FileSystem {
         try {
             ensureOpen();
             FileStatus inode = this.fs.getFileStatus(path.getRawResolvedPath());
-            if (inode.isDir() == false)
+            if (inode.isDirectory() == false)
                 throw new NotDirectoryException(getString(path.getResolvedPath()));
             List<Path> list = new ArrayList<>();
             for (FileStatus stat : this.fs.listStatus(path.getRawResolvedPath())) {
@@ -290,7 +290,7 @@ public class HadoopFileSystem extends FileSystem {
 		else
 		{
 			FileStatus stat = this.fs.getFileStatus(hadoopPath);
-			if (stat.isDir()) {
+			if (stat.isDirectory()) {
 				FileStatus[] stats = this.fs.listStatus(hadoopPath);
 				if (stats.length > 0)
 					throw new DirectoryNotEmptyException(hadoopPath.toString());
@@ -396,7 +396,7 @@ public class HadoopFileSystem extends FileSystem {
             try {
                 ensureOpen();
                 FileStatus e = this.fs.getFileStatus(path);
-                if (e == null || e.isDir())
+                if (e == null || e.isDirectory())
                     throw new NoSuchFileException(path.toString());
                 final ReadableByteChannel rbc =
                     Channels.newChannel(getInputStream(path));
@@ -627,7 +627,7 @@ public class HadoopFileSystem extends FileSystem {
             FileStatus eSrc = this.fs.getFileStatus(eSrc_path);
             if (!this.fs.exists(eSrc_path))
                 throw new NoSuchFileException(getString(src));
-            if (eSrc.isDir()) {    // specification says to create dst directory
+            if (eSrc.isDirectory()) {    // specification says to create dst directory
                 createDirectory(dst);
                 return;
             }
