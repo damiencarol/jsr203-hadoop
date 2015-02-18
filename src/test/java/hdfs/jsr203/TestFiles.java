@@ -132,4 +132,29 @@ public class TestFiles {
         assertNotNull(Files.getAttribute(rootPath, "hadoop:len", LinkOption.NOFOLLOW_LINKS));
         assertNotNull(Files.getAttribute(rootPath, "hadoop:replication", LinkOption.NOFOLLOW_LINKS));
     }
+    
+    /**
+     * Test 'hadoop' file view support.
+     * 
+     * Also test that 'blockSize', 'len' and 'replication' are supported.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testGetAttributeBasic() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        
+        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("basic"));
+
+        assertNotNull(Files.getAttribute(rootPath, "basic:lastModifiedTime", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:lastAccessTime", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:creationTime", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:size", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:isRegularFile", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:isDirectory", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:isSymbolicLink", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "basic:isOther", LinkOption.NOFOLLOW_LINKS));
+        // TODO this one is complex, not implemented yet
+        //assertNotNull(Files.getAttribute(rootPath, "basic:fileKey", LinkOption.NOFOLLOW_LINKS));
+    }
 }
