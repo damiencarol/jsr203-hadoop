@@ -21,9 +21,7 @@ import hdfs.jsr203.HadoopPath;
 
 import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
-import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,6 +41,7 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
         fileKey,
         
         blockSize,
+        len,
         replication
     };
 
@@ -122,34 +121,38 @@ public class HadoopFileAttributeView implements BasicFileAttributeView
         return map;
     }
 
-    Object attribute(AttrID id, HadoopFileAttributes zfas) {
+    Object attribute(AttrID id, HadoopFileAttributes hfas) {
         switch (id) {
         case size:
-            return zfas.size();
+            return hfas.size();
         case creationTime:
-            return zfas.creationTime();
+            return hfas.creationTime();
         case lastAccessTime:
-            return zfas.lastAccessTime();
+            return hfas.lastAccessTime();
         case lastModifiedTime:
-            return zfas.lastModifiedTime();
+            return hfas.lastModifiedTime();
         case isDirectory:
-            return zfas.isDirectory();
+            return hfas.isDirectory();
         case isRegularFile:
-            return zfas.isRegularFile();
+            return hfas.isRegularFile();
         case isSymbolicLink:
-            return zfas.isSymbolicLink();
+            return hfas.isSymbolicLink();
         case isOther:
-            return zfas.isOther();
+            return hfas.isOther();
         case fileKey:
-            return zfas.fileKey();
+            return hfas.fileKey();
             
         case blockSize:
             if (isHadoopView)
-                return zfas.getFileStatus().getBlockSize();
+                return hfas.getFileStatus().getBlockSize();
+            break;
+        case len:
+            if (isHadoopView)
+                return hfas.getFileStatus().getLen();
             break;
         case replication:
             if (isHadoopView)
-                return zfas.getFileStatus().getReplication();
+                return hfas.getFileStatus().getReplication();
             break;
         }
         return null;

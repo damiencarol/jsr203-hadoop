@@ -114,4 +114,22 @@ public class TestFiles {
     	assertNotNull(view.readAttributes());
     	assertNotNull(view.readAttributes().lastModifiedTime());
     }
+
+    /**
+     * Test 'hadoop' file view support.
+     * 
+     * Also test that 'blockSize', 'len' and 'replication' are supported.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testGetHadoopFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        
+        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("hadoop"));
+
+        assertNotNull(Files.getAttribute(rootPath, "hadoop:blockSize", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "hadoop:len", LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(rootPath, "hadoop:replication", LinkOption.NOFOLLOW_LINKS));
+    }
 }
