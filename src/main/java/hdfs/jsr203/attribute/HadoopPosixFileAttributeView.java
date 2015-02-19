@@ -26,6 +26,7 @@ import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Set;
 
 import org.apache.hadoop.fs.FileStatus;
@@ -47,8 +48,14 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
 
 	@Override
 	public UserPrincipal getOwner() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
+			FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
+			return ls.lookupPrincipalByName(fileStatus.getOwner());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override

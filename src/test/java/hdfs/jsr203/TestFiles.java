@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.UserPrincipal;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -156,5 +157,23 @@ public class TestFiles {
         assertNotNull(Files.getAttribute(rootPath, "basic:isOther", LinkOption.NOFOLLOW_LINKS));
         // TODO this one is complex, not implemented yet
         //assertNotNull(Files.getAttribute(rootPath, "basic:fileKey", LinkOption.NOFOLLOW_LINKS));
+    }
+
+    /**
+     * Test owner in posix file view support.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testGetPosixView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        
+        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("posix"));
+        PosixFileAttributeView view = Files.getFileAttributeView(rootPath,
+				PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+        assertNotNull(view);
+        UserPrincipal user = view.getOwner();
+		assertNotNull(user);
+		assertNotNull(user.getName());
     }
 }
