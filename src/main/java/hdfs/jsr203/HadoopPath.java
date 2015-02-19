@@ -596,7 +596,7 @@ public class HadoopPath implements Path {
         }
         HadoopFileAttributeView hfv = HadoopFileSystemProvider.getView(this, view);
         if (hfv == null) {
-            throw new UnsupportedOperationException("view not supported");
+            throw new UnsupportedOperationException("view <" + view + "> not supported");
         }
         return hfv.readAttributes(attrs);
 	}
@@ -689,7 +689,7 @@ public class HadoopPath implements Path {
 	    }
 	    HadoopFileAttributeView view = HadoopFileSystemProvider.getView(this, type);
 	    if (view == null)
-	        throw new UnsupportedOperationException("view <" + view + "> is not supported");
+	        throw new UnsupportedOperationException("view <" + type + "> is not supported");
 	    view.setAttribute(attr, value);
 	}
     
