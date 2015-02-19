@@ -25,6 +25,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
 import hdfs.jsr203.attribute.HadoopPosixFileAttributes;
+import hdfs.jsr203.attribute.HadoopUserPrincipalLookupService;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -15,7 +15,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package hdfs.jsr203;
+package hdfs.jsr203.attribute;
+
+import hdfs.jsr203.HadoopFileSystem;
 
 import java.nio.file.attribute.GroupPrincipal;
 
