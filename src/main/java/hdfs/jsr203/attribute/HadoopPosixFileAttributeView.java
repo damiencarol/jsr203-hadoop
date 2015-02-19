@@ -30,6 +30,7 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.Set;
 
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 
 public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
 	
@@ -60,8 +61,8 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
 
 	@Override
 	public void setOwner(UserPrincipal owner) throws IOException {
-		// TODO Auto-generated method stub
-
+		FileSystem fs = path.getFileSystem().getHDFS();
+		fs.setOwner(path.getRawResolvedPath(), owner.getName(), null);
 	}
 
 	@Override
@@ -84,8 +85,8 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
 
 	@Override
 	public void setGroup(GroupPrincipal group) throws IOException {
-		// TODO Auto-generated method stub
-
+		FileSystem fs = path.getFileSystem().getHDFS();
+		fs.setOwner(path.getRawResolvedPath(), null, group.getName());
 	}
 
 }
