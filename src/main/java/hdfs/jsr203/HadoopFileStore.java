@@ -49,13 +49,13 @@ public class HadoopFileStore extends FileStore {
 	@Override
 	public long getTotalSpace() throws IOException {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.system.getHDFS().getStatus().getCapacity();
 	}
 
 	@Override
 	public long getUsableSpace() throws IOException {
 		// TODO Auto-generated method stub
-		return 0;
+		return this.system.getHDFS().getStatus().getCapacity();
 	}
 
 	@Override
