@@ -67,12 +67,13 @@ public class TestAttributes {
 
 	/**
 	 * Simple test to get all attributes.
+	 * 
 	 * @throws IOException
 	 */
 	@Test
 	public void testWriteBuffered() throws IOException {
 		Path pathToTest = Paths.get(clusterUri);
-        
+
 		Set<String> sup = pathToTest.getFileSystem()
 				.supportedFileAttributeViews();
 
@@ -82,5 +83,30 @@ public class TestAttributes {
 				assertNotNull(item.getKey());
 			}
 		}
+	}
+
+	/**
+	 * Simple test to get attributes.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testReadAttributes() throws IOException {
+		Path pathToTest = Paths.get(clusterUri);
+
+		// Read all basic-file-attributes.
+		assertNotNull(Files.readAttributes(pathToTest, "*",
+				LinkOption.NOFOLLOW_LINKS));
+		// Reads the file size, last modified time, and last access time
+		// attributes.
+		assertNotNull(Files.readAttributes(pathToTest,
+				"size,lastModifiedTime,lastAccessTime",
+				LinkOption.NOFOLLOW_LINKS));
+		// Read all POSIX-file-attributes.
+		assertNotNull(Files.readAttributes(pathToTest, "posix:*",
+				LinkOption.NOFOLLOW_LINKS));
+		// Reads the POSX file permissions, owner, and file size.
+		assertNotNull(Files.readAttributes(pathToTest,
+				"posix:permissions,owner,size", LinkOption.NOFOLLOW_LINKS));
 	}
 }
