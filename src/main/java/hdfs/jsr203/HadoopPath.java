@@ -43,6 +43,7 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Arrays;
@@ -582,25 +583,6 @@ public class HadoopPath implements Path {
 		return this.hdfs.newByteChannel(getRawResolvedPath(), options, attrs);
 	}
 
-	public Map<String, Object> readAttributes(String attributes,
-			LinkOption[] options) throws IOException {
-		String view = null;
-        String attrs = null;
-        int colonPos = attributes.indexOf(':');
-        if (colonPos == -1) {
-            view = "basic";
-            attrs = attributes;
-        } else {
-            view = attributes.substring(0, colonPos++);
-            attrs = attributes.substring(colonPos);
-        }
-        HadoopFileAttributeView hfv = HadoopFileSystemProvider.getView(this, view);
-        if (hfv == null) {
-            throw new UnsupportedOperationException("view <" + view + "> not supported");
-        }
-        return hfv.readAttributes(attrs);
-	}
-
 	// the result path does not contain ./ and .. components
     private volatile byte[] resolved = null;
     byte[] getResolvedPath() {
@@ -673,25 +655,6 @@ public class HadoopPath implements Path {
             m--;
         return (m == to.length)? to : Arrays.copyOf(to, m);
     }
-
-    void setAttribute(String attribute, Object value, LinkOption... options)
-            throws IOException
-	{
-	    String type = null;
-	    String attr = null;
-	    int colonPos = attribute.indexOf(':');
-	    if (colonPos == -1) {
-	        type = "basic";
-	        attr = attribute;
-	    } else {
-	        type = attribute.substring(0, colonPos++);
-	        attr = attribute.substring(colonPos);
-	    }
-	    HadoopFileAttributeView view = HadoopFileSystemProvider.getView(this, type);
-	    if (view == null)
-	        throw new UnsupportedOperationException("view <" + type + "> is not supported");
-	    view.setAttribute(attr, value);
-	}
     
 	public void setTimes(FileTime mtime, FileTime atime, FileTime ctime)
 	        throws IOException

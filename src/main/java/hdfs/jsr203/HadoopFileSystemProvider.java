@@ -90,41 +90,8 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	@Override
 	public <V extends FileAttributeView> V getFileAttributeView(Path path,
 			Class<V> type, LinkOption... options) {
-		return getView(toHadoopPath(path), type);
+		return toHadoopPath(path).getFileSystem().getView(toHadoopPath(path), type);
 	}
-	
-
-
-	public static HadoopFileAttributeView getView(HadoopPath path, String type) {
-		if (type == null)
-            throw new NullPointerException();
-		if (type.equals("basic"))
-            return new HadoopFileAttributeView(path, false);
-		if (type.equals("hadoop"))
-            return new HadoopFileAttributeView(path, true);
-		/*if (type.equals("posix"))
-            return new HadoopPosixFileAttributeView(path);*/
-        /*if (type == HadoopFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path, true);
-        if (type == PosixFileAttributeView.class)
-            return (V)new HadoopPosixFileAttributeView(path);*/
-        return null;
-	}
-
-    @SuppressWarnings("unchecked")
-	static <V extends FileAttributeView> V getView(HadoopPath path, Class<V> type) {
-        if (type == null)
-            throw new NullPointerException();
-        if (type == BasicFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path, false);
-        if (type == HadoopFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path, true);
-        if (type == FileOwnerAttributeView.class)
-            return (V)new HadoopPosixFileAttributeView(path);
-        if (type == PosixFileAttributeView.class)
-            return (V)new HadoopPosixFileAttributeView(path);
-        return null;
-    }
 
 	@Override
 	public FileStore getFileStore(Path path) throws IOException {
@@ -208,12 +175,12 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 	public Map<String, Object> readAttributes(Path path, String attributes,
 			LinkOption... options) throws IOException
 	{
-		return toHadoopPath(path).readAttributes(attributes, options);
+		return toHadoopPath(path).getFileSystem().readAttributes(toHadoopPath(path), attributes, options);
 	}
 
 	@Override
 	public void setAttribute(Path path, String attribute, Object value,
 			LinkOption... options) throws IOException {
-		toHadoopPath(path).setAttribute(attribute, value, options);
+		toHadoopPath(path).getFileSystem().setAttribute(toHadoopPath(path), attribute, value, options);
 	}
 }

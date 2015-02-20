@@ -21,38 +21,52 @@ import hdfs.jsr203.HadoopPath;
 
 import java.io.IOException;
 import java.nio.file.LinkOption;
-import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.hadoop.fs.FileStatus;
 
-public class HadoopFileAttributeView implements FileAttributeView, IAttributeReader, IAttributeWriter
+public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAttributeReader, IAttributeWriter
 {
     private static enum AttrID {
-        accessTime,
-        blockSize,
-        group,
-        len,
-        modificationTime,
-        owner,
-        replication,
+        size,
+        creationTime,
+        lastAccessTime,
+        lastModifiedTime,
         isDirectory,
-        //isEncrypted, TODO enable encryption
-        isFile,
-        isSymLink
+        isRegularFile,
+        isSymbolicLink,
+        isOther,
+        fileKey,
+        
+        blockSize,
+        len,
+        replication
     };
 
     private final HadoopPath path;
+    private final boolean isHadoopView;
 
-    public HadoopFileAttributeView(HadoopPath path) {
+    public HadoopBasicFileAttributeView(HadoopPath path, boolean isHadoopView) {
         this.path = path;
+        this.isHadoopView = isHadoopView;
+    }
+
+    static HadoopBasicFileAttributeView get(HadoopPath path, String type) {
+        if (type == null)
+            throw new NullPointerException();
+        if (type.equals("basic"))
+            return new HadoopBasicFileAttributeView(path, false);
+        if (type.equals("hadoop"))
+            return new HadoopBasicFileAttributeView(path, true);
+        return null;
     }
 
     @Override
     public String name() {
-        return "hadoop";
+        return isHadoopView ? "hadoop" : "basic";
     }
 
     public HadoopFileAttributes readAttributes() throws IOException
@@ -61,6 +75,7 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
 		return new HadoopFileAttributes(fileStatus );
     }
 
+    @Override
     public void setTimes(FileTime lastModifiedTime,
                          FileTime lastAccessTime,
                          FileTime createTime)
@@ -74,12 +89,12 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
         throws IOException
     {
         try {
-            if (AttrID.valueOf(attribute) == AttrID.modificationTime)
+            if (AttrID.valueOf(attribute) == AttrID.lastModifiedTime)
                 setTimes ((FileTime)value, null, null);
-            if (AttrID.valueOf(attribute) == AttrID.accessTime)
+            if (AttrID.valueOf(attribute) == AttrID.lastAccessTime)
                 setTimes (null, (FileTime)value, null);
-            //if (AttrID.valueOf(attribute) == AttrID.creationTime)
-            //    setTimes (null, null, (FileTime)value);
+            if (AttrID.valueOf(attribute) == AttrID.creationTime)
+                setTimes (null, null, (FileTime)value);
             return;
         } catch (IllegalArgumentException x) {}
         throw new UnsupportedOperationException("'" + attribute +
@@ -89,50 +104,58 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
     @Override
     public Map<String, Object> readAttributes(String attributes, LinkOption[] options) throws IOException
     {
-    	FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
+        HadoopFileAttributes zfas = readAttributes();
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         if ("*".equals(attributes)) {
             for (AttrID id : AttrID.values()) {
                 try {
-                    map.put(id.name(), attribute(id, fileStatus));
+                    map.put(id.name(), attribute(id, zfas));
                 } catch (IllegalArgumentException x) {}
             }
         } else {
             String[] as = attributes.split(",");
             for (String a : as) {
                 try {
-                    map.put(a, attribute(AttrID.valueOf(a), fileStatus));
+                    map.put(a, attribute(AttrID.valueOf(a), zfas));
                 } catch (IllegalArgumentException x) {}
             }
         }
         return map;
     }
 
-    Object attribute(AttrID id, FileStatus hfas) {
+    Object attribute(AttrID id, HadoopFileAttributes hfas) {
         switch (id) {
-        case accessTime:
-            return hfas.getAccessTime();
-        case blockSize:
-            return hfas.getBlockSize();
-        case group:
-            return hfas.getGroup();
-        case len:
-            return hfas.getLen();
-        case modificationTime:
-            return hfas.getModificationTime();
-        case owner:
-            return hfas.getOwner();
-        case replication:
-            return hfas.getReplication();
+        case size:
+            return hfas.size();
+        case creationTime:
+            return hfas.creationTime();
+        case lastAccessTime:
+            return hfas.lastAccessTime();
+        case lastModifiedTime:
+            return hfas.lastModifiedTime();
         case isDirectory:
             return hfas.isDirectory();
-        // TODO enable encryption
-        //case isEncrypted:
-        //    return hfas.isEncrypted();
-        case isFile:
-            return hfas.isFile();
-        case isSymLink:
-            return hfas.isSymlink();
+        case isRegularFile:
+            return hfas.isRegularFile();
+        case isSymbolicLink:
+            return hfas.isSymbolicLink();
+        case isOther:
+            return hfas.isOther();
+        case fileKey:
+            return hfas.fileKey();
+            
+        case blockSize:
+            if (isHadoopView)
+                return hfas.getFileStatus().getBlockSize();
+            break;
+        case len:
+            if (isHadoopView)
+                return hfas.getFileStatus().getLen();
+            break;
+        case replication:
+            if (isHadoopView)
+                return hfas.getFileStatus().getReplication();
+            break;
         }
         return null;
     }

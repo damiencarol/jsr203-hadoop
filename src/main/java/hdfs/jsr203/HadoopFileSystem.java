@@ -24,8 +24,13 @@ import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
+import hdfs.jsr203.attribute.HadoopBasicFileAttributeView;
+import hdfs.jsr203.attribute.HadoopFileAttributeView;
+import hdfs.jsr203.attribute.HadoopPosixFileAttributeView;
 import hdfs.jsr203.attribute.HadoopPosixFileAttributes;
 import hdfs.jsr203.attribute.HadoopUserPrincipalLookupService;
+import hdfs.jsr203.attribute.IAttributeReader;
+import hdfs.jsr203.attribute.IAttributeWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +49,7 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
+import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.OpenOption;
@@ -52,8 +58,12 @@ import java.nio.file.PathMatcher;
 import java.nio.file.ReadOnlyFileSystemException;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
@@ -63,6 +73,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -209,7 +220,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	private static final Set<String> supportedFileAttributeViews =
             Collections.unmodifiableSet(
-                new HashSet<String>(Arrays.asList("basic", "hadoop", "posix")));
+                new HashSet<String>(Arrays.asList("basic", "hadoop", "owner", "posix")));
 
     @Override
     public Set<String> supportedFileAttributeViews() {
@@ -707,5 +718,98 @@ public class HadoopFileSystem extends FileSystem {
 		//HadoopPath hdp = new HadoopPath(this, path).normalize().toUri().getPath();
 		URI uri = this.fs.getUri().resolve(getString(path));
 		return new org.apache.hadoop.fs.Path(uri);
+	}
+	
+
+
+	public IAttributeReader getView(HadoopPath path, String type) {
+		if (type == null)
+            throw new NullPointerException();
+		if (type.equals("basic"))
+            return new HadoopBasicFileAttributeView(path, false);
+		if (type.equals("hadoop"))
+            return new HadoopFileAttributeView(path);
+		if (type.equals("owner"))
+            return new HadoopPosixFileAttributeView(path, false);
+		if (type.equals("posix"))
+            return new HadoopPosixFileAttributeView(path, true);
+        return null;
+	}
+	
+	public IAttributeWriter getAttributeWriter(HadoopPath path, String type) {
+		if (type == null)
+            throw new NullPointerException();
+		if (type.equals("basic"))
+            return new HadoopBasicFileAttributeView(path, false);
+		if (type.equals("hadoop"))
+            return new HadoopFileAttributeView(path);
+		if (type.equals("owner"))
+            return new HadoopPosixFileAttributeView(path, false);
+		if (type.equals("posix"))
+            return new HadoopPosixFileAttributeView(path, true);
+        return null;
+	}
+	
+    @SuppressWarnings("unchecked")
+	<V extends FileAttributeView> V getView(HadoopPath path, Class<V> type) {
+        if (type == null)
+            throw new NullPointerException();
+        if (type == BasicFileAttributeView.class)
+            return (V)new HadoopBasicFileAttributeView(path, false);
+        if (type == HadoopFileAttributeView.class)
+            return (V)new HadoopFileAttributeView(path);
+        if (type == FileOwnerAttributeView.class)
+            return (V)new HadoopPosixFileAttributeView(path, false);
+        if (type == PosixFileAttributeView.class)
+            return (V)new HadoopPosixFileAttributeView(path, true);
+        return null;
+    }
+
+	public Map<String, Object> readAttributes(HadoopPath hadoopPath,
+			String attributes, LinkOption[] options) throws IOException {
+		// TODO Auto-generated method stub
+
+		/*public Map<String, Object> readAttributes(String attributes,
+				LinkOption[] options) throws IOException {*/
+		
+		String view = null;
+        String attrs = null;
+        int colonPos = attributes.indexOf(':');
+        if (colonPos == -1) {
+            view = "basic";
+            attrs = attributes;
+        } else {
+            view = attributes.substring(0, colonPos++);
+            attrs = attributes.substring(colonPos);
+        }
+        IAttributeReader hfv = getView(hadoopPath, view);
+        if (hfv == null) {
+            throw new UnsupportedOperationException("view <" + view + "> not supported");
+        }
+        return hfv.readAttributes(attrs, options);
+	}
+
+	public void setAttribute(HadoopPath hadoopPath, String attribute,
+			Object value, LinkOption[] options) throws IOException {
+		// TODO Auto-generated method stub
+		
+
+	    /*void setAttribute(String attribute, Object value, LinkOption... options)
+	            throws IOException
+		{*/
+		    String type = null;
+		    String attr = null;
+		    int colonPos = attribute.indexOf(':');
+		    if (colonPos == -1) {
+		        type = "basic";
+		        attr = attribute;
+		    } else {
+		        type = attribute.substring(0, colonPos++);
+		        attr = attribute.substring(colonPos);
+		    }
+		    IAttributeWriter view = getAttributeWriter(hadoopPath, type);
+		    if (view == null)
+		        throw new UnsupportedOperationException("view <" + type + "> is not supported");
+		    view.setAttribute(attr, value, options);
 	}
 }

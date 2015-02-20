@@ -20,6 +20,7 @@ package hdfs.jsr203.attribute;
 import hdfs.jsr203.HadoopPath;
 
 import java.io.IOException;
+import java.nio.file.LinkOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributeView;
@@ -27,17 +28,38 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 
-public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
+public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAttributeReader, IAttributeWriter {
 	
 	private final HadoopPath path;
+	/** posix or owner ? */
+	private final boolean isPosixView;
+	
+	private static enum AttrID {
+        owner,
+        creationTime,
+        lastAccessTime,
+        lastModifiedTime,
+        isDirectory,
+        isRegularFile,
+        isSymbolicLink,
+        isOther,
+        fileKey,
+        
+        blockSize,
+        len,
+        replication
+    };
 
-	public HadoopPosixFileAttributeView(HadoopPath path) {
+	public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {
 		this.path = path;
+		this.isPosixView = isPosixView;
 	}
 
 	@Override
@@ -89,4 +111,45 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView {
 		fs.setOwner(path.getRawResolvedPath(), null, group.getName());
 	}
 
+	@Override
+    public Map<String, Object> readAttributes(String attributes, LinkOption[] options) throws IOException
+    {
+        PosixFileAttributes zfas = readAttributes();
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        if ("*".equals(attributes)) {
+            for (AttrID id : AttrID.values()) {
+                try {
+                    map.put(id.name(), attribute(id, zfas));
+                } catch (IllegalArgumentException x) {}
+            }
+        } else {
+            String[] as = attributes.split(",");
+            for (String a : as) {
+                try {
+                    map.put(a, attribute(AttrID.valueOf(a), zfas));
+                } catch (IllegalArgumentException x) {}
+            }
+        }
+        return map;
+    }
+
+	@Override
+	public void setAttribute(String attr, Object value, LinkOption[] options)
+			throws IOException {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+	
+	Object attribute(AttrID id, PosixFileAttributes hfas) {
+        switch (id) {
+        case owner:
+            return hfas.owner().getName();
+            
+        case blockSize:
+            if (isPosixView)
+                return 0;//hfas.getFileStatus().getBlockSize();
+            break;
+        }
+        return null;
+    }
 }
