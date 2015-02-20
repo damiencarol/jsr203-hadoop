@@ -42,6 +42,7 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
@@ -118,6 +119,8 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
             return (V)new HadoopFileAttributeView(path, false);
         if (type == HadoopFileAttributeView.class)
             return (V)new HadoopFileAttributeView(path, true);
+        if (type == FileOwnerAttributeView.class)
+            return (V)new HadoopPosixFileAttributeView(path);
         if (type == PosixFileAttributeView.class)
             return (V)new HadoopPosixFileAttributeView(path);
         return null;
