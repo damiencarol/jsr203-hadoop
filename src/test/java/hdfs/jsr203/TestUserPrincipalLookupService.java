@@ -19,11 +19,16 @@ package hdfs.jsr203;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 
 import org.apache.hadoop.conf.Configuration;
@@ -75,4 +80,19 @@ public class TestUserPrincipalLookupService {
         UserPrincipalLookupService lus = rootPath.getFileSystem().getUserPrincipalLookupService();
         assertNotNull(lus);
     }
+    
+    /**
+     * Try to get user and set the same user in the root.
+     *  
+     * @throws IOException
+     */
+    @Test
+	public void testGetSetUGI() throws IOException {
+		Path rootPath = Paths.get(clusterUri);
+
+		UserPrincipal user = Files.getOwner(rootPath, LinkOption.NOFOLLOW_LINKS);
+		assertNotNull(user);
+		
+		Files.setOwner(rootPath, user);
+	}
 }
