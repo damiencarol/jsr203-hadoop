@@ -41,15 +41,17 @@ This project is still a beta.
 
 The following features are complete.
 
-* Basic Path support (build from string/URI, resolve)
+* Path support (build from string/URI, resolve, relativize, equals, ...)
 * Directory stream (provide ability to list files in directory, get status, ...)
 * Create/delete file/directory
-* Basic Input/Output
-* Basic attribute views ("basic", "posix", "hadoop" for hadoop specific attributes)
+* Input/Output
+* Attribute views ("basic", "owner", "posix")
+* Hadoop dedicated view "hadoop" for hadoop specific attributes (len, block size, replication factor)
 
-More feature will come :
+More features will come :
 
 * Security and permissions
+* complete list of hadoop specific attributes
 
 For more details, see the <a href="REFERENCE.md">Reference guide</a>.
 
