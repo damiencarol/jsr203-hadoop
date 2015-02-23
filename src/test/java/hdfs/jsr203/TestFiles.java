@@ -83,7 +83,7 @@ public class TestFiles {
 		Path dir2 = Files.createDirectories(dir);
 		assertTrue(Files.exists(dir2));
 		
-		Files.delete(rootPath.resolve("tmp"));
+		Files.delete(rootPath.resolve("tmp/1"));
     }
     
     /**
