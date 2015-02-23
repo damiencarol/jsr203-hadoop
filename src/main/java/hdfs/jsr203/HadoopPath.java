@@ -17,15 +17,12 @@
 */
 package hdfs.jsr203;
 
-import hdfs.jsr203.attribute.HadoopFileAttributeView;
 import hdfs.jsr203.attribute.HadoopFileAttributes;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.AccessDeniedException;
-import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
@@ -43,12 +40,10 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -86,7 +81,7 @@ public class HadoopPath implements Path {
 	}
 	
 	PosixFileAttributes getPosixAttributes() throws IOException {
-		return this.hdfs.getPosixFileAttributes(getResolved());
+		return this.hdfs.getPosixFileAttributes(this);
 	}
 	
 	private HadoopPath checkPath(Path path) {
@@ -491,7 +486,6 @@ public class HadoopPath implements Path {
 	@Override
 	public Path toRealPath(LinkOption... options) throws IOException {
 		HadoopPath realPath = new HadoopPath(this.hdfs, getResolvedPath()).toAbsolutePath();
-        realPath.checkAccess();
         return realPath;
 	}
 
@@ -504,35 +498,7 @@ public class HadoopPath implements Path {
         }
 	}
 
-	void checkAccess(AccessMode... modes) throws IOException {
-		boolean w = false;
-		boolean x = false;
-		for (AccessMode mode : modes) {
-			switch (mode) {
-			case READ:
-				break;
-			case WRITE:
-				w = true;
-				break;
-			case EXECUTE:
-				x = true;
-				break;
-			default:
-				throw new UnsupportedOperationException();
-			}
-		}
-		org.apache.hadoop.fs.Path hdfs_path = getRawResolvedPath();
-		// ZipFileAttributes attrs = zfs.getFileAttributes(getResolvedPath());
-		// if (attrs == null && (path.length != 1 || path[0] != '/'))
-		if (!this.hdfs.getHDFS().exists(hdfs_path))
-			throw new NoSuchFileException(toString());
-		if (w) {
-			if (this.hdfs.isReadOnly())
-				throw new AccessDeniedException(toString());
-		}
-		if (x)
-			throw new AccessDeniedException(toString());
-	}
+	
 
 	void createDirectory(FileAttribute<?>... attrs) throws IOException {
 		this.hdfs.createDirectory(getResolvedPath(), attrs);

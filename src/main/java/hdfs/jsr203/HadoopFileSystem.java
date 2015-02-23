@@ -32,6 +32,7 @@ import hdfs.jsr203.attribute.HadoopUserPrincipalLookupService;
 import hdfs.jsr203.attribute.IAttributeReader;
 import hdfs.jsr203.attribute.IAttributeWriter;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -43,6 +44,8 @@ import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.AccessMode;
 import java.nio.file.ClosedFileSystemException;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryNotEmptyException;
@@ -65,6 +68,8 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -78,7 +83,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.permission.AclEntry;
+import org.apache.hadoop.fs.permission.FsAction;
+import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.security.AccessControlException;
 
 public class HadoopFileSystem extends FileSystem {
 	
@@ -210,7 +220,8 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public WatchService newWatchService() throws IOException {
-		throw new UnsupportedOperationException();
+		//return new HadoopWatchService(this);
+		throw new UnsupportedOperationException("Watch Service not implemented");
 	}
 
 	@Override
@@ -351,7 +362,7 @@ public class HadoopFileSystem extends FileSystem {
             beginRead();
             try {
                 final WritableByteChannel wbc = Channels.newChannel(
-                    newOutputStream(path, options.toArray(new OpenOption[0])));
+                    newOutputStream(path, options, attrs));
                 long leftover = 0;
                 if (options.contains(StandardOpenOption.APPEND)) {
                     /*Entry e = getEntry0(path);
@@ -463,7 +474,7 @@ public class HadoopFileSystem extends FileSystem {
 	
 	// Returns an output stream for writing the contents into the specified
     // entry.
-    OutputStream newOutputStream(org.apache.hadoop.fs.Path path, OpenOption... options)
+    OutputStream newOutputStream(org.apache.hadoop.fs.Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
         throws IOException
     {
         //checkWritable();
@@ -505,7 +516,21 @@ public class HadoopFileSystem extends FileSystem {
         } finally {
             //endRead();
         }*/
-        return this.fs.create(path);
+        
+        FSDataOutputStream outputStream = this.fs.create(path);
+        /*
+        for (int i = 0; i < attrs.length; i++) {
+        	FileAttribute<?> item = attrs[i];
+			if (item.value().getClass() == PosixFilePermissions.class) {
+        		Set<PosixFilePermission> itemPs = (Set<PosixFilePermission>) item.value();
+				FsPermission p = FsPermission.valueOf("-" + PosixFilePermissions.toString(itemPs));
+        		this.fs.setPermission(path, p);
+        		break;
+        	}
+        	System.out.println(item.getClass());
+        }
+        */
+        return outputStream;
     }
     
     private InputStream getInputStream(org.apache.hadoop.fs.Path path)
@@ -702,12 +727,12 @@ public class HadoopFileSystem extends FileSystem {
 		this.fs.setTimes(path, mtime.toMillis(), atime.toMillis());
 	}
 
-	PosixFileAttributes getPosixFileAttributes(byte[] path) throws IOException
+	PosixFileAttributes getPosixFileAttributes(HadoopPath path) throws IOException
 	{
         beginRead();
         try {
             ensureOpen();
-            FileStatus stat = this.fs.getFileStatus(toHadoopPath(path));
+            FileStatus stat = this.fs.getFileStatus(path.getRawResolvedPath());
             return new HadoopPosixFileAttributes(this, stat);
         } finally {
             endRead();
@@ -811,5 +836,46 @@ public class HadoopFileSystem extends FileSystem {
 		    if (view == null)
 		        throw new UnsupportedOperationException("view <" + type + "> is not supported");
 		    view.setAttribute(attr, value, options);
+	}
+	
+	void checkAccess(HadoopPath path, AccessMode... modes) throws IOException {
+		// Get Raw path
+		org.apache.hadoop.fs.Path hdfs_path = path.getRawResolvedPath();
+		// First check if the path exists
+		if (!path.getFileSystem().getHDFS().exists(hdfs_path))
+			throw new NoSuchFileException(toString());
+		// Check if ACL is enabled
+		if (!path.getFileSystem().getHDFS().getConf().getBoolean("dfs.namenode.acls.enabled", false)) {
+			return;
+		}
+		// For each modes
+		try {
+			for (AccessMode mode : modes) {
+				switch (mode) {
+				case READ:
+					// TODO Evaluate using 2.6.0 to use access()
+					//this.hdfs.getHDFS().access(hdfs_path, action);
+					for (AclEntry entry : path.getFileSystem().getHDFS().getAclStatus(hdfs_path).getEntries()) {
+						System.out.println("entry=" + entry);
+					}
+					//checkAccessCatch(hdfs_path, FsAction.READ);
+					break;
+				case WRITE:
+					//checkAccessCatch(hdfs_path, FsAction.WRITE);
+					break;
+				case EXECUTE:
+					//checkAccessCatch(hdfs_path, FsAction.EXECUTE);
+					break;
+				default:
+					throw new UnsupportedOperationException();
+				}
+			}
+		} catch (AccessControlException e) {
+			throw new AccessDeniedException(path.toString(), "", e.getMessage());
+		} catch (FileNotFoundException e) {
+			throw new NoSuchFileException(path.toString(), "", e.getMessage());
+		} catch (IOException e) {
+			throw new IOException(e);
+		}
 	}
 }

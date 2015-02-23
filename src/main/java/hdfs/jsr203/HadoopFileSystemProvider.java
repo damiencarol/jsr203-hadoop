@@ -17,12 +17,7 @@
 */
 package hdfs.jsr203;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hdfs.jsr203.attribute.HadoopFileAttributeView;
 import hdfs.jsr203.attribute.HadoopFileAttributes;
-import hdfs.jsr203.attribute.HadoopPosixFileAttributeView;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,17 +33,17 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
-import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
-import java.nio.file.attribute.FileOwnerAttributeView;
-import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HadoopFileSystemProvider extends FileSystemProvider {
   public static final String SCHEME = "hdfs";
@@ -67,7 +62,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public void checkAccess(Path path, AccessMode... modes) throws IOException {
-		toHadoopPath(path).checkAccess(modes);
+		toHadoopPath(path).getFileSystem().checkAccess(toHadoopPath(path), modes);
 	}
 
 	@Override
