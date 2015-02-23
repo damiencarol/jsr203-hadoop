@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -74,7 +75,7 @@ public class TestFiles {
      * Test for {@link Files#createDirectories(Path, java.nio.file.attribute.FileAttribute...)  Files.createDirectories()}.
      * @throws IOException
      */
-    @Test
+    @Test(expected = DirectoryNotEmptyException.class)
     public void testCreateDirectories() throws IOException {
         Path rootPath = Paths.get(clusterUri);
 
@@ -82,8 +83,13 @@ public class TestFiles {
 		
 		Path dir2 = Files.createDirectories(dir);
 		assertTrue(Files.exists(dir2));
-		
-		Files.delete(rootPath.resolve("tmp/1"));
+
+		Files.delete(rootPath.resolve("tmp/1/2/3/4/5"));
+		Files.delete(rootPath.resolve("tmp/1/2/3/4"));
+		Files.delete(rootPath.resolve("tmp/1/2/3"));
+		Files.delete(rootPath.resolve("tmp/1/2"));
+		// Throws
+		Files.delete(rootPath.resolve("tmp"));
     }
     
     /**
