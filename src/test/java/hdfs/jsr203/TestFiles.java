@@ -85,6 +85,20 @@ public class TestFiles {
 		
 		Files.delete(rootPath.resolve("tmp"));
     }
+    
+    /**
+     * Test for {@link Files#isReadable(Path)  Files.isReadable()}.
+     * @throws IOException
+     */
+    @Test
+    public void testIsReadable() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path temp = Files.createTempFile("isReadable", "");
+		assertTrue(Files.exists(temp));
+		
+		assertTrue(Files.isReadable(temp));;
+    }
 
     @Test
     public void testGetLastModifiedTime() throws IOException {

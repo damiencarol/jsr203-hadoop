@@ -77,7 +77,7 @@ public class TestPosixFilePermissions {
 	public void testWriteBuffered() throws IOException {
 		Path rootPath = Paths.get(clusterUri);
 
-		Path pathToTest = rootPath.resolve(rootPath.resolve("out6.txt"));
+		Path pathToTest = rootPath.resolve("tmp/out6.txt");
 
 		Path path = pathToTest;
 		Set<PosixFilePermission> perms = EnumSet.of(
@@ -89,7 +89,6 @@ public class TestPosixFilePermissions {
 
 		Set<PosixFilePermission> perms2 = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS);
 		assertNotNull(perms2);
-		//out.println(PosixFilePermissions.toString(perms2));
 		
 		assertTrue(perms2.contains(PosixFilePermission.OWNER_READ));
 	}
