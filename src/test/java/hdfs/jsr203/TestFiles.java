@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -35,6 +36,7 @@ import java.nio.file.attribute.UserPrincipal;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.log4j.BasicConfigurator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,6 +68,22 @@ public class TestFiles {
         MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
         hdfsCluster.waitActive();
         return hdfsCluster;
+    }
+    
+    /**
+     * Test for {@link Files#createDirectories(Path, java.nio.file.attribute.FileAttribute...)  Files.createDirectories()}.
+     * @throws IOException
+     */
+    @Test
+    public void testCreateDirectories() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+		Path dir = rootPath.resolve(rootPath.resolve("tmp/1/2/3/4/5"));
+		
+		Path dir2 = Files.createDirectories(dir);
+		assertTrue(Files.exists(dir2));
+		
+		Files.delete(rootPath.resolve("tmp"));
     }
 
     @Test
