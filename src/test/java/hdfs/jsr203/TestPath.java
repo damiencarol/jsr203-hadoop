@@ -28,11 +28,13 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class TestPath {
     private static MiniDFSCluster cluster;
@@ -98,5 +100,30 @@ public class TestPath {
         Path path2 = rootPath.resolve("file2.txt");
 
         assertThat(path2, Matchers.greaterThan(path1));
+    }
+
+    /**
+     * Assertion to check that :
+     * <code>Paths.get(p.toUri()).equals(p .toAbsolutePath()) </code>
+     * @throws IOException 
+     */
+    @Test
+    public void testToURItoAbsolutePathCombination() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+        Files.createFile(rootPath.resolve("tmp/testNormalize/file.txt"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/../file.txt");
+        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+
+        p = rootPath.resolve("tmp/testNormalize/");
+        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        p = rootPath.resolve("tmp/testNormalize");
+        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        p = rootPath.resolve("tmp/testNormalize/dir1");
+        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        p = rootPath.resolve("tmp/testNormalize/dir1/");
+        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
     }
 }
