@@ -495,7 +495,7 @@ public class HadoopPath implements Path {
 		try {
             return new URI(HadoopFileSystemProvider.SCHEME, null, 
             		hdfs.getHost(), hdfs.getPort(),
-            		new String(path), null, null);
+            		new String(toAbsolutePath().path), null, null);
         } catch (Exception ex) {
             throw new AssertionError(ex);
         }
