@@ -492,7 +492,9 @@ public class HadoopPath implements Path {
 	@Override
 	public URI toUri() {
 		try {
-            return getRawResolvedPath().toUri();
+            return new URI(HadoopFileSystemProvider.SCHEME, null, 
+            		hdfs.getHost(), hdfs.getPort(),
+            		new String(path), null, null);
         } catch (Exception ex) {
             throw new AssertionError(ex);
         }
