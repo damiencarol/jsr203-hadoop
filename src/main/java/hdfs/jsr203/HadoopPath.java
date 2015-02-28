@@ -54,7 +54,7 @@ public class HadoopPath implements Path {
 	private volatile int[] offsets;
     private String internalPath;
 	private final HadoopFileSystem hdfs;
-    private int hashcode = 0;  // cached hashcode (created lazily)
+    private int hashcode = 0;  // cached hash code (created lazily)
 
 	HadoopPath(HadoopFileSystem hdfs, byte[] path) {
         this(hdfs, path, false);
@@ -104,7 +104,7 @@ public class HadoopPath implements Path {
     public boolean equals(Object obj) {
         return obj != null &&
                obj instanceof HadoopPath &&
-               this.hdfs == ((HadoopPath)obj).hdfs &&
+               this.hdfs.equals(((HadoopPath)obj).hdfs) &&
                compareTo((Path) obj) == 0;
     }
 
@@ -480,6 +480,7 @@ public class HadoopPath implements Path {
 
 	@Override
 	public File toFile() {
+		// No, just no.
 		throw new UnsupportedOperationException();
 	}
 
