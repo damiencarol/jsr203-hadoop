@@ -17,12 +17,8 @@
  */
 package hdfs.jsr203;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
@@ -37,19 +33,22 @@ import java.nio.file.attribute.UserPrincipal;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TestFiles {
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class TestFiles extends TestHadoop {
+
 	private static MiniDFSCluster cluster;
     private static URI clusterUri;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         cluster = startMini(TestFileSystem.class.getName());
-        clusterUri = cluster.getFileSystem().getUri();
+        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
     }
 
     @AfterClass

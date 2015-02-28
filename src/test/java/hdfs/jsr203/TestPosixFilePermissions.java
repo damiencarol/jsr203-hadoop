@@ -39,7 +39,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TestPosixFilePermissions {
+public class TestPosixFilePermissions extends TestHadoop {
 
 	private static MiniDFSCluster cluster;
 	private static URI clusterUri;
@@ -47,7 +47,7 @@ public class TestPosixFilePermissions {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		cluster = startMini(TestFileSystem.class.getName());
-		clusterUri = cluster.getFileSystem().getUri();
+		clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
 	}
 
 	@AfterClass

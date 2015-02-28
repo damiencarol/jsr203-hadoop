@@ -17,6 +17,13 @@
  */
 package hdfs.jsr203;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
@@ -25,28 +32,22 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class TestPath {
+public class TestPath extends TestHadoop {
+
     private static MiniDFSCluster cluster;
     private static URI clusterUri;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         cluster = startMini(TestFileSystem.class.getName());
-        clusterUri = cluster.getFileSystem().getUri();
+        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
     }
 
-    @AfterClass
+	@AfterClass
     public static void teardownClass() throws Exception {
         if (cluster != null)
         {
@@ -104,7 +105,7 @@ public class TestPath {
 
     /**
      * Assertion to check that :
-     * <code>Paths.get(p.toUri()).equals(p .toAbsolutePath()) </code>
+     * <code>Paths.get(p.toUri()).equals(p.toAbsolutePath()) </code>
      * @throws IOException 
      */
     @Test
@@ -115,7 +116,7 @@ public class TestPath {
         Files.createFile(rootPath.resolve("tmp/testNormalize/file.txt"));
 
         Path p = rootPath.resolve("tmp/testNormalize/dir1/../file.txt");
-        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
 
         p = rootPath.resolve("tmp/testNormalize/");
         assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));

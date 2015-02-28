@@ -42,7 +42,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
-public class TestFileSystem {
+public class TestFileSystem extends TestHadoop {
 
     private static MiniDFSCluster cluster;
     private static URI clusterUri;
@@ -50,7 +50,7 @@ public class TestFileSystem {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         cluster = startMini(TestFileSystem.class.getName());
-        clusterUri = cluster.getFileSystem().getUri();
+        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
     }
 
     @AfterClass
