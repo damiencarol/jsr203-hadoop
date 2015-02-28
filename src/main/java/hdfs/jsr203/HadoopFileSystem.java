@@ -97,6 +97,7 @@ public class HadoopFileSystem extends FileSystem {
 	private boolean readOnly;
 	private volatile boolean isOpen = true;
 	private UserPrincipalLookupService userPrincipalLookupService;
+    private int hashcode = 0;  // cached hash code (created lazily)
 
 	public HadoopFileSystem(FileSystemProvider provider, String host, int port) throws IOException {
 		
@@ -877,5 +878,20 @@ public class HadoopFileSystem extends FileSystem {
 		} catch (IOException e) {
 			throw new IOException(e);
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		int h = hashcode;
+        if (h == 0)
+            hashcode = h = this.fs.hashCode();
+        return h;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null &&
+               obj instanceof HadoopFileSystem &&
+               this.fs.getUri().compareTo(((HadoopFileSystem)obj).fs.getUri()) == 0;
 	}
 }
