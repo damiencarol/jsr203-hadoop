@@ -137,4 +137,16 @@ public class TestPath extends TestHadoop {
         Path p = rootPath.resolve("tmp/testNormalize/dir1/");
         assertEquals(p.getParent(), p.subpath(0, p.getNameCount()-1));
     }
+
+    @Test
+    public void testGetNameCount() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+
+        assertEquals(0, rootPath.getNameCount());
+        assertEquals(3, p.getNameCount());
+    }
 }
