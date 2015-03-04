@@ -21,10 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
@@ -212,5 +214,22 @@ public class TestFiles extends TestHadoop {
         UserPrincipal user = view.getOwner();
 		assertNotNull(user);
 		assertNotNull(user.getName());
+    }
+    
+    /**
+     * Test create existing file with StandardOpenOption.CREATE_NEW throws
+     * a <code>FileAlreadyExistsException</code>
+     * @throws IOException
+     */
+    @Test(expected = FileAlreadyExistsException.class)
+    public void testCreateFileThrowsFileAlreadyExistsException() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+		Path pathToTest = rootPath.resolve("tmp/out6.txt");
+
+		Files.createFile(pathToTest);
+		Files.createFile(pathToTest);
+		Files.createFile(pathToTest);
+		Files.createFile(pathToTest);
     }
 }
