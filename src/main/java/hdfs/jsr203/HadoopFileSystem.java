@@ -357,7 +357,15 @@ public class HadoopFileSystem extends FileSystem {
 		
 		
 		checkOptions(options);
-        if (options.contains(StandardOpenOption.WRITE) ||
+		
+		// Check that file not exists
+		if (options.contains(StandardOpenOption.CREATE_NEW) && 
+				this.fs.exists(path)) {
+			throw new FileAlreadyExistsException(path.toString());
+		}
+				
+		
+		if (options.contains(StandardOpenOption.WRITE) ||
             options.contains(StandardOpenOption.APPEND)) {
             checkWritable();
             beginRead();
