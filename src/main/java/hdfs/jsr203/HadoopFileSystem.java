@@ -17,13 +17,6 @@
 */
 package hdfs.jsr203;
 
-import static hdfs.jsr203.HadoopUtils.toRegexPattern;
-import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.READ;
 import hdfs.jsr203.attribute.HadoopBasicFileAttributeView;
 import hdfs.jsr203.attribute.HadoopFileAttributeView;
 import hdfs.jsr203.attribute.HadoopPosixFileAttributeView;
@@ -36,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -68,8 +60,6 @@ import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
@@ -86,9 +76,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.AclEntry;
-import org.apache.hadoop.fs.permission.FsAction;
-import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.security.AccessControlException;
+
+import static hdfs.jsr203.HadoopUtils.toRegexPattern;
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
 
 public class HadoopFileSystem extends FileSystem {
 	
@@ -747,14 +743,6 @@ public class HadoopFileSystem extends FileSystem {
         }
 	}
 	
-	private org.apache.hadoop.fs.Path toHadoopPath(byte[] path) {
-		//HadoopPath hdp = new HadoopPath(this, path).normalize().toUri().getPath();
-		URI uri = this.fs.getUri().resolve(getString(path));
-		return new org.apache.hadoop.fs.Path(uri);
-	}
-	
-
-
 	public IAttributeReader getView(HadoopPath path, String type) {
 		if (type == null)
             throw new NullPointerException();

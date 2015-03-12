@@ -62,6 +62,8 @@ public class HadoopPath implements Path {
 
 	HadoopPath(HadoopFileSystem hdfs, byte[] path, boolean normalized)
     {
+		assert hdfs != null;
+		
         this.hdfs = hdfs;
         if (normalized)
             this.path = path;
