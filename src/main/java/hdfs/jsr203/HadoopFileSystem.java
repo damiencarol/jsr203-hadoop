@@ -221,8 +221,7 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public WatchService newWatchService() throws IOException {
-		//return new HadoopWatchService(this);
-		throw new UnsupportedOperationException("Watch Service not implemented");
+		return new HadoopWatchService(this);
 	}
 
 	@Override

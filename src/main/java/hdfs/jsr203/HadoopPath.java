@@ -305,7 +305,9 @@ public class HadoopPath implements Path {
 		if (watcher == null || events == null || modifiers == null) {
             throw new NullPointerException();
         }
-        throw new UnsupportedOperationException();
+		
+		HadoopWatchService hws = (HadoopWatchService) watcher;
+        return new HadoopWatchKey(hws, this);
 	}
 	
 	private boolean equalsNameAt(HadoopPath other, int index) {
