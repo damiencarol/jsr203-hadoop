@@ -50,11 +50,7 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAt
         isRegularFile,
         isSymbolicLink,
         isOther,
-        fileKey,
-        
-        blockSize,
-        len,
-        replication
+        fileKey
     };
 
 	public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {
@@ -145,10 +141,10 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAt
         case owner:
             return hfas.owner().getName();
             
-        case blockSize:
+       /*case blockSize:
             if (isPosixView)
                 return 0;//hfas.getFileStatus().getBlockSize();
-            break;
+            break;*/
         }
         return null;
     }
