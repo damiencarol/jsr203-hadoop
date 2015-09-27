@@ -1,1 +1,17 @@
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "G+7yVa6O/2/cUs9Sd0wIqudCUE+T8X0J2yxodmsn8Y7htr81dqLzgmzoBF2h/9+rvorEIOVFHlL+TldgzNzOQBmEsPLQpD3cewuWtXtL31F8tVI3b8ooqlevY8jjOXqWEjBjzA9WpemN7N6Mri/H2AiiygM4fn+jP1HBO/Cy0no="
+
+addons:
+  coverity_scan:
+    project:
+      name: "damiencarol/jsr203-hadoop"
+      description: "Build submitted via Travis CI"
+    notification_email: damien.carol@gmail.com
+    build_command_prepend: "mvn clean"
+    build_command:   "mvn -DskipTests=true compile"
+    branch_pattern: coverity_scan
+
 language: java
