@@ -73,6 +73,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.AclEntry;
@@ -425,8 +426,9 @@ public class HadoopFileSystem extends FileSystem {
                 FileStatus e = this.fs.getFileStatus(path);
                 if (e == null || e.isDirectory())
                     throw new NoSuchFileException(path.toString());
+                final FSDataInputStream inputStream = getInputStream(path);
                 final ReadableByteChannel rbc =
-                    Channels.newChannel(getInputStream(path));
+                    Channels.newChannel(inputStream);
                 final long size = e.getLen();
                 return new SeekableByteChannel() {
                     long read = 0;
@@ -441,7 +443,10 @@ public class HadoopFileSystem extends FileSystem {
                     public SeekableByteChannel position(long pos)
                         throws IOException
                     {
-                        throw new UnsupportedOperationException();
+                        // ReadableByteChannel is not buffered, so it reads through
+                        inputStream.seek(pos);
+                        read = pos;
+                        return this;
                     }
 
                     public int read(ByteBuffer dst) throws IOException {
@@ -537,7 +542,7 @@ public class HadoopFileSystem extends FileSystem {
         return outputStream;
     }
     
-    private InputStream getInputStream(org.apache.hadoop.fs.Path path)
+    private FSDataInputStream getInputStream(org.apache.hadoop.fs.Path path)
             throws IOException
         {
     	return this.fs.open(path);

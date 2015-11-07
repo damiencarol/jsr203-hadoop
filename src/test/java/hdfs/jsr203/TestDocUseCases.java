@@ -21,17 +21,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestDocUseCases extends TestHadoop {
 
@@ -63,7 +68,7 @@ public class TestDocUseCases extends TestHadoop {
 	}
 
 	@Test
-	public void testWriteBuffered() throws IOException {
+	public void testWriteBufferedAndRead() throws IOException {
 		Path rootPath = Paths.get(clusterUri);
 
 		Path file = rootPath.resolve(rootPath.resolve("temp_file.txt"));
@@ -73,8 +78,20 @@ public class TestDocUseCases extends TestHadoop {
 		BufferedWriter writer = Files.newBufferedWriter(file, charset);
 		writer.write(s, 0, s.length());
 		writer.close();
+
+		List<String> lines = Files.readAllLines(file, charset);
+		assertEquals(1, lines.size());
+		assertEquals(s, lines.get(0));
+
+		// test positioned reads
+		int offset = 8;
+		byte[] contents = new byte[s.length() - offset];
+		ByteBuffer buffer = ByteBuffer.wrap(contents);
+		SeekableByteChannel seekableByteChannel = Files.newByteChannel(file);
+		seekableByteChannel.position(offset);
+		int read = seekableByteChannel.read(buffer);
+		assertEquals(s.length() - offset, read);
+		assertEquals("a test", new String(contents, charset));
 	}
-	
-	
 
 }
