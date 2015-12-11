@@ -17,7 +17,17 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	
+        <developers>
+            <developer>
+                <name>Damien Carolr</name>
+                <email>damien.carol@gmail.com</email>
+            </developer>
+        </developers>
+        <scm>
+            <connection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</connection>
+            <developerConnection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</developerConnection>
+            <url>git@github.com:damiencarol/jsr203-hadoop.git</url>
+        </scm>
 	<build>
 		<plugins>
 			<plugin>
