@@ -22,6 +22,19 @@ $ mvn install
 
 Use `mvn -DskipTests` if you do not want to execute the tests.
 
+Maven artifact
+==============
+
+Use this:
+
+```xml
+    <dependency>
+  		<groupId>com.github.jsr203hadoop</groupId>
+  		<artifactId>jsr203hadoop</artifactId>
+  		<version>1.0.0</version>
+  	</dependency>
+```
+
 Example
 =======
 
