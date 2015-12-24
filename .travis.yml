@@ -1,5 +1,12 @@
-language: java
 sudo: false
+
+language: java
+install: mvn install -Dgpg.skip=true
+jdk:
+  - oraclejdk7
+  - oraclejdk8
+  - openjdk7
+  - openjdk6
 
 env:
   global:
