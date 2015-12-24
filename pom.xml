@@ -51,6 +51,20 @@
                                 <autoReleaseAfterClose>true</autoReleaseAfterClose>
                             </configuration>
                         </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-gpg-plugin</artifactId>
+                            <version>1.5</version>
+                            <executions>
+                                <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -341,4 +355,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<name>jsr203hadoop</name>
+	<description>A Java NIO file system provider for HDFS</description>
+	<url>https://github.com/damiencarol/jsr203-hadoop</url>
 </project>
