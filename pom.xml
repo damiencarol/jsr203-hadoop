@@ -19,8 +19,12 @@
 	</licenses>
         <developers>
             <developer>
-                <name>Damien Carolr</name>
+                <name>Damien Carol</name>
                 <email>damien.carol@gmail.com</email>
+                <roles>
+                	<role>Java Developer</role>
+                </roles>
+                <timezone>Europe/Paris</timezone>
             </developer>
         </developers>
         <scm>
