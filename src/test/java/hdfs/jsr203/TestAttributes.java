@@ -109,4 +109,34 @@ public class TestAttributes extends TestHadoop {
 		assertNotNull(Files.readAttributes(pathToTest,
 				"posix:permissions,owner,size", LinkOption.NOFOLLOW_LINKS));
 	}
+
+    /**
+     * Simple test to get attributes by string.
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void testReadAttribute() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        // Read all basic-file-attributes.
+        assertNotNull(Files.getAttribute(pathToTest, "basic:creationTime",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:fileKey",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:isDirectory",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:isRegularFile",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:isSymbolicLink",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:isOther",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:lastAccessTime",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:lastModifiedTime",
+                LinkOption.NOFOLLOW_LINKS));
+        assertNotNull(Files.getAttribute(pathToTest, "basic:size",
+                LinkOption.NOFOLLOW_LINKS));
+    }
 }
