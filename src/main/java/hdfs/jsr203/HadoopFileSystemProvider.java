@@ -21,6 +21,7 @@ import hdfs.jsr203.attribute.HadoopFileAttributes;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -135,6 +136,14 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 			Set<? extends OpenOption> options, FileAttribute<?>... attrs)
 			throws IOException {
 		return toHadoopPath(path).newByteChannel(options, attrs);
+	}
+	
+	@Override
+	public FileChannel newFileChannel(Path path,
+            Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+                    throws IOException
+	{
+	    return toHadoopPath(path).newFileChannel(options, attrs);
 	}
 
 	@Override

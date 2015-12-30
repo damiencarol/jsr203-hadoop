@@ -27,6 +27,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Set;
 
+import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.FsPermission;
 
@@ -34,8 +35,8 @@ public class HadoopPosixFileAttributes extends HadoopFileAttributes implements P
 
 	private HadoopFileSystem hdfs;
 
-	public HadoopPosixFileAttributes(HadoopFileSystem hdfs, FileStatus fileStatus) {
-		super(fileStatus);
+	public HadoopPosixFileAttributes(HadoopFileSystem hdfs, Object fileKey, FileStatus fileStatus) throws IOException {
+	    super(fileKey, fileStatus);
 		this.hdfs = hdfs;
 	}
 

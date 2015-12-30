@@ -4,12 +4,15 @@
 	<groupId>com.github.jsr203hadoop</groupId>
 	<artifactId>jsr203hadoop</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
-	
+	<name>jsr203hadoop</name>
+	<description>A Java NIO file system provider for HDFS</description>
+	<url>https://github.com/damiencarol/jsr203-hadoop</url>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<hadoop.version>2.6.0</hadoop.version>
 	</properties>
-	  
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -17,58 +20,61 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-        <developers>
-            <developer>
-                <name>Damien Carol</name>
-                <email>damien.carol@gmail.com</email>
-                <roles>
-                	<role>Java Developer</role>
-                </roles>
-                <timezone>Europe/Paris</timezone>
-            </developer>
-        </developers>
-        <scm>
-            <connection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</connection>
-            <developerConnection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</developerConnection>
-            <url>git@github.com:damiencarol/jsr203-hadoop.git</url>
-        </scm>
-        <distributionManagement>
-            <snapshotRepository>
-                <id>ossrh</id>
-                <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            </snapshotRepository>
-            <repository>
-                <id>ossrh</id>
-                <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-            </repository>
-        </distributionManagement>
+	<developers>
+		<developer>
+			<name>Damien Carol</name>
+			<email>damien.carol@gmail.com</email>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Europe/Paris</timezone>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</connection>
+		<developerConnection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</developerConnection>
+		<url>git@github.com:damiencarol/jsr203-hadoop.git</url>
+	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 	<build>
 		<plugins>
-                        <plugin>
-                            <groupId>org.sonatype.plugins</groupId>
-                            <artifactId>nexus-staging-maven-plugin</artifactId>
-                            <version>1.6.3</version>
-                            <extensions>true</extensions>
-                            <configuration>
-                                <serverId>ossrh</serverId>
-                                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                                <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-gpg-plugin</artifactId>
-                            <version>1.5</version>
-                            <executions>
-                                <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.3</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -91,19 +97,19 @@
 					</execution>
 				</executions>
 			</plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.9.1</version>
-                            <executions>
-                                <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -348,7 +354,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<name>jsr203hadoop</name>
-	<description>A Java NIO file system provider for HDFS</description>
-	<url>https://github.com/damiencarol/jsr203-hadoop</url>
 </project>

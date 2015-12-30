@@ -26,7 +26,9 @@ import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.Path;
 
 public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAttributeReader, IAttributeWriter
 {
@@ -71,8 +73,10 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
 
     public HadoopFileAttributes readAttributes() throws IOException
     {
-        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
-		return new HadoopFileAttributes(fileStatus );
+        Path resolvedPath = path.getRawResolvedPath();
+        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(resolvedPath);
+        String fileKey = resolvedPath.toString();
+		return new HadoopFileAttributes(fileKey,fileStatus);
     }
 
     @Override
