@@ -31,11 +31,13 @@
 			<timezone>Europe/Paris</timezone>
 		</developer>
 	</developers>
+
 	<scm>
 		<connection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</connection>
 		<developerConnection>scm:git:git@github.com:damiencarol/jsr203-hadoop.git</developerConnection>
 		<url>git@github.com:damiencarol/jsr203-hadoop.git</url>
 	</scm>
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
