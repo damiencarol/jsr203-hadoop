@@ -17,8 +17,6 @@
 */
 package hdfs.jsr203.attribute;
 
-import hdfs.jsr203.HadoopPath;
-
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.BasicFileAttributeView;
@@ -26,9 +24,10 @@ import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+
+import hdfs.jsr203.HadoopPath;
 
 public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAttributeReader, IAttributeWriter
 {
@@ -45,7 +44,8 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
         
         blockSize,
         len,
-        replication
+        replication,
+        isEncrypted
     };
 
     private final HadoopPath path;
@@ -160,6 +160,11 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
             if (isHadoopView)
                 return hfas.getFileStatus().getReplication();
             break;
+        case isEncrypted:
+            if (isHadoopView)
+                return hfas.getFileStatus().isEncrypted();
+            break;
+
         }
         return null;
     }
