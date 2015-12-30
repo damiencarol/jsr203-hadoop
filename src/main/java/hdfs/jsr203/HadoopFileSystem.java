@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -271,10 +272,10 @@ public class HadoopFileSystem extends FileSystem {
 		beginWrite();
         try {
             ensureOpen();
-            FileStatus inode = this.fs.getFileStatus(path.getRawResolvedPath());
-            if (inode.isDirectory() == false)
-                throw new NotDirectoryException(getString(path.getResolvedPath()));
-            List<Path> list = new ArrayList<>();
+            //FileStatus inode = this.fs.getFileStatus(path.getRawResolvedPath());
+            //if (inode.isDirectory() == false)
+            //    throw new NotDirectoryException(getString(path.getResolvedPath()));
+            List<Path> list = new ArrayList<Path>();
             for (FileStatus stat : this.fs.listStatus(path.getRawResolvedPath())) {
                 HadoopPath hp = new HadoopPath(this, stat.getPath().toUri().getPath().getBytes());
                 if (filter == null || filter.accept(hp))
@@ -285,7 +286,7 @@ public class HadoopFileSystem extends FileSystem {
             endWrite();
         }
 	}
-	
+
 	final byte[] getBytes(String name) {
 		// TODO : add charset management
         return name.getBytes();//zc.getBytes(name);
@@ -341,6 +342,14 @@ public class HadoopFileSystem extends FileSystem {
                 throw new IllegalArgumentException();
         }
     }
+	
+	FileChannel newFileChannel(org.apache.hadoop.fs.Path path, 
+	        Set<? extends OpenOption> options, 
+	        FileAttribute<?>[] attrs) throws IOException
+	{
+        checkOptions(options);
+	    throw new IOException("NOT FINISHED !!!");
+	}
 
 	SeekableByteChannel newByteChannel(org.apache.hadoop.fs.Path path,
             Set<? extends OpenOption> options,
@@ -486,7 +495,7 @@ public class HadoopFileSystem extends FileSystem {
     OutputStream newOutputStream(org.apache.hadoop.fs.Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
         throws IOException
     {
-        //checkWritable();
+        checkWritable();
         boolean hasCreateNew = false;
         boolean hasCreate = false;
         boolean hasAppend = false;
@@ -741,8 +750,10 @@ public class HadoopFileSystem extends FileSystem {
         beginRead();
         try {
             ensureOpen();
-            FileStatus stat = this.fs.getFileStatus(path.getRawResolvedPath());
-            return new HadoopPosixFileAttributes(this, stat);
+            org.apache.hadoop.fs.Path resolvedPath = path.getRawResolvedPath();
+            FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(resolvedPath);
+            String fileKey = resolvedPath.toString();
+            return new HadoopPosixFileAttributes(this, fileKey, fileStatus);
         } finally {
             endRead();
         }

@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAttributeReader, IAttributeWriter {
 	
@@ -90,8 +91,10 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAt
 
 	@Override
 	public PosixFileAttributes readAttributes() throws IOException {
-		FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
-		return new HadoopPosixFileAttributes(this.path.getFileSystem(), fileStatus);
+        Path resolvedPath = path.getRawResolvedPath();
+        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(resolvedPath);
+        String fileKey = resolvedPath.toString();
+		return new HadoopPosixFileAttributes(this.path.getFileSystem(), fileKey, fileStatus);
 	}
 
 	@Override

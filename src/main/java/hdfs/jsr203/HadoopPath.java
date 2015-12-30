@@ -22,6 +22,7 @@ import hdfs.jsr203.attribute.HadoopFileAttributes;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
@@ -46,6 +47,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import org.apache.hadoop.fs.BlockLocation;
+import org.apache.hadoop.fs.FileStatus;
 
 public class HadoopPath implements Path {
 
@@ -74,12 +78,10 @@ public class HadoopPath implements Path {
     }
 
 	HadoopFileAttributes getAttributes() throws IOException {
-		// this.hdfs.fs.getFileAttributes(this);//getResolvedPath());
-
-		HadoopFileAttributes hfas = new HadoopFileAttributes(this.hdfs
-				.getHDFS().getFileStatus(this.getRawResolvedPath()));
-		// if (hfas == null) throw new NoSuchFileException(toString());
-		return hfas;
+        org.apache.hadoop.fs.Path resolvedPath = this.getRawResolvedPath();
+        FileStatus fileStatus = hdfs.getHDFS().getFileStatus(resolvedPath);
+        String fileKey = resolvedPath.toString();
+		return new HadoopFileAttributes(fileKey,fileStatus);
 	}
 	
 	PosixFileAttributes getPosixAttributes() throws IOException {
@@ -555,6 +557,12 @@ public class HadoopPath implements Path {
 			FileAttribute<?>... attrs) throws IOException {
 		return this.hdfs.newByteChannel(getRawResolvedPath(), options, attrs);
 	}
+	
+
+    FileChannel newFileChannel(Set<? extends OpenOption> options, FileAttribute<?>[] attrs) throws IOException 
+    {
+        return this.hdfs.newFileChannel(getRawResolvedPath(), options, attrs);
+    }
 
 	// the result path does not contain ./ and .. components
     private volatile byte[] resolved = null;
