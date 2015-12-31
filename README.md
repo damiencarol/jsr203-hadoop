@@ -54,12 +54,17 @@ This project is still a beta.
 
 The following features are complete.
 
-* Path support (build from string/URI, resolve, relativize, equals, ...)
-* Directory stream (provide ability to list files in directory, get status, ...)
-* Create/delete file/directory
-* Input/Output
-* Attribute views ("basic", "owner", "posix")
-* Hadoop dedicated view "hadoop" for hadoop specific attributes (len, block size, replication factor)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Path support - build from string/URI | Done ||
+| Path support - resolve, relativize, equals, ... | Done |
+| Directory stream (provide ability to list files in directory, get status, ...) | Done ||
+| Create/delete file/directory | Done ||
+| Input/Output | Partial | Full support of SeekableByteChannel, FileChannel pending | 
+| Attribute view "basic" | Done | Full support (fileKey is implemented) |
+| Attribute view "owner" | Done | Full support (Use Hadoop UGI) |
+| Attribute view "posix" | Done ||
+| Hadoop dedicated view "hadoop" for hadoop specific attributes (len, block size, replication factor) | Done | More attributes will come |
 
 More features will come :
 
