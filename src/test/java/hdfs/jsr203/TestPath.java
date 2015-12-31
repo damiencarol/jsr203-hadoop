@@ -149,4 +149,14 @@ public class TestPath extends TestHadoop {
         assertEquals(0, rootPath.getNameCount());
         assertEquals(3, p.getNameCount());
     }
+
+    @Test
+    public void testResolveSibling() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        assertEquals(p, p.resolveSibling(p.getFileName()));
+    }
 }
