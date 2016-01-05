@@ -168,4 +168,20 @@ public class TestPath extends TestHadoop {
         assertEquals("tmp", p.getName(0).toString());
         assertEquals("testNormalize", p.getName(1).toString());
     }
+
+    @Test
+    public void startsWith() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        assertTrue(p.startsWith("tmp"));
+    }
+
+    @Test
+    public void endsWith() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        assertTrue(p.endsWith("test"));
+    }
 }
