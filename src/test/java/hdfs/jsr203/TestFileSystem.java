@@ -41,7 +41,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
 public class TestFileSystem extends TestHadoop {
 
     private static MiniDFSCluster cluster;
@@ -55,8 +54,7 @@ public class TestFileSystem extends TestHadoop {
 
     @AfterClass
     public static void teardownClass() throws Exception {
-        if (cluster != null)
-        {
+        if (cluster != null) {
             cluster.shutdown();
         }
     }
@@ -66,8 +64,8 @@ public class TestFileSystem extends TestHadoop {
         FileUtil.fullyDelete(baseDir);
         Configuration conf = new Configuration();
         conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
-		MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
-		MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+        MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
         hdfsCluster.waitActive();
         return hdfsCluster;
     }
@@ -95,12 +93,12 @@ public class TestFileSystem extends TestHadoop {
     }
 
     @Test(expected = NoSuchFileException.class)
-    public void testNoSuchFileExceptionOnDelete() throws URISyntaxException,
-            IOException {
+    public void testNoSuchFileExceptionOnDelete() throws URISyntaxException, IOException {
         // start the demo cluster
-        //MiniDFSCluster cluster = startMini("testNoSuchFileExceptionOnDelete");
-        //URI uri = new URI("hdfs://" + host + ":" + cluster.getNameNodePort() + "/tmp/test_file");
-
+        // MiniDFSCluster cluster =
+        // startMini("testNoSuchFileExceptionOnDelete");
+        // URI uri = new URI("hdfs://" + host + ":" + cluster.getNameNodePort()
+        // + "/tmp/test_file");
 
         URI uri = clusterUri.resolve("/tmp/testNoSuchFileExceptionOnDelete");
         Path path = Paths.get(uri);
@@ -115,13 +113,12 @@ public class TestFileSystem extends TestHadoop {
         try {
             Files.delete(path); // this one generate the exception
         } finally {
-            //cluster.shutdown();
+            // cluster.shutdown();
         }
     }
 
     @Test(expected = DirectoryNotEmptyException.class)
-    public void testDirectoryNotEmptyExceptionOnDelete()
-            throws URISyntaxException, IOException {
+    public void testDirectoryNotEmptyExceptionOnDelete() throws URISyntaxException, IOException {
         // Create the directory
         URI uriDir = clusterUri.resolve("/tmp/testDirectoryNotEmptyExceptionOnDelete");
         Path pathDir = Paths.get(uriDir);
@@ -129,7 +126,6 @@ public class TestFileSystem extends TestHadoop {
         if (Files.exists(pathDir)) {
             Files.delete(pathDir);
         }
-
 
         Files.createDirectory(pathDir);
         assertTrue(Files.exists(pathDir));
@@ -144,14 +140,12 @@ public class TestFileSystem extends TestHadoop {
     }
 
     @Test
-    public void testSetLastModifiedTime() throws URISyntaxException,
-            IOException {
+    public void testSetLastModifiedTime() throws URISyntaxException, IOException {
         URI uri = clusterUri.resolve("/tmp/testSetLastModifiedTime");
         Path file = Paths.get(uri);
         Files.createFile(file);
         assertTrue(Files.exists(file));
-        BasicFileAttributes attr = Files.readAttributes(file,
-                BasicFileAttributes.class);
+        BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
         assertNotNull(attr);
         long currentTime = System.currentTimeMillis();
         FileTime ft = FileTime.fromMillis(currentTime);
@@ -237,4 +231,17 @@ public class TestFileSystem extends TestHadoop {
         HadoopFileSystemProvider.toHadoopPath(Paths.get("my_file"));
     }
 
+    /**
+     * Simple test to check {@link PathMatcher} support.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void getPathMatcher() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:*.{java,class}");
+
+        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+    }
 }
