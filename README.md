@@ -4,6 +4,7 @@ jsr203-hadoop
 JSR 203 Implementation for Hadoop Distributed File System
 
 [![Build Status](https://travis-ci.org/damiencarol/jsr203-hadoop.svg?branch=master)](https://travis-ci.org/damiencarol/jsr203-hadoop)
+[![Coverage Status](https://coveralls.io/repos/damiencarol/jsr203-hadoop/badge.svg?branch=master&service=github)](https://coveralls.io/github/damiencarol/jsr203-hadoop?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/)
 
 #### Maven artifact
