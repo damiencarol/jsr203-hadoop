@@ -17,6 +17,7 @@
  */
 package hdfs.jsr203;
 
+import static java.nio.file.FileVisitResult.CONTINUE;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -25,14 +26,21 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.EnumSet;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -236,5 +244,80 @@ public class TestFiles extends TestHadoop {
         Files.createFile(pathToTest);
         Files.createFile(pathToTest);
         Files.createFile(pathToTest);
+    }
+    
+
+    /**
+     * A {@code FileVisitor} that finds
+     * all files that match the
+     * specified pattern.
+     */
+    public static class Finder
+        extends SimpleFileVisitor<Path> {
+
+        private final PathMatcher matcher;
+        private int numMatches = 0;
+
+        Finder(String pattern) {
+            matcher = FileSystems.getDefault()
+                    .getPathMatcher("glob:" + pattern);
+        }
+
+        // Compares the glob pattern against
+        // the file or directory name.
+        void find(Path file) {
+            Path name = file.getFileName();
+            if (name != null && matcher.matches(name)) {
+                numMatches++;
+                System.out.println(file);
+            }
+        }
+
+        // Prints the total number of
+        // matches to standard out.
+        void done() {
+            System.out.println("Matched: "
+                + numMatches);
+        }
+
+        // Invoke the pattern matching
+        // method on each file.
+        @Override
+        public FileVisitResult visitFile(Path file,
+                BasicFileAttributes attrs) {
+            find(file);
+            return CONTINUE;
+        }
+
+        // Invoke the pattern matching
+        // method on each directory.
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir,
+                BasicFileAttributes attrs) {
+            find(dir);
+            return CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file,
+                IOException exc) {
+            System.err.println(exc);
+            return CONTINUE;
+        }
+    }
+    
+    /**
+     * Simple test to visit directories.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void walkFileTree() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+        EnumSet<FileVisitOption> opts = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
+
+        String pattern = "*";
+        Finder finder = new Finder(pattern);
+        Files.walkFileTree(pathToTest, opts, Integer.MAX_VALUE, finder);
     }
 }

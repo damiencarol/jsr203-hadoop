@@ -17,8 +17,6 @@
 */
 package hdfs.jsr203.attribute;
 
-import hdfs.jsr203.HadoopFileSystem;
-
 import java.io.IOException;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -27,9 +25,10 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Set;
 
-import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.FsPermission;
+
+import hdfs.jsr203.HadoopFileSystem;
 
 public class HadoopPosixFileAttributes extends HadoopFileAttributes implements PosixFileAttributes {
 
