@@ -4,6 +4,7 @@ jsr203-hadoop
 JSR 203 Implementation for Hadoop Distributed File System
 
 [![Build Status](https://travis-ci.org/damiencarol/jsr203-hadoop.svg?branch=master)](https://travis-ci.org/damiencarol/jsr203-hadoop)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/)
 
 #### Maven artifact
 
@@ -70,7 +71,7 @@ For more details, see the <a href="REFERENCE.md">Reference guide</a>.
 
 * License: <a href="LICENSE">Apache License, Version 2.0.</a>
 * Author: <a href="https://github.com/damiencarol">Damien Carol</a>
-* Source code:<a href="http://github.com/damiencarol/jsr203-hadoop">http://github.com/damiencarol/jsr203-hadoop</a>
+* Source code: <a href="http://github.com/damiencarol/jsr203-hadoop">http://github.com/damiencarol/jsr203-hadoop</a>
 
 #### Ressources
 
