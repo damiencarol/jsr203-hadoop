@@ -280,4 +280,20 @@ public class TestFileSystem extends TestHadoop {
 
         assertTrue(matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
     }
+
+    /**
+     * Simple test to check {@link FileStore} support.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void getFileStores() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        Iterable<FileStore> fileStores = pathToTest.getFileSystem().getFileStores();
+        for (FileStore store : fileStores) {
+            store.getUsableSpace();
+            assertNotNull(store.toString());
+        }
+    }
 }
