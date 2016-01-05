@@ -250,7 +250,7 @@ public class TestFileSystem extends TestHadoop {
 
         PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:*.{java,class}");
 
-        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+        assertTrue(matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
     }
     
     /**
@@ -264,7 +264,7 @@ public class TestFileSystem extends TestHadoop {
 
         PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:*.{java,class");
 
-        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+        assertTrue(matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
     }
 
     /**
@@ -278,6 +278,6 @@ public class TestFileSystem extends TestHadoop {
 
         PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:????.{java,class}");
 
-        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+        assertTrue(matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
     }
 }

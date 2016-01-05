@@ -26,7 +26,7 @@ public abstract class TestHadoop {
         	return new URI(clusterUri.getScheme(), null,
         			clusterUri.getHost(), clusterUri.getPort(),
         			"/", null, null);
-        } else if (clusterUri.getPath().trim()=="") {
+        } else if (clusterUri.getPath().trim().equals("")) {
         	return new URI(clusterUri.getScheme(), null,
         			clusterUri.getHost(), clusterUri.getPort(),
         			"/", null, null);

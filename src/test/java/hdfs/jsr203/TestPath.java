@@ -20,6 +20,7 @@ package hdfs.jsr203;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,10 +48,9 @@ public class TestPath extends TestHadoop {
         clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
     }
 
-	@AfterClass
+    @AfterClass
     public static void teardownClass() throws Exception {
-        if (cluster != null)
-        {
+        if (cluster != null) {
             cluster.shutdown();
         }
     }
@@ -81,8 +81,8 @@ public class TestPath extends TestHadoop {
      */
     @Test
     public void testRelativizeResolveCombination() {
-        Path p = Paths.get(clusterUri);
-        Path q = p.resolve("tmp/testNormalize/dir1/../file.txt");
+        Path p = Paths.get(clusterUri).resolve("/a/b");
+        Path q = p.getFileSystem().getPath("c", "d");
 
         assertEquals(q, p.relativize(p.resolve(q)));
     }
@@ -106,7 +106,8 @@ public class TestPath extends TestHadoop {
     /**
      * Assertion to check that :
      * <code>Paths.get(p.toUri()).equals(p.toAbsolutePath()) </code>
-     * @throws IOException 
+     * 
+     * @throws IOException
      */
     @Test
     public void testToURItoAbsolutePathCombination() throws IOException {
@@ -119,23 +120,24 @@ public class TestPath extends TestHadoop {
         assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
 
         p = rootPath.resolve("tmp/testNormalize/");
-        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
         p = rootPath.resolve("tmp/testNormalize");
-        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
         p = rootPath.resolve("tmp/testNormalize/dir1");
-        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
         p = rootPath.resolve("tmp/testNormalize/dir1/");
-        assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
     }
-    
+
     @Test
-    public void testSubpath() throws IOException {
+    public void testSubpath() throws IOException, URISyntaxException {
         Path rootPath = Paths.get(clusterUri);
 
         Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
         Path p = rootPath.resolve("tmp/testNormalize/dir1/");
-        assertEquals(p.getParent(), p.subpath(0, p.getNameCount()-1));
+
+        assertEquals("tmp/testNormalize", p.subpath(0, p.getNameCount() - 1).toString());
     }
 
     @Test
@@ -169,12 +171,28 @@ public class TestPath extends TestHadoop {
         assertEquals("testNormalize", p.getName(1).toString());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void getNameInvalidIndex() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        p.getName(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getNameInvalidIndex2() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        p.getName(p.getNameCount());
+    }
+
     @Test
     public void startsWith() throws IOException {
         Path rootPath = Paths.get(clusterUri);
 
         Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertTrue(p.startsWith("tmp"));
+        assertTrue(p.startsWith("/tmp"));
     }
 
     @Test
@@ -183,5 +201,13 @@ public class TestPath extends TestHadoop {
 
         Path p = rootPath.resolve("tmp/testNormalize/test");
         assertTrue(p.endsWith("test"));
+    }
+
+    @Test
+    public void getRoot() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        assertEquals(rootPath, p.getRoot());
     }
 }
