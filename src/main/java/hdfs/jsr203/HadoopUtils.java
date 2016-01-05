@@ -21,6 +21,10 @@ import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
 public class HadoopUtils {
+    
+    /* Keep private the constructor for this utility class */
+    private HadoopUtils() {
+    }
 
 	/**
      * Append a slash at the end, if it does not have one yet
