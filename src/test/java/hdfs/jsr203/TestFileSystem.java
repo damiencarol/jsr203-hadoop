@@ -35,6 +35,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.regex.PatternSyntaxException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -241,6 +242,34 @@ public class TestFileSystem extends TestHadoop {
         Path pathToTest = Paths.get(clusterUri);
 
         PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:*.{java,class}");
+
+        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+    }
+    
+    /**
+     * Simple test to check {@link PathMatcher} support.
+     *
+     * @throws IOException
+     */
+    @Test(expected = PatternSyntaxException.class)
+    public void getPathMatcherMissingHandelbar() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:*.{java,class");
+
+        assertTrue(matcher.matches(pathToTest.resolve("test.java")));
+    }
+
+    /**
+     * Simple test to check {@link PathMatcher} support.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void getPathMatcherMask() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        PathMatcher matcher = pathToTest.getFileSystem().getPathMatcher("glob:????.{java,class}");
 
         assertTrue(matcher.matches(pathToTest.resolve("test.java")));
     }
