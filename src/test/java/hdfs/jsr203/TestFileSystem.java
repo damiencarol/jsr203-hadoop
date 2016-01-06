@@ -252,7 +252,7 @@ public class TestFileSystem extends TestHadoop {
 
         assertTrue(matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
     }
-    
+
     /**
      * Simple test to check {@link PathMatcher} support.
      *
@@ -295,5 +295,19 @@ public class TestFileSystem extends TestHadoop {
             store.getUsableSpace();
             assertNotNull(store.toString());
         }
+    }
+
+    @Test
+    public void getSeparator() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        assertNotNull(pathToTest.getFileSystem().getSeparator());
+    }
+
+    @Test
+    public void getRootDirectories() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+
+        assertNotNull(pathToTest.getFileSystem().getRootDirectories());
     }
 }

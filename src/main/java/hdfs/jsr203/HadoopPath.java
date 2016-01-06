@@ -17,8 +17,6 @@
 */
 package hdfs.jsr203;
 
-import hdfs.jsr203.attribute.HadoopFileAttributes;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -48,8 +46,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
+
+import hdfs.jsr203.attribute.HadoopFileAttributes;
 
 public class HadoopPath implements Path {
 
@@ -526,7 +525,7 @@ public class HadoopPath implements Path {
 	/**
 	 * Helper to get the raw interface of HDFS path.
 	 * 
-	 * @return
+	 * @return raw HDFS path object
 	 */
 	public org.apache.hadoop.fs.Path getRawResolvedPath() {
 		return new org.apache.hadoop.fs.Path("hdfs://"

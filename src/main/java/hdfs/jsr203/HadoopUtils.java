@@ -1,26 +1,26 @@
 /**
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements. See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership. The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package hdfs.jsr203;
 
 import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
-public class HadoopUtils {
+class HadoopUtils {
     
     /* Keep private the constructor for this utility class */
     private HadoopUtils() {
@@ -29,7 +29,7 @@ public class HadoopUtils {
 	/**
      * Append a slash at the end, if it does not have one yet
      */
-    public static byte[] toDirectoryPath(byte[] dir) {
+    static byte[] toDirectoryPath(byte[] dir) {
         if (dir.length != 0 && dir[dir.length - 1] != '/') {
             dir = Arrays.copyOf(dir, dir.length + 1);
             dir[dir.length - 1] = '/';
@@ -54,11 +54,11 @@ public class HadoopUtils {
     }
     
     /**
-     * Creates a regex pattern from the given glob expression.
+     * Creates a {@code regex} pattern from the given {@code glob} expression.
      *
      * @throws  PatternSyntaxException
      */
-    public static String toRegexPattern(String globPattern) {
+    static String toRegexPattern(String globPattern) {
         boolean inGroup = false;
         StringBuilder regex = new StringBuilder("^");
 
