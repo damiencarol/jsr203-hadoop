@@ -41,8 +41,10 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -216,30 +218,21 @@ public class HadoopPath implements Path {
 
 	@Override
 	public Iterator<Path> iterator() {
-		return new Iterator<Path>() {
-            private int i = 0;
+	    return asList().iterator();
+	}
 
-            @Override
-            public boolean hasNext() {
-                return (i < getNameCount());
-            }
-
-            @Override
-            public Path next() {
-                if (i < getNameCount()) {
-                    Path result = getName(i);
-                    i++;
-                    return result;
-                } else {
-                    throw new NoSuchElementException();
-                }
-            }
-
-            @Override
-            public void remove() {
-                throw new ReadOnlyFileSystemException();
-            }
-        };
+	private List<Path> asList() {
+	    return new AbstractList<Path>() {
+	        @Override
+	        public Path get(int index) {
+	            return getName(index);
+	        }
+	        
+	        @Override
+	        public int size() {
+	            return getNameCount();
+	        }
+	    };
 	}
 
 	@Override
