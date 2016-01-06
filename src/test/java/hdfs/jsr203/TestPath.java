@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -34,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -209,5 +211,17 @@ public class TestPath extends TestHadoop {
 
         Path p = rootPath.resolve("tmp/testNormalize/test");
         assertEquals(rootPath, p.getRoot());
+    }
+
+    @Test
+    public void iterator() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Path p = rootPath.resolve("tmp/testNormalize/test");
+        Iterator<Path> it = p.iterator();
+        assertNotNull(it);
+        assertEquals("tmp", it.next().toString());
+        assertEquals("testNormalize", it.next().toString());
+        assertEquals("test", it.next().toString());
     }
 }
