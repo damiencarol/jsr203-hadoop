@@ -158,7 +158,8 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		if (port == -1)
 			port = 8020; // Default hadoop port
 		
-		return new HadoopFileSystem(this, uri.getHost(), port);
+//		return new HadoopFileSystem(this, uri.getHost(), port);
+		return new HadoopFileSystem(this);
 	}
 
 	@SuppressWarnings("unchecked")

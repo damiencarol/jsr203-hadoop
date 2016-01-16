@@ -491,9 +491,16 @@ public class HadoopPath implements Path {
 	@Override
 	public URI toUri() {
 		try {
-            return new URI(HadoopFileSystemProvider.SCHEME, null, 
-            		hdfs.getHost(), hdfs.getPort(),
-            		new String(toAbsolutePath().path), null, null);
+			if (hdfs.getPort() >= 0) {
+		          return new URI(HadoopFileSystemProvider.SCHEME, null, 
+		            		hdfs.getHost(), hdfs.getPort(),
+		            		new String(toAbsolutePath().path), null, null);
+			} else {
+				return new URI(HadoopFileSystemProvider.SCHEME, 
+						hdfs.getHost(), new String(toAbsolutePath().path), null);
+			}
+  
+    
         } catch (Exception ex) {
             throw new AssertionError(ex);
         }
@@ -522,7 +529,7 @@ public class HadoopPath implements Path {
 	 */
 	public org.apache.hadoop.fs.Path getRawResolvedPath() {
 		return new org.apache.hadoop.fs.Path("hdfs://"
-				+ hdfs.getHost() + ":" + hdfs.getPort() + new String(getResolvedPath()));
+				+ hdfs.getHostPort() + new String(getResolvedPath()));
 	}
 
 	void delete() throws IOException {

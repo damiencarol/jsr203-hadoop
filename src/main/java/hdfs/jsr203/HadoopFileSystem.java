@@ -109,7 +109,17 @@ public class HadoopFileSystem extends FileSystem {
         
         this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
 	}
-	
+	public HadoopFileSystem(FileSystemProvider provider) throws IOException {
+		this.provider = provider;
+		Configuration conf = HdfsConfInitiator.getConf();
+		try {
+			this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
+		this.userPrincipalLookupService = new HadoopUserPrincipalLookupService(this);
+	}
 	private final void beginWrite() {
 	        //rwlock.writeLock().lock();
 	    }
@@ -236,6 +246,17 @@ public class HadoopFileSystem extends FileSystem {
         return supportedFileAttributeViews;
     }
 	
+    public String getHostPort() {
+    	String host = getHost();
+    	int port = getPort();
+    	if (port >= 0) {
+    		return host + ":" + port;
+    	} else {
+    		return host;	
+    	}
+    	
+    }
+    
 	public String getHost()
 	{
 		return fs.getUri().getHost();
@@ -734,7 +755,7 @@ public class HadoopFileSystem extends FileSystem {
 	{
 		HadoopPath hp = new HadoopPath(this, bs);
 		org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path("hdfs://"
-				+ this.getHost() + ":" + this.getPort() + new String(hp.getResolvedPath()));
+				+ this.getHostPort() + new String(hp.getResolvedPath()));
 		// Get actual value
 		if (mtime == null || atime == null)
 		{
