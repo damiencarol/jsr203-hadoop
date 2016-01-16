@@ -543,9 +543,7 @@ public class HadoopPath implements Path {
 	void move(HadoopPath target, CopyOption... options) throws IOException {
 		if (this.hdfs.sameCluster(target.hdfs))
         {
-            this.hdfs.copyFile(true,
-                         getResolvedPath(), target.getResolvedPath(),
-                         options);
+            this.hdfs.moveFile(getResolvedPath(), target.getResolvedPath(), options);
         } else {
             copyToTarget(target, options);
             delete();
