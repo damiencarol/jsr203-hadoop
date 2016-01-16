@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -309,5 +310,30 @@ public class TestFileSystem extends TestHadoop {
         Path pathToTest = Paths.get(clusterUri);
 
         assertNotNull(pathToTest.getFileSystem().getRootDirectories());
+    }
+    
+    @Test
+    public void testCopyeAndMoveFiles() throws IOException {
+        URI uriSrc = clusterUri.resolve("/tmp/testSrcFile");
+        Path pathSrc = Paths.get(uriSrc);
+        
+        URI uriDstCp = clusterUri.resolve("/tmp/testDstCopyFile");
+        Path pathDstCp = Paths.get(uriDstCp);
+        
+        BufferedWriter br = Files.newBufferedWriter(pathSrc);
+        br.write("write \n several \n things\n");
+        br.close();
+        Files.copy(pathSrc, pathDstCp);
+        assertTrue(Files.exists(pathDstCp));
+        assertEquals(Files.size(pathSrc), Files.size(pathDstCp));
+        
+        URI uriDstMv = clusterUri.resolve("/tmp/testDstCopyFile");
+        Path pathDstMv = Paths.get(uriDstMv);
+        Files.move(pathDstCp, pathDstMv);
+        assertFalse(Files.exists(pathDstCp));//move from
+        assertTrue(Files.exists(pathDstMv));//move to
+        assertEquals(Files.size(pathSrc), Files.size(pathDstMv));
+        Files.deleteIfExists(pathSrc);
+        Files.deleteIfExists(pathDstMv);
     }
 }
