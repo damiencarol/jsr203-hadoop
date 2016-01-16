@@ -77,6 +77,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.permission.AclEntry;
 import org.apache.hadoop.security.AccessControlException;
 
@@ -695,16 +696,28 @@ public class HadoopFileSystem extends FileSystem {
                     hasCopyAttrs = true;
             }
             org.apache.hadoop.fs.Path eDst_path = new HadoopPath(this, dst).getRawResolvedPath();
-            FileStatus eDst = this.fs.getFileStatus(eDst_path);
-            if (!fs.exists(eDst_path)) {
+//            FileStatus eDst = this.fs.getFileStatus(eDst_path); //if eDst_path not exist, it will throw an error
+    
+            if (fs.exists(eDst_path)) {
                 if (!hasReplace)
                     throw new FileAlreadyExistsException(getString(dst));
+
+                if(!fs.delete(eDst_path, false)) {
+                	throw new AccessDeniedException("cannot delete hdfs file " + getString(dst));
+                }
             } else {
                 //checkParents(dst);
             }
-           
-            org.apache.hadoop.fs.Path[] srcs = new org.apache.hadoop.fs.Path[] {eSrc_path};
-			this.fs.concat(eDst_path, srcs);
+            
+            //Simply use FileUtil.copy here. Can we use DistCp for very big files here? zongjie@novelbio.com
+            boolean isCanDeleteSourceFile = FileUtil.copy(fs, eSrc_path, fs, eDst_path, deletesrc, fs.getConf());
+            if (!isCanDeleteSourceFile) {
+            	throw new AccessDeniedException("cannot delete source file " + eSrc_path.toString());
+            }
+            
+//            org.apache.hadoop.fs.Path[] srcs = new org.apache.hadoop.fs.Path[] {eSrc_path};
+//			this.fs.concat(eDst_path, srcs);
+            
             /*
             Entry u = new Entry(eSrc, Entry.COPY);    // copy eSrc entry
             u.name(dst);                              // change name
@@ -730,6 +743,52 @@ public class HadoopFileSystem extends FileSystem {
         }
     }
 
+	void moveFile(byte[]src, byte[] dst, CopyOption... options)
+	        throws IOException
+	    {
+		checkWritable();
+        if (Arrays.equals(src, dst))
+            return;    // do nothing, src and dst are the same
+
+        beginWrite();
+        try {
+            ensureOpen();
+            org.apache.hadoop.fs.Path eSrc_path = new HadoopPath(this, src).getRawResolvedPath();
+            FileStatus eSrc = this.fs.getFileStatus(eSrc_path);
+            if (!this.fs.exists(eSrc_path))
+                throw new NoSuchFileException(getString(src));
+            if (eSrc.isDirectory()) {    // specification says to create dst directory
+                createDirectory(dst);
+                return;
+            }
+            boolean hasReplace = false;
+            boolean hasCopyAttrs = false;
+            for (CopyOption opt : options) {
+                if (opt == REPLACE_EXISTING)
+                    hasReplace = true;
+                else if (opt == COPY_ATTRIBUTES)
+                    hasCopyAttrs = true;
+            }
+            org.apache.hadoop.fs.Path eDst_path = new HadoopPath(this, dst).getRawResolvedPath();
+    
+            if (fs.exists(eDst_path)) {
+                if (!hasReplace)
+                    throw new FileAlreadyExistsException(getString(dst));
+
+                if(!fs.delete(eDst_path, false)) {
+                	throw new AccessDeniedException("cannot delete hdfs file " + getString(dst));
+                }
+            }
+            //Simply rename the path
+            if (!fs.rename(eSrc_path, eDst_path)) {
+            	throw new AccessDeniedException("cannot move source file " + eSrc_path.toString());
+            }
+   
+        } finally {
+            endWrite();
+        }
+    }
+	
 	public void setTimes(byte[] bs, FileTime mtime, FileTime atime, FileTime ctime) throws IOException
 	{
 		HadoopPath hp = new HadoopPath(this, bs);
