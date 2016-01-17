@@ -327,7 +327,7 @@ public class TestFileSystem extends TestHadoop {
         assertTrue(Files.exists(pathDstCp));
         assertEquals(Files.size(pathSrc), Files.size(pathDstCp));
         
-        URI uriDstMv = clusterUri.resolve("/tmp/testDstCopyFile");
+        URI uriDstMv = clusterUri.resolve("/tmp/testDstMoveFile");
         Path pathDstMv = Paths.get(uriDstMv);
         Files.move(pathDstCp, pathDstMv);
         assertFalse(Files.exists(pathDstCp));//move from
