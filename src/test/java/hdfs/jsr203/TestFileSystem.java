@@ -320,9 +320,9 @@ public class TestFileSystem extends TestHadoop {
         URI uriDstCp = clusterUri.resolve("/tmp/testDstCopyFile");
         Path pathDstCp = Paths.get(uriDstCp);
         
-        BufferedWriter br = Files.newBufferedWriter(pathSrc);
-        br.write("write \n several \n things\n");
-        br.close();
+        OutputStream os = Files.newOutputStream(pathSrc);
+        os.write("write \n several \n things\n".getBytes());
+        os.close();
         Files.copy(pathSrc, pathDstCp);
         assertTrue(Files.exists(pathDstCp));
         assertEquals(Files.size(pathSrc), Files.size(pathDstCp));
