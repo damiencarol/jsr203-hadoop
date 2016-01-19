@@ -363,4 +363,11 @@ public class TestFiles extends TestHadoop {
         Assert.assertNotNull(Files.getAttribute(path, "hadoop:isFile"));
         Assert.assertNotNull(Files.getAttribute(path, "hadoop:isSymLink"));
     }
+
+    @Test
+    public void getOwner() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        Assert.assertNotNull(Files.getOwner(path));
+    }
 }
