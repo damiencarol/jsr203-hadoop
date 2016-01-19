@@ -32,7 +32,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAttributeReader, IAttributeWriter {
+public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView implements PosixFileAttributeView, IAttributeReader, IAttributeWriter {
 	
 	private final HadoopPath path;
 	/** posix or owner ? */
@@ -51,6 +51,7 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAt
     };
 
 	public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {
+	    super(path);
 		this.path = path;
 		this.isPosixView = isPosixView;
 	}
@@ -60,24 +61,6 @@ public class HadoopPosixFileAttributeView implements PosixFileAttributeView, IAt
 			FileTime createTime) throws IOException {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public UserPrincipal getOwner() throws IOException {
-		try {
-			UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
-			FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
-			return ls.lookupPrincipalByName(fileStatus.getOwner());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	@Override
-	public void setOwner(UserPrincipal owner) throws IOException {
-		FileSystem fs = path.getFileSystem().getHDFS();
-		fs.setOwner(path.getRawResolvedPath(), owner.getName(), null);
 	}
 
 	@Override
