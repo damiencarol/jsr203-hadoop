@@ -65,6 +65,9 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView i
 
 	@Override
 	public String name() {
+	    if (!isPosixView) {
+	        return super.name();
+	    }
 		return "posix";
 	}
 

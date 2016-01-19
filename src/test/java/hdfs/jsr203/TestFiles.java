@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
@@ -369,5 +370,23 @@ public class TestFiles extends TestHadoop {
         Path rootPath = Paths.get(clusterUri);
         Path path = Files.createTempFile(rootPath, "test", "tmp");
         Assert.assertNotNull(Files.getOwner(path));
+    }
+
+    @Test
+    public void getFileAttributeViewFileOwnerAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        FileOwnerAttributeView view = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
+        Assert.assertNotNull(view);
+        Assert.assertEquals("owner", view.name());
+    }
+
+    @Test
+    public void getFileAttributeViewPosixFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
+        Assert.assertNotNull(view);
+        Assert.assertEquals("posix", view.name());
     }
 }
