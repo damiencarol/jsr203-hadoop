@@ -37,7 +37,7 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
         owner,
         replication,
         isDirectory,
-        //isEncrypted, TODO enable encryption
+        isEncrypted,
         isFile,
         isSymLink
     };
@@ -126,9 +126,8 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
             return hfas.getReplication();
         case isDirectory:
             return hfas.isDirectory();
-        // TODO enable encryption
-        //case isEncrypted:
-        //    return hfas.isEncrypted();
+        case isEncrypted:
+            return hfas.isEncrypted();
         case isFile:
             return hfas.isFile();
         case isSymLink:
