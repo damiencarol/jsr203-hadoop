@@ -378,6 +378,24 @@ public class TestFiles extends TestHadoop {
     }
 
     @Test
+    public void getFileAttributeViewBasicFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        BasicFileAttributeView view = Files.getFileAttributeView(path, BasicFileAttributeView.class);
+        Assert.assertNotNull(view);
+        Assert.assertEquals("basic", view.name());
+    }
+
+    @Test
+    public void getFileAttributeViewHadoopFileAttributeView() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        HadoopFileAttributeView view = Files.getFileAttributeView(path, HadoopFileAttributeView.class);
+        Assert.assertNotNull(view);
+        Assert.assertEquals("hadoop", view.name());
+    }
+
+    @Test
     public void getFileAttributeViewPosixFileAttributeView() throws IOException {
         Path rootPath = Paths.get(clusterUri);
         Path path = Files.createTempFile(rootPath, "test", "tmp");
@@ -389,6 +407,7 @@ public class TestFiles extends TestHadoop {
         attributes = view.readAttributes();
         Assert.assertNotNull(attributes.group());
         Assert.assertNotNull(attributes.group().getName());
+        Assert.assertNotNull(attributes.fileKey());
     }
 
     @Test
