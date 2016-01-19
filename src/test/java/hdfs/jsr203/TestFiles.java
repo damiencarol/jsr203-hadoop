@@ -346,4 +346,14 @@ public class TestFiles extends TestHadoop {
         Assert.assertNotNull(att);
         Files.setAttribute(path, "hadoop:replication", att);
     }
+
+    @Test
+    public void getHadoopViewAttributes() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        Assert.assertNotNull(Files.getAttribute(path, "hadoop:blockSize"));
+        Assert.assertNotNull(Files.getAttribute(path, "hadoop:len"));
+        Assert.assertNotNull(Files.getAttribute(path, "hadoop:replication"));
+        Assert.assertNotNull(Files.getAttribute(path, "hadoop:isEncrypted"));
+    }
 }
