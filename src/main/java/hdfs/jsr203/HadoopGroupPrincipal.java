@@ -15,35 +15,23 @@
  */
 package hdfs.jsr203;
 
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
+import java.nio.file.attribute.GroupPrincipal;
 
-/**
- * Implementation for {@link WatchEvent}.
- */
-class HadoopCreateWatchEvent implements WatchEvent<Path> {
-	
-	private Path path;
-	private java.nio.file.WatchEvent.Kind<Path> kind;
+import org.apache.hadoop.security.UserGroupInformation;
 
-	public HadoopCreateWatchEvent(Path path, java.nio.file.WatchEvent.Kind<Path> kind) {
-		this.path = path;
-		this.kind = kind;
+public class HadoopGroupPrincipal implements GroupPrincipal {
+
+	private UserGroupInformation ugi;
+	//private HadoopFileSystem hdfs;
+
+	public HadoopGroupPrincipal(HadoopFileSystem hdfs, String name) {
+		this.ugi = UserGroupInformation.createRemoteUser(name);
+		//this.hdfs = hdfs;
 	}
 
 	@Override
-	public WatchEvent.Kind<Path> kind() {
-		return this.kind;
-	}
-
-	@Override
-	public int count() {
-		return 1;
-	}
-
-	@Override
-	public Path context() {
-		return this.path;
+	public String getName() {
+		return this.ugi.getUserName();
 	}
 
 }

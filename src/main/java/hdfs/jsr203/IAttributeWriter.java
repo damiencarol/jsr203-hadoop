@@ -15,35 +15,11 @@
  */
 package hdfs.jsr203;
 
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
+import java.io.IOException;
+import java.nio.file.LinkOption;
 
-/**
- * Implementation for {@link WatchEvent}.
- */
-class HadoopCreateWatchEvent implements WatchEvent<Path> {
-	
-	private Path path;
-	private java.nio.file.WatchEvent.Kind<Path> kind;
+public interface IAttributeWriter {
 
-	public HadoopCreateWatchEvent(Path path, java.nio.file.WatchEvent.Kind<Path> kind) {
-		this.path = path;
-		this.kind = kind;
-	}
-
-	@Override
-	public WatchEvent.Kind<Path> kind() {
-		return this.kind;
-	}
-
-	@Override
-	public int count() {
-		return 1;
-	}
-
-	@Override
-	public Path context() {
-		return this.path;
-	}
+	void setAttribute(String attr, Object value, LinkOption[] options) throws IOException;
 
 }

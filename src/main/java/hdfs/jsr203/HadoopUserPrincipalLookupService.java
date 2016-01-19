@@ -15,35 +15,32 @@
  */
 package hdfs.jsr203;
 
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
+import java.io.IOException;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 
 /**
- * Implementation for {@link WatchEvent}.
+ * 
  */
-class HadoopCreateWatchEvent implements WatchEvent<Path> {
-	
-	private Path path;
-	private java.nio.file.WatchEvent.Kind<Path> kind;
+class HadoopUserPrincipalLookupService extends
+		UserPrincipalLookupService {
 
-	public HadoopCreateWatchEvent(Path path, java.nio.file.WatchEvent.Kind<Path> kind) {
-		this.path = path;
-		this.kind = kind;
+	private HadoopFileSystem hdfs;
+
+	public HadoopUserPrincipalLookupService(HadoopFileSystem hadoopFileSystem) {
+		this.hdfs = hadoopFileSystem;
 	}
 
 	@Override
-	public WatchEvent.Kind<Path> kind() {
-		return this.kind;
+	public UserPrincipal lookupPrincipalByName(String name) throws IOException {
+		return new HadoopUserPrincipal(this.hdfs, name);
 	}
 
 	@Override
-	public int count() {
-		return 1;
-	}
-
-	@Override
-	public Path context() {
-		return this.path;
+	public GroupPrincipal lookupPrincipalByGroupName(String group)
+			throws IOException {
+		return new HadoopGroupPrincipal(this.hdfs, group);
 	}
 
 }

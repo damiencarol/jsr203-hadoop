@@ -1,10 +1,9 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright 2016 Damien Carol <damien.carol@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,8 +15,10 @@
  */
 
 /**
- * Main package for JSR 203 implementation for Apache Hadoop distributed file system (HDFS).
+ * Main package for JSR 203 implementation for Apache Hadoop distributed file
+ * system (HDFS).
  * <p>
- * Contains the implementation pointed by the actual {@code META-INF/services/} entry.
+ * Contains the implementation pointed by the actual {@code META-INF/services/}
+ * entry.
  */
 package hdfs.jsr203;

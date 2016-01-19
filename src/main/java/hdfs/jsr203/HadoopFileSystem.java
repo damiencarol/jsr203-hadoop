@@ -1,33 +1,29 @@
-/**
-* Licensed to the Apache Software Foundation (ASF) under one
-* or more contributor license agreements. See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership. The ASF licenses this file
-* to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+/*
+ * Copyright 2016 Damien Carol <damien.carol@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package hdfs.jsr203;
 
-import hdfs.jsr203.attribute.HadoopBasicFileAttributeView;
-import hdfs.jsr203.attribute.HadoopFileAttributeView;
-import hdfs.jsr203.attribute.HadoopPosixFileAttributeView;
-import hdfs.jsr203.attribute.HadoopPosixFileAttributes;
-import hdfs.jsr203.attribute.HadoopUserPrincipalLookupService;
-import hdfs.jsr203.attribute.IAttributeReader;
-import hdfs.jsr203.attribute.IAttributeWriter;
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -47,7 +43,6 @@ import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.NotDirectoryException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -80,14 +75,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.permission.AclEntry;
 import org.apache.hadoop.security.AccessControlException;
-
-import static hdfs.jsr203.HadoopUtils.toRegexPattern;
-import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.READ;
 
 public class HadoopFileSystem extends FileSystem {
 	
@@ -176,7 +163,7 @@ public class HadoopFileSystem extends FileSystem {
         String input = syntaxAndPattern.substring(pos + 1);
         String expr;
         if (syntax.equals(GLOB_SYNTAX)) {
-            expr = toRegexPattern(input);
+            expr = HadoopUtils.toRegexPattern(input);
         } else {
             if (syntax.equals(REGEX_SYNTAX)) {
                 expr = input;
