@@ -43,12 +43,21 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hadoop.fs.PathFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HadoopFileSystemProvider extends FileSystemProvider {
   public static final String SCHEME = "hdfs";
   private Logger logger = LoggerFactory.getLogger(getClass());
+
+  // Copy-cat of  org.apache.hadoop.mapreduce.lib.input.FileInputFormat.hiddenFileFilter
+  private static final PathFilter hiddenFileFilter = new PathFilter() {
+      public boolean accept(org.apache.hadoop.fs.Path p){
+          String name = p.getName();
+          return !name.startsWith("_") && !name.startsWith(".");
+          }
+      };
 
   // Checks that the given file is a HadoopPath
   static final HadoopPath toHadoopPath(Path path) {
@@ -116,8 +125,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public boolean isHidden(Path path) throws IOException {
-		// TODO Auto-generated method stub
-		return false;
+		return !hiddenFileFilter.accept(toHadoopPath(path).getRawResolvedPath());
 	}
 
 	@Override
