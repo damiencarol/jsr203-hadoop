@@ -22,7 +22,6 @@ import java.nio.file.attribute.FileTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
@@ -78,8 +77,6 @@ public class HadoopFileAttributeView implements FileAttributeView, IAttributeRea
                 setTimes ((FileTime)value, null, null);
             if (AttrID.valueOf(attribute) == AttrID.accessTime)
                 setTimes (null, (FileTime)value, null);
-            //if (AttrID.valueOf(attribute) == AttrID.creationTime)
-            //    setTimes (null, null, (FileTime)value);
             return;
         } catch (IllegalArgumentException x) {}
         throw new UnsupportedOperationException("'" + attribute +

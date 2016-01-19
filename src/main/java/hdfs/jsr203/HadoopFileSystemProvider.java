@@ -40,8 +40,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.fs.PathFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link FileSystemProvider} implementation for HDFS.
@@ -50,7 +48,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HadoopFileSystemProvider extends FileSystemProvider {
     public static final String SCHEME = "hdfs";
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     // Copy-cat of
     // org.apache.hadoop.mapreduce.lib.input.FileInputFormat.hiddenFileFilter
@@ -107,7 +104,6 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
         try {
             return newFileSystem(uri, Collections.<String, Object> emptyMap());
         } catch (IOException e) {
-            logger.error("Problem instantiating HadoopFileSystem: ", e);
             throw new FileSystemNotFoundException(e.getMessage());
         }
     }
