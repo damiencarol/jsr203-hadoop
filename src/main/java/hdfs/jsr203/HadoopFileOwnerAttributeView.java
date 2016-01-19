@@ -22,6 +22,9 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 
 import org.apache.hadoop.fs.FileStatus;
 
+/**
+ * Implementation of {@link FileOwnerAttributeView}
+ */
 public class HadoopFileOwnerAttributeView implements FileOwnerAttributeView {
 
     private final HadoopPath path;
@@ -37,19 +40,14 @@ public class HadoopFileOwnerAttributeView implements FileOwnerAttributeView {
 
     @Override
     public UserPrincipal getOwner() throws IOException {
-        try {
-            UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
-            FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
-            return ls.lookupPrincipalByName(fileStatus.getOwner());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
+        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
+        return ls.lookupPrincipalByName(fileStatus.getOwner());
     }
 
     @Override
     public void setOwner(UserPrincipal owner) throws IOException {
-        // TODO manage change of owner
+        // TODO manage update the file owner
         throw new IOException("Not implemented");
     }
 
