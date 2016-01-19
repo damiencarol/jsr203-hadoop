@@ -337,4 +337,13 @@ public class TestFiles extends TestHadoop {
         Path path = Files.createTempFile(rootPath, "test", "tmp");
         Assert.assertTrue(Files.isSameFile(path, path));
     }
+
+    @Test
+    public void setAttribute() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        Object att = Files.getAttribute(path, "hadoop:replication");
+        Assert.assertNotNull(att);
+        Files.setAttribute(path, "hadoop:replication", att);
+    }
 }
