@@ -40,8 +40,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.EnumSet;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -247,22 +250,18 @@ public class TestFiles extends TestHadoop {
         Files.createFile(pathToTest);
         Files.createFile(pathToTest);
     }
-    
 
     /**
-     * A {@code FileVisitor} that finds
-     * all files that match the
-     * specified pattern.
+     * A {@code FileVisitor} that finds all files that match the specified
+     * pattern.
      */
-    public static class Finder
-        extends SimpleFileVisitor<Path> {
+    public static class Finder extends SimpleFileVisitor<Path> {
 
         private final PathMatcher matcher;
         private int numMatches = 0;
 
         Finder(String pattern) {
-            matcher = FileSystems.getDefault()
-                    .getPathMatcher("glob:" + pattern);
+            matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
         }
 
         // Compares the glob pattern against
@@ -278,15 +277,13 @@ public class TestFiles extends TestHadoop {
         // Prints the total number of
         // matches to standard out.
         void done() {
-            System.out.println("Matched: "
-                + numMatches);
+            System.out.println("Matched: " + numMatches);
         }
 
         // Invoke the pattern matching
         // method on each file.
         @Override
-        public FileVisitResult visitFile(Path file,
-                BasicFileAttributes attrs) {
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
             find(file);
             return CONTINUE;
         }
@@ -294,20 +291,18 @@ public class TestFiles extends TestHadoop {
         // Invoke the pattern matching
         // method on each directory.
         @Override
-        public FileVisitResult preVisitDirectory(Path dir,
-                BasicFileAttributes attrs) {
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
             find(dir);
             return CONTINUE;
         }
 
         @Override
-        public FileVisitResult visitFileFailed(Path file,
-                IOException exc) {
+        public FileVisitResult visitFileFailed(Path file, IOException exc) {
             System.err.println(exc);
             return CONTINUE;
         }
     }
-    
+
     /**
      * Simple test to visit directories.
      *
@@ -388,5 +383,15 @@ public class TestFiles extends TestHadoop {
         PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
         Assert.assertNotNull(view);
         Assert.assertEquals("posix", view.name());
+    }
+
+    @Test
+    public void createFile() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = rootPath.resolve("test");
+
+        Set<PosixFilePermission> perms = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE,
+                PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ);
+        Files.createFile(path, PosixFilePermissions.asFileAttribute(perms));
     }
 }
