@@ -98,10 +98,14 @@ public class HadoopFileSystem extends FileSystem {
 	private UserPrincipalLookupService userPrincipalLookupService;
     private int hashcode = 0;  // cached hash code (created lazily)
 
-	public HadoopFileSystem(FileSystemProvider provider, String host, int port) throws IOException {
+	public HadoopFileSystem(FileSystemProvider provider, String host, int uriPort) throws IOException {
 		
 		this.provider = provider;
 		
+		int port = uriPort;
+        if (port == -1)
+            port = 8020; // Default Hadoop port
+
 		// Create dynamic configuration
 		Configuration conf = new org.apache.hadoop.conf.Configuration();
 		conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
