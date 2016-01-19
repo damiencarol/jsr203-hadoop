@@ -40,6 +40,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
@@ -383,6 +384,11 @@ public class TestFiles extends TestHadoop {
         PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
         Assert.assertNotNull(view);
         Assert.assertEquals("posix", view.name());
+        
+        PosixFileAttributes attributes;
+        attributes = view.readAttributes();
+        Assert.assertNotNull(attributes.group());
+        Assert.assertNotNull(attributes.group().getName());
     }
 
     @Test

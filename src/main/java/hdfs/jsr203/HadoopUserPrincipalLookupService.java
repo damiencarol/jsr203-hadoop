@@ -21,7 +21,7 @@ import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 
 /**
- * 
+ * Implementation of {link {@link UserPrincipalLookupService}.
  */
 class HadoopUserPrincipalLookupService extends
 		UserPrincipalLookupService {
