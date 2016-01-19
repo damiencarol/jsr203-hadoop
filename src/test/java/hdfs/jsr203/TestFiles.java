@@ -46,6 +46,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -319,5 +320,14 @@ public class TestFiles extends TestHadoop {
         String pattern = "*";
         Finder finder = new Finder(pattern);
         Files.walkFileTree(pathToTest, opts, Integer.MAX_VALUE, finder);
+    }
+
+    @Test
+    public void isHidden() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        Assert.assertFalse(Files.isHidden(path));
+        Path path2 = Files.createTempFile(rootPath, ".", "tmp");
+        Assert.assertTrue(Files.isHidden(path2));
     }
 }
