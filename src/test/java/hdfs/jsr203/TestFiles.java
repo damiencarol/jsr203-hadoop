@@ -330,4 +330,11 @@ public class TestFiles extends TestHadoop {
         Path path2 = Files.createTempFile(rootPath, ".", "tmp");
         Assert.assertTrue(Files.isHidden(path2));
     }
+
+    @Test
+    public void isSameFile() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        Assert.assertTrue(Files.isSameFile(path, path));
+    }
 }
