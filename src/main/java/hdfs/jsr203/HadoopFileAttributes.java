@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.hadoop.fs.FileStatus;
 
 /**
- * Implementation of BasicFileAttributes.
+ * Implementation of {@link BasicFileAttributes}.
  */
 public class HadoopFileAttributes implements BasicFileAttributes {
-    /** Internal implementation of file status */
+    /* Internal implementation of file status */
     private final FileStatus fileStatus;
     private final Object fileKey;
 
@@ -77,11 +77,6 @@ public class HadoopFileAttributes implements BasicFileAttributes {
     @Override
     public long size() {
         return this.fileStatus.getLen();
-    }
-
-    @Override
-    public String toString() {
-        return "HadoopFileAttributes [fileStatus=" + fileStatus + ", fileKey=" + fileKey + "]";
     }
 
     protected FileStatus getFileStatus() {
