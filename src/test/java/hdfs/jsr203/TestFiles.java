@@ -390,7 +390,7 @@ public class TestFiles extends TestHadoop {
     public void getFileAttributeViewHadoopFileAttributeView() throws IOException {
         Path rootPath = Paths.get(clusterUri);
         Path path = Files.createTempFile(rootPath, "test", "tmp");
-        HadoopFileAttributeView view = Files.getFileAttributeView(path, HadoopFileAttributeView.class);
+        HadoopBasicFileAttributeView view = Files.getFileAttributeView(path, HadoopBasicFileAttributeView.class);
         Assert.assertNotNull(view);
         Assert.assertEquals("hadoop", view.name());
     }

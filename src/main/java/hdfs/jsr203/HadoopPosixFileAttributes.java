@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.FsPermission;
 
-public class HadoopPosixFileAttributes extends HadoopFileAttributes implements PosixFileAttributes {
+public class HadoopPosixFileAttributes extends HadoopBasicFileAttributes implements PosixFileAttributes {
 
 	private HadoopFileSystem hdfs;
 

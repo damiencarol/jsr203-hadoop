@@ -27,8 +27,10 @@ import org.apache.hadoop.fs.FileStatus;
 public class HadoopBasicFileAttributes implements BasicFileAttributes {
     /* Internal implementation of file status */
     private final FileStatus fileStatus;
+    private final Object fileKey;
 
-    public HadoopBasicFileAttributes(FileStatus fileStatus) {
+    public HadoopBasicFileAttributes(final Object fileKey, final FileStatus fileStatus) {
+        this.fileKey = fileKey;
         this.fileStatus = fileStatus;
     }
 
@@ -39,8 +41,7 @@ public class HadoopBasicFileAttributes implements BasicFileAttributes {
 
     @Override
     public Object fileKey() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.fileKey;
     }
 
     @Override

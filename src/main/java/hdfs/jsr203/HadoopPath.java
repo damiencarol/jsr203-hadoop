@@ -72,11 +72,11 @@ class HadoopPath implements Path {
         this.internalPath = new String(path) ;
     }
 
-	HadoopFileAttributes getAttributes() throws IOException {
+	HadoopBasicFileAttributes getAttributes() throws IOException {
         org.apache.hadoop.fs.Path resolvedPath = this.getRawResolvedPath();
         FileStatus fileStatus = hdfs.getHDFS().getFileStatus(resolvedPath);
         String fileKey = resolvedPath.toString();
-		return new HadoopFileAttributes(fileKey,fileStatus);
+		return new HadoopBasicFileAttributes(fileKey,fileStatus);
 	}
 	
 	PosixFileAttributes getPosixAttributes() throws IOException {

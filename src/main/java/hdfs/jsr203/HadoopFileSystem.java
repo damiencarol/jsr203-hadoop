@@ -815,7 +815,7 @@ public class HadoopFileSystem extends FileSystem {
 		if (type.equals("basic"))
             return new HadoopBasicFileAttributeView(path, false);
 		if (type.equals("hadoop"))
-            return new HadoopFileAttributeView(path);
+            return new HadoopBasicFileAttributeView(path, true);
 		if (type.equals("owner"))
             return new HadoopPosixFileAttributeView(path, false);
 		if (type.equals("posix"))
@@ -829,7 +829,7 @@ public class HadoopFileSystem extends FileSystem {
 		if (type.equals("basic"))
             return new HadoopBasicFileAttributeView(path, false);
 		if (type.equals("hadoop"))
-            return new HadoopFileAttributeView(path);
+            return new HadoopBasicFileAttributeView(path, true);
 		if (type.equals("owner"))
             return new HadoopPosixFileAttributeView(path, false);
 		if (type.equals("posix"))
@@ -843,8 +843,8 @@ public class HadoopFileSystem extends FileSystem {
             throw new NullPointerException();
         if (type == BasicFileAttributeView.class)
             return (V)new HadoopBasicFileAttributeView(path, false);
-        if (type == HadoopFileAttributeView.class)
-            return (V)new HadoopFileAttributeView(path);
+        if (type == HadoopBasicFileAttributeView.class)
+            return (V)new HadoopBasicFileAttributeView(path, true);
         if (type == FileOwnerAttributeView.class)
             return (V)new HadoopPosixFileAttributeView(path, false);
         if (type == PosixFileAttributeView.class)

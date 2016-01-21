@@ -160,7 +160,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
     public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
             throws IOException {
 
-        if (type == BasicFileAttributes.class || type == HadoopFileAttributes.class)
+        if (type == BasicFileAttributes.class || type == HadoopBasicFileAttributes.class)
             return (A) toHadoopPath(path).getAttributes();
 
         if (type == PosixFileAttributes.class)

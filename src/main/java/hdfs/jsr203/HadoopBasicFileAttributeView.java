@@ -37,11 +37,18 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
         isSymbolicLink,
         isOther,
         fileKey,
-        
+
+        accessTime,
         blockSize,
+        group,
         len,
+        modificationTime,
+        owner,
         replication,
-        isEncrypted
+        //isDirectory,
+        isEncrypted,
+        isFile,
+        isSymLink
     };
 
     private final HadoopPath path;
@@ -67,12 +74,12 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
         return isHadoopView ? "hadoop" : "basic";
     }
 
-    public HadoopFileAttributes readAttributes() throws IOException
+    public HadoopBasicFileAttributes readAttributes() throws IOException
     {
         Path resolvedPath = path.getRawResolvedPath();
         FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(resolvedPath);
         String fileKey = resolvedPath.toString();
-		return new HadoopFileAttributes(fileKey,fileStatus);
+		return new HadoopBasicFileAttributes(fileKey,fileStatus);
     }
 
     @Override
@@ -104,7 +111,7 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
     @Override
     public Map<String, Object> readAttributes(String attributes, LinkOption[] options) throws IOException
     {
-        HadoopFileAttributes zfas = readAttributes();
+        HadoopBasicFileAttributes zfas = readAttributes();
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         if ("*".equals(attributes)) {
             for (AttrID id : AttrID.values()) {
@@ -123,45 +130,57 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
         return map;
     }
 
-    Object attribute(AttrID id, HadoopFileAttributes hfas) {
-        switch (id) {
-        case size:
-            return hfas.size();
-        case creationTime:
-            return hfas.creationTime();
-        case lastAccessTime:
-            return hfas.lastAccessTime();
-        case lastModifiedTime:
-            return hfas.lastModifiedTime();
-        case isDirectory:
-            return hfas.isDirectory();
-        case isRegularFile:
-            return hfas.isRegularFile();
-        case isSymbolicLink:
-            return hfas.isSymbolicLink();
-        case isOther:
-            return hfas.isOther();
-        case fileKey:
-            return hfas.fileKey();
-            
-        case blockSize:
-            if (isHadoopView)
+    Object attribute(AttrID id, HadoopBasicFileAttributes hfas) {
+        if (isHadoopView) {
+            switch (id) {
+            case accessTime:
+                return hfas.getFileStatus().getAccessTime();
+            case blockSize:
                 return hfas.getFileStatus().getBlockSize();
-            break;
-        case len:
-            if (isHadoopView)
+            case group:
+                return hfas.getFileStatus().getGroup();
+            case len:
                 return hfas.getFileStatus().getLen();
-            break;
-        case replication:
-            if (isHadoopView)
+            case modificationTime:
+                return hfas.getFileStatus().getModificationTime();
+            case owner:
+                return hfas.getFileStatus().getOwner();
+            case replication:
                 return hfas.getFileStatus().getReplication();
-            break;
-        case isEncrypted:
-            if (isHadoopView)
+            case isDirectory:
+                return hfas.getFileStatus().isDirectory();
+            case isEncrypted:
                 return hfas.getFileStatus().isEncrypted();
-            break;
-
+            case isFile:
+                return hfas.getFileStatus().isFile();
+            case isSymLink:
+                return hfas.getFileStatus().isSymlink();
+            default:
+                return null;
+            }
+        } else {
+            switch (id) {
+            case size:
+                return hfas.size();
+            case creationTime:
+                return hfas.creationTime();
+            case lastAccessTime:
+                return hfas.lastAccessTime();
+            case lastModifiedTime:
+                return hfas.lastModifiedTime();
+            case isDirectory:
+                return hfas.isDirectory();
+            case isRegularFile:
+                return hfas.isRegularFile();
+            case isSymbolicLink:
+                return hfas.isSymbolicLink();
+            case isOther:
+                return hfas.isOther();
+            case fileKey:
+                return hfas.fileKey();
+            default:
+                return null;
+            }
         }
-        return null;
     }
 }
