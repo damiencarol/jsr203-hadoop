@@ -150,6 +150,25 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.15</version>
+				<configuration>
+					<!-- only include one class to show idea -->
+					<includes>**/hdfs/jsr203/HadoopFileSystemProvider.java</includes>
+					<configLocation>checkstyle.xml</configLocation>
+				</configuration>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
                         <plugin>
                             <groupId>org.jacoco</groupId>
                             <artifactId>jacoco-maven-plugin</artifactId>
