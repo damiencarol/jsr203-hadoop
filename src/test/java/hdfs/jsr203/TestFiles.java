@@ -35,8 +35,10 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.FileOwnerAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
@@ -375,6 +377,14 @@ public class TestFiles extends TestHadoop {
         FileOwnerAttributeView view = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
         Assert.assertNotNull(view);
         Assert.assertEquals("owner", view.name());
+    }
+    
+
+    @Test(expected=UnsupportedOperationException.class)
+    public void getFileAttributeViewUnsupportedOperationException() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        DosFileAttributes view = Files.readAttributes(path, DosFileAttributes.class);
     }
 
     @Test
