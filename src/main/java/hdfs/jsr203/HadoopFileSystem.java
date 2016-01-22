@@ -339,8 +339,15 @@ public class HadoopFileSystem extends FileSystem {
 	        Set<? extends OpenOption> options, 
 	        FileAttribute<?>[] attrs) throws IOException
 	{
-        checkOptions(options);
-	    throw new IOException("NOT FINISHED !!!");
+	    checkOptions(options);
+        
+        // Check that file not exists
+        if (options.contains(StandardOpenOption.CREATE_NEW) && 
+                this.fs.exists(path)) {
+            throw new FileAlreadyExistsException(path.toString());
+        }
+        // TODO: implement writing
+	    return new HadoopFileChannel(newByteChannel(path, options, attrs));
 	}
 
 	SeekableByteChannel newByteChannel(org.apache.hadoop.fs.Path path,

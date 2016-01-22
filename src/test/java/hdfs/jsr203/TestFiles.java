@@ -35,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
@@ -273,14 +272,14 @@ public class TestFiles extends TestHadoop {
             Path name = file.getFileName();
             if (name != null && matcher.matches(name)) {
                 numMatches++;
-                System.out.println(file);
+                //System.out.println(file);
             }
         }
 
         // Prints the total number of
         // matches to standard out.
         void done() {
-            System.out.println("Matched: " + numMatches);
+            //System.out.println("Matched: " + numMatches);
         }
 
         // Invoke the pattern matching
@@ -384,7 +383,7 @@ public class TestFiles extends TestHadoop {
     public void getFileAttributeViewUnsupportedOperationException() throws IOException {
         Path rootPath = Paths.get(clusterUri);
         Path path = Files.createTempFile(rootPath, "test", "tmp");
-        DosFileAttributes view = Files.readAttributes(path, DosFileAttributes.class);
+        Files.readAttributes(path, DosFileAttributes.class);
     }
 
     @Test

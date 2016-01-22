@@ -1,0 +1,60 @@
+package hdfs.jsr203;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileUtil;
+import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class TestFileChannel extends TestHadoop {
+
+    private static MiniDFSCluster cluster;
+    private static URI clusterUri;
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        cluster = startMini(TestFileSystem.class.getName());
+        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+    }
+
+    @AfterClass
+    public static void teardownClass() throws Exception {
+        if (cluster != null) {
+            cluster.shutdown();
+        }
+    }
+
+    private static MiniDFSCluster startMini(String testName) throws IOException {
+        File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+        FileUtil.fullyDelete(baseDir);
+        Configuration conf = new Configuration();
+        conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+        MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+        hdfsCluster.waitActive();
+        return hdfsCluster;
+    }
+    
+    @Test
+    public void open() throws IOException {
+        Path rootPath = Paths.get(clusterUri);
+        Path path = Files.createTempFile(rootPath, "test", "tmp");
+        FileChannel ch = FileChannel.open(path);
+        InputStream input = Channels.newInputStream(ch);
+        Assert.assertEquals(0, input.available());
+        ch.close();
+    }
+
+}

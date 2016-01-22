@@ -18,7 +18,7 @@ package hdfs.jsr203;
 import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
-class HadoopUtils {
+public class HadoopUtils {
     
     /* Keep private the constructor for this utility class */
     private HadoopUtils() {
