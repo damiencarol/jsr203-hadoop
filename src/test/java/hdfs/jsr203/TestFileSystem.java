@@ -36,6 +36,9 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.ProviderMismatchException;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.spi.FileSystemProvider;
@@ -45,6 +48,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -310,29 +314,40 @@ public class TestFileSystem extends TestHadoop {
 
         assertNotNull(pathToTest.getFileSystem().getRootDirectories());
     }
-    
+
     @Test
-    public void testCopyeAndMoveFiles() throws IOException {
+    public void testCopyAndMoveFiles() throws IOException {
         URI uriSrc = clusterUri.resolve("/tmp/testSrcFile");
         Path pathSrc = Paths.get(uriSrc);
-        
+
         URI uriDstCp = clusterUri.resolve("/tmp/testDstCopyFile");
         Path pathDstCp = Paths.get(uriDstCp);
-        
+
         OutputStream os = Files.newOutputStream(pathSrc);
         os.write("write \n several \n things\n".getBytes());
         os.close();
         Files.copy(pathSrc, pathDstCp);
         assertTrue(Files.exists(pathDstCp));
         assertEquals(Files.size(pathSrc), Files.size(pathDstCp));
-        
+
         URI uriDstMv = clusterUri.resolve("/tmp/testDstMoveFile");
         Path pathDstMv = Paths.get(uriDstMv);
         Files.move(pathDstCp, pathDstMv);
-        assertFalse(Files.exists(pathDstCp));//move from
-        assertTrue(Files.exists(pathDstMv));//move to
+        assertFalse(Files.exists(pathDstCp));// move from
+        assertTrue(Files.exists(pathDstMv));// move to
         assertEquals(Files.size(pathSrc), Files.size(pathDstMv));
         Files.deleteIfExists(pathSrc);
         Files.deleteIfExists(pathDstMv);
+    }
+
+    @Test
+    public void newWatchService() throws IOException {
+        Path pathToTest = Paths.get(clusterUri);
+        WatchService ws = pathToTest.getFileSystem().newWatchService();
+        WatchKey key = pathToTest.register(ws,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_DELETE,
+                StandardWatchEventKinds.ENTRY_MODIFY);
+        Assert.assertTrue(key.isValid());
     }
 }
