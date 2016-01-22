@@ -20,6 +20,7 @@ public class HdfsConfInitiator {
 		try {
 	        fs = FileSystem.get(conf);
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new RuntimeException("cannot initial hadoop fs", e);
         }
 	}
