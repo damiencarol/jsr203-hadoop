@@ -55,347 +55,374 @@ import org.junit.Test;
 
 public class TestFiles extends TestHadoop {
 
-    private static MiniDFSCluster cluster;
-    private static URI clusterUri;
+  private static MiniDFSCluster cluster;
+  private static URI clusterUri;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        cluster = startMini(TestFileSystem.class.getName());
-        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    cluster = startMini(TestFileSystem.class.getName());
+    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  }
+
+  @AfterClass
+  public static void teardownClass() throws Exception {
+    if (cluster != null) {
+      cluster.shutdown();
     }
+  }
 
-    @AfterClass
-    public static void teardownClass() throws Exception {
-        if (cluster != null) {
-            cluster.shutdown();
-        }
-    }
+  private static MiniDFSCluster startMini(String testName) throws IOException {
+    File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+    FileUtil.fullyDelete(baseDir);
+    Configuration conf = new Configuration();
+    conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+    MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+    MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+    hdfsCluster.waitActive();
+    return hdfsCluster;
+  }
 
-    private static MiniDFSCluster startMini(String testName) throws IOException {
-        File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
-        FileUtil.fullyDelete(baseDir);
-        Configuration conf = new Configuration();
-        conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
-        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
-        MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
-        hdfsCluster.waitActive();
-        return hdfsCluster;
-    }
+  /**
+   * Test for
+   * {@link Files#createDirectories(Path, java.nio.file.attribute.FileAttribute...)
+   * Files.createDirectories()}.
+   * 
+   * @throws IOException
+   */
+  @Test(expected = DirectoryNotEmptyException.class)
+  public void testCreateDirectories() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test for
-     * {@link Files#createDirectories(Path, java.nio.file.attribute.FileAttribute...)
-     * Files.createDirectories()}.
-     * 
-     * @throws IOException
-     */
-    @Test(expected = DirectoryNotEmptyException.class)
-    public void testCreateDirectories() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path dir = rootPath.resolve(rootPath.resolve("tmp/1/2/3/4/5"));
 
-        Path dir = rootPath.resolve(rootPath.resolve("tmp/1/2/3/4/5"));
+    Path dir2 = Files.createDirectories(dir);
+    assertTrue(Files.exists(dir2));
 
-        Path dir2 = Files.createDirectories(dir);
-        assertTrue(Files.exists(dir2));
+    Files.delete(rootPath.resolve("tmp/1/2/3/4/5"));
+    Files.delete(rootPath.resolve("tmp/1/2/3/4"));
+    Files.delete(rootPath.resolve("tmp/1/2/3"));
+    Files.delete(rootPath.resolve("tmp/1/2"));
+    // Throws
+    Files.delete(rootPath.resolve("tmp"));
+  }
 
-        Files.delete(rootPath.resolve("tmp/1/2/3/4/5"));
-        Files.delete(rootPath.resolve("tmp/1/2/3/4"));
-        Files.delete(rootPath.resolve("tmp/1/2/3"));
-        Files.delete(rootPath.resolve("tmp/1/2"));
-        // Throws
-        Files.delete(rootPath.resolve("tmp"));
-    }
+  /**
+   * Test for {@link Files#isReadable(Path) Files.isReadable()}.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testIsReadable() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test for {@link Files#isReadable(Path) Files.isReadable()}.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testIsReadable() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path temp = Files.createTempFile(rootPath, "isReadable", "");
+    assertTrue(Files.exists(temp));
 
-        Path temp = Files.createTempFile(rootPath, "isReadable", "");
-        assertTrue(Files.exists(temp));
+    assertTrue(Files.isReadable(temp));
+  }
 
-        assertTrue(Files.isReadable(temp));
-    }
+  @Test
+  public void testGetLastModifiedTime() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void testGetLastModifiedTime() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    FileTime ft = Files.getLastModifiedTime(rootPath);
 
-        FileTime ft = Files.getLastModifiedTime(rootPath, LinkOption.NOFOLLOW_LINKS);
+    assertNotNull(ft);
 
-        assertNotNull(ft);
+  }
 
-    }
+  /**
+   * Test 'basic' file view support.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetBasicFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test 'basic' file view support.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetBasicFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    assertTrue(rootPath.getFileSystem().supportedFileAttributeViews()
+        .contains("basic"));
 
-        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("basic"));
+    // Get root view
+    BasicFileAttributeView view = Files.getFileAttributeView(rootPath,
+        BasicFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 
-        // Get root view
-        BasicFileAttributeView view = Files.getFileAttributeView(rootPath, BasicFileAttributeView.class,
-                LinkOption.NOFOLLOW_LINKS);
+    assertNotNull(view);
+    assertNotNull(view.readAttributes());
+    assertNotNull(view.readAttributes().lastModifiedTime());
+  }
 
-        assertNotNull(view);
-        assertNotNull(view.readAttributes());
-        assertNotNull(view.readAttributes().lastModifiedTime());
-    }
+  /**
+   * Test {@code posix} file view support.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetPosixFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test {@code posix} file view support.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetPosixFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    assertTrue(rootPath.getFileSystem().supportedFileAttributeViews()
+        .contains("posix"));
 
-        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("posix"));
+    // Get root view
+    PosixFileAttributeView view = Files.getFileAttributeView(rootPath,
+        PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
 
-        // Get root view
-        PosixFileAttributeView view = Files.getFileAttributeView(rootPath, PosixFileAttributeView.class,
-                LinkOption.NOFOLLOW_LINKS);
+    assertNotNull(view);
+    assertNotNull(view.readAttributes());
+    assertNotNull(view.readAttributes().lastModifiedTime());
+  }
 
-        assertNotNull(view);
-        assertNotNull(view.readAttributes());
-        assertNotNull(view.readAttributes().lastModifiedTime());
-    }
+  /**
+   * Test read attributes in {@code hadoop} file view.
+   * 
+   * <p>
+   * Also test that {@code hadoop:blockSize}, {@code hadoop:len} and
+   * {@code hadoop:replication} are supported.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetHadoopFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test read attributes in {@code hadoop} file view.
-     * 
-     * <p>
-     * Also test that {@code hadoop:blockSize}, {@code hadoop:len} and
-     * {@code hadoop:replication} are supported.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetHadoopFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    assertTrue(rootPath.getFileSystem().supportedFileAttributeViews()
+        .contains("hadoop"));
 
-        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("hadoop"));
+    assertNotNull(Files.getAttribute(rootPath, "hadoop:blockSize"));
+    assertNotNull(Files.getAttribute(rootPath, "hadoop:len"));
+    assertNotNull(Files.getAttribute(rootPath, "hadoop:replication"));
+  }
 
-        assertNotNull(Files.getAttribute(rootPath, "hadoop:blockSize", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "hadoop:len", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "hadoop:replication", LinkOption.NOFOLLOW_LINKS));
-    }
+  /**
+   * Test {@link java.nio.file.attribute.BasicFileAttributeView
+   * BasicFileAttributeView} support.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetAttributeBasic() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test {@link java.nio.file.attribute.BasicFileAttributeView
-     * BasicFileAttributeView} support.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetAttributeBasic() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    assertTrue(rootPath.getFileSystem().supportedFileAttributeViews()
+        .contains("basic"));
 
-        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("basic"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:lastModifiedTime"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:lastAccessTime"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:creationTime"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:size"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:isRegularFile"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:isDirectory"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:isSymbolicLink"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:isOther"));
+    assertNotNull(Files.getAttribute(rootPath, "basic:fileKey"));
+  }
 
-        assertNotNull(Files.getAttribute(rootPath, "basic:lastModifiedTime", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:lastAccessTime", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:creationTime", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:size", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:isRegularFile", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:isDirectory", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:isSymbolicLink", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:isOther", LinkOption.NOFOLLOW_LINKS));
-        assertNotNull(Files.getAttribute(rootPath, "basic:fileKey", LinkOption.NOFOLLOW_LINKS));
-    }
+  /**
+   * Test owner in posix file view support.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetPosixView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test owner in posix file view support.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetPosixView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    assertTrue(rootPath.getFileSystem().supportedFileAttributeViews()
+        .contains("posix"));
+    PosixFileAttributeView view = Files.getFileAttributeView(rootPath,
+        PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+    assertNotNull(view);
+    UserPrincipal user = view.getOwner();
+    assertNotNull(user);
+    assertNotNull(user.getName());
+  }
 
-        assertTrue(rootPath.getFileSystem().supportedFileAttributeViews().contains("posix"));
-        PosixFileAttributeView view = Files.getFileAttributeView(rootPath, PosixFileAttributeView.class,
-                LinkOption.NOFOLLOW_LINKS);
-        assertNotNull(view);
-        UserPrincipal user = view.getOwner();
-        assertNotNull(user);
-        assertNotNull(user.getName());
-    }
+  /**
+   * Test create existing file with StandardOpenOption.CREATE_NEW throws a
+   * <code>FileAlreadyExistsException</code>
+   * 
+   * @throws IOException
+   */
+  @Test(expected = FileAlreadyExistsException.class)
+  public void testCreateFileThrowsFileAlreadyExistsException()
+      throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test create existing file with StandardOpenOption.CREATE_NEW throws a
-     * <code>FileAlreadyExistsException</code>
-     * 
-     * @throws IOException
-     */
-    @Test(expected = FileAlreadyExistsException.class)
-    public void testCreateFileThrowsFileAlreadyExistsException() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path pathToTest = rootPath.resolve("tmp/out6.txt");
 
-        Path pathToTest = rootPath.resolve("tmp/out6.txt");
+    Files.createFile(pathToTest);
+    Files.createFile(pathToTest);
+    Files.createFile(pathToTest);
+    Files.createFile(pathToTest);
+  }
 
-        Files.createFile(pathToTest);
-        Files.createFile(pathToTest);
-        Files.createFile(pathToTest);
-        Files.createFile(pathToTest);
-    }
+  /**
+   * Simple test to visit directories.
+   *
+   * @throws IOException
+   */
+  @Test
+  public void walkFileTree() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+    // Try a simple walk
+    Files.walkFileTree(pathToTest, EnumSet.of(FileVisitOption.FOLLOW_LINKS), 1,
+        new FileVisitor<Path>() {
 
-    /**
-     * Simple test to visit directories.
-     *
-     * @throws IOException
-     */
-    @Test
-    public void walkFileTree() throws IOException {
-        Path pathToTest = Paths.get(clusterUri);
-        // Try a simple walk
-        Files.walkFileTree(pathToTest, EnumSet.of(FileVisitOption.FOLLOW_LINKS), 1, new FileVisitor<Path>() {
+          @Override
+          public FileVisitResult preVisitDirectory(Path dir,
+              BasicFileAttributes attrs) throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
 
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                return FileVisitResult.CONTINUE;
-            }
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+              throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                return FileVisitResult.CONTINUE;
-            }
+          @Override
+          public FileVisitResult visitFileFailed(Path file, IOException exc)
+              throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
 
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                return FileVisitResult.CONTINUE;
-            }
+          @Override
+          public FileVisitResult postVisitDirectory(Path dir, IOException exc)
+              throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
 
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                return FileVisitResult.CONTINUE;
-            }
-            
         });
-    }
+  }
 
-    @Test
-    public void isHidden() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Assert.assertFalse(Files.isHidden(path));
-        Path path2 = Files.createTempFile(rootPath, ".", "tmp");
-        Assert.assertTrue(Files.isHidden(path2));
-    }
+  @Test
+  public void isHidden() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Assert.assertFalse(Files.isHidden(path));
+    Path path2 = Files.createTempFile(rootPath, ".", "tmp");
+    Assert.assertTrue(Files.isHidden(path2));
+  }
 
-    @Test
-    public void isSameFile() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Assert.assertTrue(Files.isSameFile(path, path));
-    }
+  @Test
+  public void isSameFile() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Assert.assertTrue(Files.isSameFile(path, path));
+  }
 
-    @Test
-    public void setAttribute() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Object att = Files.getAttribute(path, "hadoop:replication");
-        Assert.assertNotNull(att);
-        Files.setAttribute(path, "hadoop:replication", att);
-    }
+  @Test
+  public void setAttribute() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Object att = Files.getAttribute(path, "hadoop:replication");
+    Assert.assertNotNull(att);
+    Files.setAttribute(path, "hadoop:replication", att);
+  }
 
-    @Test
-    public void getHadoopViewAttributes() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:accessTime"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:blockSize"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:group"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:len"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:modificationTime"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:owner"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:replication"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:isDirectory"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:isEncrypted"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:isFile"));
-        Assert.assertNotNull(Files.getAttribute(path, "hadoop:isSymLink"));
-    }
+  @Test
+  public void getHadoopViewAttributes() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:accessTime"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:blockSize"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:group"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:len"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:modificationTime"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:owner"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:replication"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:isDirectory"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:isEncrypted"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:isFile"));
+    Assert.assertNotNull(Files.getAttribute(path, "hadoop:isSymLink"));
+  }
 
-    @Test
-    public void getOwner() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Assert.assertNotNull(Files.getOwner(path));
-    }
+  @Test
+  public void getPosixViewAttributes() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Assert.assertNotNull(Files.getAttribute(path, "posix:group"));
+    Assert.assertNotNull(Files.getAttribute(path, "posix:permissions"));
+  }
 
-    @Test
-    public void getFileAttributeViewFileOwnerAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        FileOwnerAttributeView view = Files.getFileAttributeView(path, FileOwnerAttributeView.class);
-        Assert.assertNotNull(view);
-        Assert.assertEquals("owner", view.name());
-    }
+  @Test
+  public void getOwner() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Assert.assertNotNull(Files.getOwner(path));
+  }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getFileAttributeViewUnsupportedOperationException() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Files.readAttributes(path, DosFileAttributes.class);
-    }
+  @Test
+  public void getFileAttributeViewFileOwnerAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    FileOwnerAttributeView view = Files.getFileAttributeView(path,
+        FileOwnerAttributeView.class);
+    Assert.assertNotNull(view);
+    Assert.assertEquals("owner", view.name());
+  }
 
-    @Test
-    public void getFileAttributeViewBasicFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        BasicFileAttributeView view = Files.getFileAttributeView(path, BasicFileAttributeView.class);
-        Assert.assertNotNull(view);
-        Assert.assertEquals("basic", view.name());
-    }
+  @Test(expected = UnsupportedOperationException.class)
+  public void getFileAttributeViewUnsupportedOperationException()
+      throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Files.readAttributes(path, DosFileAttributes.class);
+  }
 
-    @Test
-    public void getFileAttributeViewHadoopFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        HadoopBasicFileAttributeView view = Files.getFileAttributeView(path, HadoopBasicFileAttributeView.class);
-        Assert.assertNotNull(view);
-        Assert.assertEquals("hadoop", view.name());
-    }
+  @Test
+  public void getFileAttributeViewBasicFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    BasicFileAttributeView view = Files.getFileAttributeView(path,
+        BasicFileAttributeView.class);
+    Assert.assertNotNull(view);
+    Assert.assertEquals("basic", view.name());
+  }
 
-    @Test
-    public void getFileAttributeViewPosixFileAttributeView() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
-        Assert.assertNotNull(view);
-        Assert.assertEquals("posix", view.name());
+  @Test
+  public void getFileAttributeViewHadoopFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    HadoopBasicFileAttributeView view = Files.getFileAttributeView(path,
+        HadoopBasicFileAttributeView.class);
+    Assert.assertNotNull(view);
+    Assert.assertEquals("hadoop", view.name());
+  }
 
-        PosixFileAttributes attributes;
-        attributes = view.readAttributes();
-        Assert.assertNotNull(attributes.group());
-        Assert.assertNotNull(attributes.group().getName());
-        Assert.assertNotNull(attributes.fileKey());
-    }
+  @Test
+  public void getFileAttributeViewPosixFileAttributeView() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    PosixFileAttributeView view = Files.getFileAttributeView(path,
+        PosixFileAttributeView.class);
+    Assert.assertNotNull(view);
+    Assert.assertEquals("posix", view.name());
 
-    @Test
-    public void createFile() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = rootPath.resolve("test");
+    PosixFileAttributes attributes;
+    attributes = view.readAttributes();
+    Assert.assertNotNull(attributes.group());
+    Assert.assertNotNull(attributes.group().getName());
+    Assert.assertNotNull(attributes.fileKey());
+  }
 
-        Set<PosixFilePermission> perms = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE,
-                PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ);
-        Files.createFile(path, PosixFilePermissions.asFileAttribute(perms));
-    }
+  @Test
+  public void createFile() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = rootPath.resolve("test");
 
-    @Test
-    public void probeContentType() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        Path path = Files.createTempFile(rootPath, "test", "tmp");
-        Files.probeContentType(path);
-    }
+    Set<PosixFilePermission> perms = EnumSet.of(
+        PosixFilePermission.OWNER_READ,
+        PosixFilePermission.OWNER_WRITE, 
+        PosixFilePermission.OWNER_EXECUTE,
+        PosixFilePermission.GROUP_READ);
+    Files.createFile(path, PosixFilePermissions.asFileAttribute(perms));
+  }
+
+  @Test
+  public void probeContentType() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+    Path path = Files.createTempFile(rootPath, "test", "tmp");
+    Files.probeContentType(path);
+  }
 }
