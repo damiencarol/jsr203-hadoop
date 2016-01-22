@@ -29,6 +29,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -254,58 +255,6 @@ public class TestFiles extends TestHadoop {
     }
 
     /**
-     * A {@code FileVisitor} that finds all files that match the specified
-     * pattern.
-     */
-    public static class Finder extends SimpleFileVisitor<Path> {
-
-        private final PathMatcher matcher;
-        private int numMatches = 0;
-
-        Finder(String pattern) {
-            matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern);
-        }
-
-        // Compares the glob pattern against
-        // the file or directory name.
-        void find(Path file) {
-            Path name = file.getFileName();
-            if (name != null && matcher.matches(name)) {
-                numMatches++;
-                //System.out.println(file);
-            }
-        }
-
-        // Prints the total number of
-        // matches to standard out.
-        void done() {
-            //System.out.println("Matched: " + numMatches);
-        }
-
-        // Invoke the pattern matching
-        // method on each file.
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-            find(file);
-            return CONTINUE;
-        }
-
-        // Invoke the pattern matching
-        // method on each directory.
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-            find(dir);
-            return CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFileFailed(Path file, IOException exc) {
-            System.err.println(exc);
-            return CONTINUE;
-        }
-    }
-
-    /**
      * Simple test to visit directories.
      *
      * @throws IOException
@@ -313,11 +262,30 @@ public class TestFiles extends TestHadoop {
     @Test
     public void walkFileTree() throws IOException {
         Path pathToTest = Paths.get(clusterUri);
-        EnumSet<FileVisitOption> opts = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
+        // Try a simple walk
+        Files.walkFileTree(pathToTest, EnumSet.of(FileVisitOption.FOLLOW_LINKS), 1, new FileVisitor<Path>() {
 
-        String pattern = "*";
-        Finder finder = new Finder(pattern);
-        Files.walkFileTree(pathToTest, opts, Integer.MAX_VALUE, finder);
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+            
+        });
     }
 
     @Test
@@ -377,9 +345,8 @@ public class TestFiles extends TestHadoop {
         Assert.assertNotNull(view);
         Assert.assertEquals("owner", view.name());
     }
-    
 
-    @Test(expected=UnsupportedOperationException.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void getFileAttributeViewUnsupportedOperationException() throws IOException {
         Path rootPath = Paths.get(clusterUri);
         Path path = Files.createTempFile(rootPath, "test", "tmp");
@@ -411,7 +378,7 @@ public class TestFiles extends TestHadoop {
         PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
         Assert.assertNotNull(view);
         Assert.assertEquals("posix", view.name());
-        
+
         PosixFileAttributes attributes;
         attributes = view.readAttributes();
         Assert.assertNotNull(attributes.group());
