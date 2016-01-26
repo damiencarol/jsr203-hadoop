@@ -514,7 +514,11 @@ public class HadoopPath implements Path {
 
 	@Override
 	public String toString() {
-		return new String(this.path);
+		if (isAbsolute()) {
+			return new String("hdfs:"+new String(getResolvedPath()));
+		} else {
+			return new String(this.path);
+		}
 	}
 
 	DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)
