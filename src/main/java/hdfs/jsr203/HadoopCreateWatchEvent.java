@@ -21,29 +21,29 @@ import java.nio.file.WatchEvent;
 /**
  * Implementation for {@link WatchEvent}.
  */
-class HadoopCreateWatchEvent implements WatchEvent<Path> {
-	
-	private Path path;
-	private java.nio.file.WatchEvent.Kind<Path> kind;
+public class HadoopCreateWatchEvent implements WatchEvent<Path> {
 
-	public HadoopCreateWatchEvent(Path path, java.nio.file.WatchEvent.Kind<Path> kind) {
-		this.path = path;
-		this.kind = kind;
-	}
+  private Path path;
+  private java.nio.file.WatchEvent.Kind<Path> kind;
 
-	@Override
-	public WatchEvent.Kind<Path> kind() {
-		return this.kind;
-	}
+  HadoopCreateWatchEvent(Path path, WatchEvent.Kind<Path> kind) {
+    this.path = path;
+    this.kind = kind;
+  }
 
-	@Override
-	public int count() {
-		return 1;
-	}
+  @Override
+  public WatchEvent.Kind<Path> kind() {
+    return this.kind;
+  }
 
-	@Override
-	public Path context() {
-		return this.path;
-	}
+  @Override
+  public int count() {
+    return 1;
+  }
+
+  @Override
+  public Path context() {
+    return this.path;
+  }
 
 }

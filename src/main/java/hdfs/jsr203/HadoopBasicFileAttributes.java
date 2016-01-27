@@ -25,62 +25,66 @@ import org.apache.hadoop.fs.FileStatus;
  * Implementation of {@link BasicFileAttributes}.
  */
 public class HadoopBasicFileAttributes implements BasicFileAttributes {
-    /* Internal implementation of file status */
-    private final FileStatus fileStatus;
-    private final Object fileKey;
+  /* Internal implementation of file status */
+  private final FileStatus fileStatus;
+  private final Object fileKey;
 
-    public HadoopBasicFileAttributes(final Object fileKey, final FileStatus fileStatus) {
-        this.fileKey = fileKey;
-        this.fileStatus = fileStatus;
-    }
+  public HadoopBasicFileAttributes(final Object fileKey,
+      final FileStatus fileStatus) {
+    this.fileKey = fileKey;
+    this.fileStatus = fileStatus;
+  }
 
-    @Override
-    public FileTime creationTime() {
-        return FileTime.from(this.fileStatus.getModificationTime(), TimeUnit.MILLISECONDS);
-    }
+  @Override
+  public FileTime creationTime() {
+    return FileTime.from(this.fileStatus.getModificationTime(),
+        TimeUnit.MILLISECONDS);
+  }
 
-    @Override
-    public Object fileKey() {
-        return this.fileKey;
-    }
+  @Override
+  public Object fileKey() {
+    return this.fileKey;
+  }
 
-    @Override
-    public boolean isDirectory() {
-        return this.fileStatus.isDirectory();
-    }
+  @Override
+  public boolean isDirectory() {
+    return this.fileStatus.isDirectory();
+  }
 
-    @Override
-    public boolean isOther() {
-        return false;
-    }
+  @Override
+  public boolean isOther() {
+    return false;
+  }
 
-    @Override
-    public boolean isRegularFile() {
-        return this.fileStatus.isFile();
-    }
+  @Override
+  public boolean isRegularFile() {
+    return this.fileStatus.isFile();
+  }
 
-    @Override
-    public boolean isSymbolicLink() {
-        return this.fileStatus.isSymlink();
-    }
+  @Override
+  public boolean isSymbolicLink() {
+    return this.fileStatus.isSymlink();
+  }
 
-    @Override
-    public FileTime lastAccessTime() {
-        return FileTime.from(this.fileStatus.getAccessTime(), TimeUnit.MILLISECONDS);
-    }
+  @Override
+  public FileTime lastAccessTime() {
+    return FileTime.from(this.fileStatus.getAccessTime(),
+        TimeUnit.MILLISECONDS);
+  }
 
-    @Override
-    public FileTime lastModifiedTime() {
-        return FileTime.from(this.fileStatus.getModificationTime(), TimeUnit.MILLISECONDS);
-    }
+  @Override
+  public FileTime lastModifiedTime() {
+    return FileTime.from(this.fileStatus.getModificationTime(),
+        TimeUnit.MILLISECONDS);
+  }
 
-    @Override
-    public long size() {
-        return this.fileStatus.getLen();
-    }
+  @Override
+  public long size() {
+    return this.fileStatus.getLen();
+  }
 
-    protected FileStatus getFileStatus() {
-        return fileStatus;
-    }
+  protected FileStatus getFileStatus() {
+    return fileStatus;
+  }
 
 }

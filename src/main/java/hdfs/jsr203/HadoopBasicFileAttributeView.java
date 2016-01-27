@@ -25,9 +25,13 @@ import java.util.Map;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
-public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAttributeReader, IAttributeWriter
-{
-    private static enum AttrID {
+/**
+ * Implement {@link BasicFileAttributeView}.
+ */
+public class HadoopBasicFileAttributeView implements BasicFileAttributeView,
+    IAttributeReader, IAttributeWriter {
+
+  private enum AttrID {
         size,
         creationTime,
         lastAccessTime,
@@ -49,138 +53,143 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView, IAt
         isEncrypted,
         isFile,
         isSymLink
-    };
+  };
 
-    private final HadoopPath path;
-    private final boolean isHadoopView;
+  private final HadoopPath path;
+  private final boolean isHadoopView;
 
-    public HadoopBasicFileAttributeView(HadoopPath path, boolean isHadoopView) {
-        this.path = path;
-        this.isHadoopView = isHadoopView;
+  public HadoopBasicFileAttributeView(HadoopPath path, boolean isHadoopView) {
+    this.path = path;
+    this.isHadoopView = isHadoopView;
+  }
+
+  static HadoopBasicFileAttributeView get(HadoopPath path, String type) {
+    if (type == null) {
+      throw new NullPointerException();
     }
-
-    static HadoopBasicFileAttributeView get(HadoopPath path, String type) {
-        if (type == null)
-            throw new NullPointerException();
-        if (type.equals("basic"))
-            return new HadoopBasicFileAttributeView(path, false);
-        if (type.equals("hadoop"))
-            return new HadoopBasicFileAttributeView(path, true);
-        return null;
+    if (type.equals("basic")) {
+      return new HadoopBasicFileAttributeView(path, false);
     }
-
-    @Override
-    public String name() {
-        return isHadoopView ? "hadoop" : "basic";
+    if (type.equals("hadoop")) {
+      return new HadoopBasicFileAttributeView(path, true);
     }
+    return null;
+  }
 
-    public HadoopBasicFileAttributes readAttributes() throws IOException
-    {
-        Path resolvedPath = path.getRawResolvedPath();
-        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(resolvedPath);
-        String fileKey = resolvedPath.toString();
-		return new HadoopBasicFileAttributes(fileKey,fileStatus);
+  @Override
+  public String name() {
+    return isHadoopView ? "hadoop" : "basic";
+  }
+
+  public HadoopBasicFileAttributes readAttributes() throws IOException {
+    Path resolvedPath = path.getRawResolvedPath();
+    FileStatus fileStatus = path.getFileSystem().getHDFS()
+        .getFileStatus(resolvedPath);
+    String fileKey = resolvedPath.toString();
+    return new HadoopBasicFileAttributes(fileKey, fileStatus);
+  }
+
+  @Override
+  public void setTimes(FileTime lastModifiedTime, FileTime lastAccessTime,
+      FileTime createTime) throws IOException {
+    path.setTimes(lastModifiedTime, lastAccessTime, createTime);
+  }
+
+  @Override
+  public void setAttribute(String attribute, Object value, LinkOption[] options)
+      throws IOException {
+    try {
+      if (AttrID.valueOf(attribute) == AttrID.lastModifiedTime) {
+        setTimes((FileTime) value, null, null);
+      }
+      if (AttrID.valueOf(attribute) == AttrID.lastAccessTime) {
+        setTimes(null, (FileTime) value, null);
+      }
+      if (AttrID.valueOf(attribute) == AttrID.creationTime) {
+        setTimes(null, null, (FileTime) value);
+      }
+      return;
+    } catch (IllegalArgumentException x) {
     }
+    throw new UnsupportedOperationException(
+        "'" + attribute + "' is unknown or read-only attribute");
+  }
 
-    @Override
-    public void setTimes(FileTime lastModifiedTime,
-                         FileTime lastAccessTime,
-                         FileTime createTime)
-        throws IOException
-    {
-        path.setTimes(lastModifiedTime, lastAccessTime, createTime);
-    }
-
-    @Override
-    public void setAttribute(String attribute, Object value, LinkOption[] options)
-        throws IOException
-    {
+  @Override
+  public Map<String, Object> readAttributes(String attributes,
+      LinkOption[] options) throws IOException {
+    HadoopBasicFileAttributes zfas = readAttributes();
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    if ("*".equals(attributes)) {
+      for (AttrID id : AttrID.values()) {
         try {
-            if (AttrID.valueOf(attribute) == AttrID.lastModifiedTime)
-                setTimes ((FileTime)value, null, null);
-            if (AttrID.valueOf(attribute) == AttrID.lastAccessTime)
-                setTimes (null, (FileTime)value, null);
-            if (AttrID.valueOf(attribute) == AttrID.creationTime)
-                setTimes (null, null, (FileTime)value);
-            return;
-        } catch (IllegalArgumentException x) {}
-        throw new UnsupportedOperationException("'" + attribute +
-            "' is unknown or read-only attribute");
-    }
-
-    @Override
-    public Map<String, Object> readAttributes(String attributes, LinkOption[] options) throws IOException
-    {
-        HadoopBasicFileAttributes zfas = readAttributes();
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        if ("*".equals(attributes)) {
-            for (AttrID id : AttrID.values()) {
-                try {
-                    map.put(id.name(), attribute(id, zfas));
-                } catch (IllegalArgumentException x) {}
-            }
-        } else {
-            String[] as = attributes.split(",");
-            for (String a : as) {
-                try {
-                    map.put(a, attribute(AttrID.valueOf(a), zfas));
-                } catch (IllegalArgumentException x) {}
-            }
+          map.put(id.name(), attribute(id, zfas));
+        } catch (IllegalArgumentException x) {
         }
-        return map;
-    }
-
-    Object attribute(AttrID id, HadoopBasicFileAttributes hfas) {
-        if (isHadoopView) {
-            switch (id) {
-            case accessTime:
-                return hfas.getFileStatus().getAccessTime();
-            case blockSize:
-                return hfas.getFileStatus().getBlockSize();
-            case group:
-                return hfas.getFileStatus().getGroup();
-            case len:
-                return hfas.getFileStatus().getLen();
-            case modificationTime:
-                return hfas.getFileStatus().getModificationTime();
-            case owner:
-                return hfas.getFileStatus().getOwner();
-            case replication:
-                return hfas.getFileStatus().getReplication();
-            case isDirectory:
-                return hfas.getFileStatus().isDirectory();
-            case isEncrypted:
-                return hfas.getFileStatus().isEncrypted();
-            case isFile:
-                return hfas.getFileStatus().isFile();
-            case isSymLink:
-                return hfas.getFileStatus().isSymlink();
-            default:
-                return null;
-            }
-        } else {
-            switch (id) {
-            case size:
-                return hfas.size();
-            case creationTime:
-                return hfas.creationTime();
-            case lastAccessTime:
-                return hfas.lastAccessTime();
-            case lastModifiedTime:
-                return hfas.lastModifiedTime();
-            case isDirectory:
-                return hfas.isDirectory();
-            case isRegularFile:
-                return hfas.isRegularFile();
-            case isSymbolicLink:
-                return hfas.isSymbolicLink();
-            case isOther:
-                return hfas.isOther();
-            case fileKey:
-                return hfas.fileKey();
-            default:
-                return null;
-            }
+      }
+    } else {
+      String[] as = attributes.split(",");
+      for (String a : as) {
+        try {
+          map.put(a, attribute(AttrID.valueOf(a), zfas));
+        } catch (IllegalArgumentException x) {
         }
+      }
     }
+    return map;
+  }
+
+  Object attribute(AttrID id, HadoopBasicFileAttributes hfas) {
+    if (isHadoopView) {
+      switch (id) {
+      case accessTime:
+        return hfas.getFileStatus().getAccessTime();
+      case blockSize:
+        return hfas.getFileStatus().getBlockSize();
+      case group:
+        return hfas.getFileStatus().getGroup();
+      case len:
+        return hfas.getFileStatus().getLen();
+      case modificationTime:
+        return hfas.getFileStatus().getModificationTime();
+      case owner:
+        return hfas.getFileStatus().getOwner();
+      case replication:
+        return hfas.getFileStatus().getReplication();
+      case isDirectory:
+        return hfas.getFileStatus().isDirectory();
+      case isEncrypted:
+        return hfas.getFileStatus().isEncrypted();
+      case isFile:
+        return hfas.getFileStatus().isFile();
+      case isSymLink:
+        return hfas.getFileStatus().isSymlink();
+      default:
+        return null;
+      }
+    } else {
+      switch (id) {
+      case size:
+        return hfas.size();
+      case creationTime:
+        return hfas.creationTime();
+      case lastAccessTime:
+        return hfas.lastAccessTime();
+      case lastModifiedTime:
+        return hfas.lastModifiedTime();
+      case isDirectory:
+        return hfas.isDirectory();
+      case isRegularFile:
+        return hfas.isRegularFile();
+      case isSymbolicLink:
+        return hfas.isSymbolicLink();
+      case isOther:
+        return hfas.isOther();
+      case fileKey:
+        return hfas.fileKey();
+      default:
+        return null;
+      }
+    }
+  }
 }

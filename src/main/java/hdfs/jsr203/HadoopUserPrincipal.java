@@ -17,43 +17,47 @@ package hdfs.jsr203;
 
 import java.nio.file.attribute.UserPrincipal;
 
+/**
+ * Implement {@link UserPrincipal}.
+ */
 public class HadoopUserPrincipal implements UserPrincipal {
 
-    private org.apache.hadoop.security.UserGroupInformation ugi;
-    private final String name;
-    // private HadoopFileSystem hdfs;
+  private org.apache.hadoop.security.UserGroupInformation ugi;
+  private final String name;
+  // private HadoopFileSystem hdfs;
 
-    public HadoopUserPrincipal(HadoopFileSystem hdfs, String name) {
-        this.ugi = org.apache.hadoop.security.UserGroupInformation.createRemoteUser(name);
-        // this.hdfs = hdfs;
-        this.name = name;
-    }
+  public HadoopUserPrincipal(HadoopFileSystem hdfs, String name) {
+    this.ugi = org.apache.hadoop.security.UserGroupInformation
+        .createRemoteUser(name);
+    // this.hdfs = hdfs;
+    this.name = name;
+  }
 
-    @Override
-    public String getName() {
-        return this.ugi.getUserName();
-    }
+  @Override
+  public String getName() {
+    return this.ugi.getUserName();
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        } else {
-            return this.ugi == ((HadoopUserPrincipal) obj).ugi;
-        }
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    } else {
+      return this.ugi == ((HadoopUserPrincipal) obj).ugi;
     }
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 948;
-        hash = hash * ugi.hashCode();
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 948;
+    hash = hash * ugi.hashCode();
+    return hash;
+  }
 
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return new HadoopUserPrincipal(null, name);
-    }
+  @Override
+  protected Object clone() throws CloneNotSupportedException {
+    return new HadoopUserPrincipal(null, name);
+  }
 }

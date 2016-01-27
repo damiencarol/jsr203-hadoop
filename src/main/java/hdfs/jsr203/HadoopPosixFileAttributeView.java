@@ -40,10 +40,18 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
   /** posix or owner ? */
   private final boolean isPosixView;
 
-  private static enum AttrID {
-    owner, creationTime, lastAccessTime, lastModifiedTime, 
-    isDirectory, isRegularFile, isSymbolicLink, isOther, fileKey,
-    group, permissions
+  private enum AttrID {
+    owner,
+    creationTime,
+    lastAccessTime,
+    lastModifiedTime,
+    isDirectory,
+    isRegularFile,
+    isSymbolicLink,
+    isOther, 
+    fileKey,
+    group,
+    permissions
   };
 
   public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {

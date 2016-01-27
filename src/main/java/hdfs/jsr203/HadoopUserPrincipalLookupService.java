@@ -23,24 +23,24 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 /**
  * Implementation of {link {@link UserPrincipalLookupService}.
  */
-class HadoopUserPrincipalLookupService extends
-		UserPrincipalLookupService {
+public class HadoopUserPrincipalLookupService
+    extends UserPrincipalLookupService {
 
-	private HadoopFileSystem hdfs;
+  private HadoopFileSystem hdfs;
 
-	public HadoopUserPrincipalLookupService(HadoopFileSystem hadoopFileSystem) {
-		this.hdfs = hadoopFileSystem;
-	}
+  public HadoopUserPrincipalLookupService(HadoopFileSystem hadoopFileSystem) {
+    this.hdfs = hadoopFileSystem;
+  }
 
-	@Override
-	public UserPrincipal lookupPrincipalByName(String name) throws IOException {
-		return new HadoopUserPrincipal(this.hdfs, name);
-	}
+  @Override
+  public UserPrincipal lookupPrincipalByName(String name) throws IOException {
+    return new HadoopUserPrincipal(this.hdfs, name);
+  }
 
-	@Override
-	public GroupPrincipal lookupPrincipalByGroupName(String group)
-			throws IOException {
-		return new HadoopGroupPrincipal(this.hdfs, group);
-	}
+  @Override
+  public GroupPrincipal lookupPrincipalByGroupName(String group)
+      throws IOException {
+    return new HadoopGroupPrincipal(this.hdfs, group);
+  }
 
 }

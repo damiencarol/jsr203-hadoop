@@ -19,19 +19,20 @@ import java.nio.file.attribute.GroupPrincipal;
 
 import org.apache.hadoop.security.UserGroupInformation;
 
+/**
+ * Implement {@link GroupPrincipal}.
+ */
 public class HadoopGroupPrincipal implements GroupPrincipal {
 
-	private UserGroupInformation ugi;
-	//private HadoopFileSystem hdfs;
+  private UserGroupInformation ugi;
 
-	public HadoopGroupPrincipal(HadoopFileSystem hdfs, String name) {
-		this.ugi = UserGroupInformation.createRemoteUser(name);
-		//this.hdfs = hdfs;
-	}
+  public HadoopGroupPrincipal(HadoopFileSystem hdfs, String name) {
+    this.ugi = UserGroupInformation.createRemoteUser(name);
+  }
 
-	@Override
-	public String getName() {
-		return this.ugi.getUserName();
-	}
+  @Override
+  public String getName() {
+    return this.ugi.getUserName();
+  }
 
 }

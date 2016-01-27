@@ -26,41 +26,48 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.FsPermission;
 
-public class HadoopPosixFileAttributes extends HadoopBasicFileAttributes implements PosixFileAttributes {
+/**
+ * Implement {@link PosixFileAttributes} and {@link BasicFileAttributes}.
+ */
+public class HadoopPosixFileAttributes extends HadoopBasicFileAttributes
+    implements PosixFileAttributes {
 
-	private HadoopFileSystem hdfs;
+  private HadoopFileSystem hdfs;
 
-	public HadoopPosixFileAttributes(HadoopFileSystem hdfs, Object fileKey, FileStatus fileStatus) throws IOException {
-	    super(fileKey, fileStatus);
-		this.hdfs = hdfs;
-	}
+  public HadoopPosixFileAttributes(HadoopFileSystem hdfs, Object fileKey,
+      FileStatus fileStatus) throws IOException {
+    super(fileKey, fileStatus);
+    this.hdfs = hdfs;
+  }
 
-	@Override
-	public UserPrincipal owner() {
-		try {
-			return this.hdfs.getUserPrincipalLookupService().lookupPrincipalByName(getFileStatus().getOwner());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+  @Override
+  public UserPrincipal owner() {
+    try {
+      return this.hdfs.getUserPrincipalLookupService()
+          .lookupPrincipalByName(getFileStatus().getOwner());
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 
-	@Override
-	public GroupPrincipal group() {
-		try {
-			return this.hdfs.getUserPrincipalLookupService().lookupPrincipalByGroupName(getFileStatus().getGroup());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+  @Override
+  public GroupPrincipal group() {
+    try {
+      return this.hdfs.getUserPrincipalLookupService()
+          .lookupPrincipalByGroupName(getFileStatus().getGroup());
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 
-	@Override
-	public Set<PosixFilePermission> permissions() {
-		FsPermission fsPermission = getFileStatus().getPermission();
-		String perms = fsPermission.getUserAction().SYMBOL +
-				fsPermission.getGroupAction().SYMBOL +
-				fsPermission.getOtherAction().SYMBOL;
-		return PosixFilePermissions.fromString(perms);
-	}
+  @Override
+  public Set<PosixFilePermission> permissions() {
+    FsPermission fsPermission = getFileStatus().getPermission();
+    String perms = fsPermission.getUserAction().SYMBOL
+        + fsPermission.getGroupAction().SYMBOL
+        + fsPermission.getOtherAction().SYMBOL;
+    return PosixFilePermissions.fromString(perms);
+  }
 }

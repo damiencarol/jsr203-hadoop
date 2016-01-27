@@ -147,6 +147,7 @@
 						<exclude>**/target/**</exclude>
 						<exclude>**/*.iml</exclude>
 						<exclude>**/*.tdd</exclude>
+						<exclude>.checkstyle</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -155,8 +156,11 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>2.15</version>
 				<configuration>
-					<includes>**/hdfs/jsr203/HadoopFile*.java</includes>
-					<includes>**/hdfs/jsr203/IAttribute*.java</includes>
+					<includes>**/hdfs/jsr203/*.java</includes>
+					<excludes>**/hdfs/jsr203/HadoopFileSystem.java</excludes>
+					<excludes>**/hdfs/jsr203/HadoopFileSystemProvider.java</excludes>
+					<excludes>**/hdfs/jsr203/HadoopPath.java</excludes>
+					<excludes>**/hdfs/jsr203/HadoopUtils.java</excludes>
 					<configLocation>checkstyle.xml</configLocation>
 				</configuration>
 				<executions>

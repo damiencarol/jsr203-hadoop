@@ -24,32 +24,34 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 
 /**
- * Implementation of {@link FileOwnerAttributeView}
+ * Implementation of {@link FileOwnerAttributeView}.
  */
 public class HadoopFileOwnerAttributeView implements FileOwnerAttributeView {
 
-    private final HadoopPath path;
+  private final HadoopPath path;
 
-    public HadoopFileOwnerAttributeView(HadoopPath path) {
-        this.path = path;
-    }
+  public HadoopFileOwnerAttributeView(HadoopPath path) {
+    this.path = path;
+  }
 
-    @Override
-    public String name() {
-        return "owner";
-    }
+  @Override
+  public String name() {
+    return "owner";
+  }
 
-    @Override
-    public UserPrincipal getOwner() throws IOException {
-        UserPrincipalLookupService ls = this.path.getFileSystem().getUserPrincipalLookupService();
-        FileStatus fileStatus = path.getFileSystem().getHDFS().getFileStatus(path.getRawResolvedPath());
-        return ls.lookupPrincipalByName(fileStatus.getOwner());
-    }
+  @Override
+  public UserPrincipal getOwner() throws IOException {
+    UserPrincipalLookupService ls = this.path.getFileSystem()
+        .getUserPrincipalLookupService();
+    FileStatus fileStatus = path.getFileSystem().getHDFS()
+        .getFileStatus(path.getRawResolvedPath());
+    return ls.lookupPrincipalByName(fileStatus.getOwner());
+  }
 
-    @Override
-    public void setOwner(UserPrincipal owner) throws IOException {
-        FileSystem fs = path.getFileSystem().getHDFS();
-        fs.setOwner(path.getRawResolvedPath(), owner.getName(), null);
-    }
+  @Override
+  public void setOwner(UserPrincipal owner) throws IOException {
+    FileSystem fs = path.getFileSystem().getHDFS();
+    fs.setOwner(path.getRawResolvedPath(), owner.getName(), null);
+  }
 
 }

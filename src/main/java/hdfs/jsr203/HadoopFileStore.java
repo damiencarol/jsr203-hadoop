@@ -21,75 +21,77 @@ import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
 
 /**
- * 
+ * Implements {@link FileStore}.
  */
 public class HadoopFileStore extends FileStore {
 
-    private HadoopFileSystem system;
+  private HadoopFileSystem system;
 
-    public HadoopFileStore(HadoopPath path) {
-        this.system = path.getFileSystem();
-    }
+  public HadoopFileStore(HadoopPath path) {
+    this.system = path.getFileSystem();
+  }
 
-    @Override
-    public String name() {
-        return this.system.getHDFS().getCanonicalServiceName();
-    }
+  @Override
+  public String name() {
+    return this.system.getHDFS().getCanonicalServiceName();
+  }
 
-    @Override
-    public String type() {
-        return "HDFS";
-    }
+  @Override
+  public String type() {
+    return "HDFS";
+  }
 
-    @Override
-    public boolean isReadOnly() {
-        return this.system.isReadOnly();
-    }
+  @Override
+  public boolean isReadOnly() {
+    return this.system.isReadOnly();
+  }
 
-    @Override
-    public long getTotalSpace() throws IOException {
-        return this.system.getHDFS().getStatus().getCapacity();
-    }
+  @Override
+  public long getTotalSpace() throws IOException {
+    return this.system.getHDFS().getStatus().getCapacity();
+  }
 
-    @Override
-    public long getUsableSpace() throws IOException {
-        return this.system.getHDFS().getStatus().getRemaining();
-    }
+  @Override
+  public long getUsableSpace() throws IOException {
+    return this.system.getHDFS().getStatus().getRemaining();
+  }
 
-    @Override
-    public long getUnallocatedSpace() throws IOException {
-        return this.system.getHDFS().getStatus().getRemaining();
-    }
+  @Override
+  public long getUnallocatedSpace() throws IOException {
+    return this.system.getHDFS().getStatus().getRemaining();
+  }
 
-    @Override
-    public boolean supportsFileAttributeView(Class<? extends FileAttributeView> type) {
-        return supportsFileAttributeView(type.getSimpleName());
-    }
+  @Override
+  public boolean supportsFileAttributeView(
+      Class<? extends FileAttributeView> type) {
+    return supportsFileAttributeView(type.getSimpleName());
+  }
 
-    @Override
-    public boolean supportsFileAttributeView(String name) {
-        return this.system.supportedFileAttributeViews().contains(name);
-    }
+  @Override
+  public boolean supportsFileAttributeView(String name) {
+    return this.system.supportedFileAttributeViews().contains(name);
+  }
 
-    @Override
-    public <V extends FileStoreAttributeView> V getFileStoreAttributeView(Class<V> type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+  @Override
+  public <V extends FileStoreAttributeView> V getFileStoreAttributeView(
+      Class<V> type) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-    @Override
-    public Object getAttribute(String attribute) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+  @Override
+  public Object getAttribute(String attribute) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("/");
-        sb.append(" (");
-        sb.append(system.getHDFS().getCanonicalServiceName());
-        sb.append(")");
-        return sb.toString();
-    }
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("/");
+    sb.append(" (");
+    sb.append(system.getHDFS().getCanonicalServiceName());
+    sb.append(")");
+    return sb.toString();
+  }
 
 }
