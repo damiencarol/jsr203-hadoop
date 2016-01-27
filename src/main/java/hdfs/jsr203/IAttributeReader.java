@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.util.Map;
 
+/**
+ * Interface to manage attributes views (reading).
+ */
 public interface IAttributeReader {
-    public Map<String, Object> readAttributes(String attributes, LinkOption[] options) throws IOException;
+  Map<String, Object> readAttributes(String attributes, LinkOption[] options)
+      throws IOException;
 }

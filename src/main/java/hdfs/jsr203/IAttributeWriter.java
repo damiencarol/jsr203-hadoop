@@ -18,8 +18,12 @@ package hdfs.jsr203;
 import java.io.IOException;
 import java.nio.file.LinkOption;
 
+/**
+ * Interface to manage attributes views.
+ */
 public interface IAttributeWriter {
 
-	void setAttribute(String attr, Object value, LinkOption[] options) throws IOException;
+  void setAttribute(String attr, Object value, LinkOption[] options)
+      throws IOException;
 
 }
