@@ -19,13 +19,10 @@ package hdfs.jsr203;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.UserPrincipal;
@@ -35,64 +32,79 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestUserPrincipalLookupService extends TestHadoop {
 
-	private static MiniDFSCluster cluster;
-    private static URI clusterUri;
+  private static MiniDFSCluster cluster;
+  private static URI clusterUri;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        cluster = startMini(TestFileSystem.class.getName());
-        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    cluster = startMini(TestFileSystem.class.getName());
+    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  }
+
+  @AfterClass
+  public static void teardownClass() throws Exception {
+    if (cluster != null) {
+      cluster.shutdown();
     }
+  }
 
-    @AfterClass
-    public static void teardownClass() throws Exception {
-        if (cluster != null)
-        {
-            cluster.shutdown();
-        }
-    }
+  private static MiniDFSCluster startMini(String testName) throws IOException {
+    File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+    FileUtil.fullyDelete(baseDir);
+    Configuration conf = new Configuration();
+    conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+    MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+    MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+    hdfsCluster.waitActive();
+    return hdfsCluster;
+  }
 
-    private static MiniDFSCluster startMini(String testName) throws IOException {
-        File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
-        FileUtil.fullyDelete(baseDir);
-        Configuration conf = new Configuration();
-        conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
-        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
-        MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
-        hdfsCluster.waitActive();
-        return hdfsCluster;
-    }
+  /**
+   * Test UserPrincipalLookupService support.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetPosixViewSetOwner() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Test UserPrincipalLookupService support.
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testGetPosixViewSetOwner() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
-        
-        UserPrincipalLookupService lus = rootPath.getFileSystem().getUserPrincipalLookupService();
-        assertNotNull(lus);
-    }
-    
-    /**
-     * Try to get user and set the same user in the root.
-     *  
-     * @throws IOException
-     */
-    @Test
-	public void testGetSetUGI() throws IOException {
-		Path rootPath = Paths.get(clusterUri);
+    UserPrincipalLookupService lus = rootPath.getFileSystem()
+        .getUserPrincipalLookupService();
+    assertNotNull(lus);
+  }
 
-		UserPrincipal user = Files.getOwner(rootPath, LinkOption.NOFOLLOW_LINKS);
-		assertNotNull(user);
-		
-		Files.setOwner(rootPath, user);
-	}
+  /**
+   * Try to get user and set the same user in the root.
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testGetSetUGI() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    UserPrincipal user = Files.getOwner(rootPath);
+    assertNotNull(user);
+
+    Files.setOwner(rootPath, user);
+  }
+
+  @Test
+  public void testUsersEquals() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    UserPrincipal user = Files.getOwner(rootPath);
+    assertNotNull(user);
+
+    // Get the same user
+    UserPrincipal user2 = Files.getOwner(rootPath);
+    assertNotNull(user2);
+
+    Assert.assertEquals(user, user2);
+  }
 }

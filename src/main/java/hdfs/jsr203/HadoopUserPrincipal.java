@@ -16,6 +16,7 @@
 package hdfs.jsr203;
 
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Arrays;
 
 /**
  * Implement {@link UserPrincipal}.
@@ -44,8 +45,11 @@ public class HadoopUserPrincipal implements UserPrincipal {
       return true;
     } else if (obj == null || getClass() != obj.getClass()) {
       return false;
+    } else if (!this.ugi.getUserName().equals(((HadoopUserPrincipal)obj).ugi.getUserName()) ||
+        !Arrays.equals(this.ugi.getGroupNames(), ((HadoopUserPrincipal)obj).ugi.getGroupNames())) {
+      return false;
     } else {
-      return this.ugi == ((HadoopUserPrincipal) obj).ugi;
+      return true;
     }
   }
 
