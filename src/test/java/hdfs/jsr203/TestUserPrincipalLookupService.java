@@ -105,11 +105,11 @@ public class TestUserPrincipalLookupService extends TestHadoop {
     UserPrincipal user2 = Files.getOwner(rootPath);
     assertNotNull(user2);
 
-    Assert.assertEquals(user, user);
-    Assert.assertEquals(user, user2);
+    Assert.assertTrue(user.equals(user));
+    Assert.assertTrue(user.equals(user2));
 
-    Assert.assertNotEquals(user, null);
-    Assert.assertNotEquals(user, new Double(-1));
+    Assert.assertFalse(user.equals(null));
+    Assert.assertFalse(user.equals(new Double(-1)));
   }
 
   @Test
@@ -120,6 +120,6 @@ public class TestUserPrincipalLookupService extends TestHadoop {
     assertNotNull(user);
 
     UserPrincipal user3 = (UserPrincipal) ((HadoopUserPrincipal) user).clone();
-    Assert.assertEquals(user, user3);
+    Assert.assertTrue(user.equals(user3));
   }
 }
