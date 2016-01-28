@@ -27,7 +27,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.permission.FsPermission;
 
 /**
- * Implement {@link PosixFileAttributes} and {@link BasicFileAttributes}.
+ * Implement {@link PosixFileAttributes}.
  */
 public class HadoopPosixFileAttributes extends HadoopBasicFileAttributes
     implements PosixFileAttributes {
