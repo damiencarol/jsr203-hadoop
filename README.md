@@ -13,7 +13,7 @@ JSR 203 Implementation for Hadoop Distributed File System
     <dependency>
   		<groupId>com.github.jsr203hadoop</groupId>
   		<artifactId>jsr203hadoop</artifactId>
-  		<version>1.0.0</version>
+  		<version>1.0.1</version>
   	</dependency>
 ```
 
