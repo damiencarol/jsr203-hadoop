@@ -110,6 +110,10 @@ public class TestUserPrincipalLookupService extends TestHadoop {
 
     Assert.assertFalse(user.equals(null));
     Assert.assertFalse(user.equals(new Double(-1)));
+
+    UserPrincipal userTest = rootPath.getFileSystem()
+        .getUserPrincipalLookupService().lookupPrincipalByName("test");
+    Assert.assertFalse(user.equals(userTest));
   }
 
   @Test
