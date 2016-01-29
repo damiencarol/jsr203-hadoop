@@ -17,8 +17,11 @@ package hdfs.jsr203;
 
 import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
+
+import org.apache.hadoop.fs.FsStatus;
 
 /**
  * Implements {@link FileStore}.
@@ -38,7 +41,7 @@ public class HadoopFileStore extends FileStore {
 
   @Override
   public String type() {
-    return "HDFS";
+    return "hdfs";
   }
 
   @Override
@@ -58,13 +61,18 @@ public class HadoopFileStore extends FileStore {
 
   @Override
   public long getUnallocatedSpace() throws IOException {
-    return this.system.getHDFS().getStatus().getRemaining();
+    FsStatus status = this.system.getHDFS().getStatus();
+    return status.getCapacity() - status.getUsed();
   }
 
   @Override
   public boolean supportsFileAttributeView(
       Class<? extends FileAttributeView> type) {
-    return supportsFileAttributeView(type.getSimpleName());
+    if (type == BasicFileAttributeView.class) {
+      return true;
+    }
+    // FIXME Implements all FileAttributeView checks
+    return false;
   }
 
   @Override
