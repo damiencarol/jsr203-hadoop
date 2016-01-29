@@ -27,7 +27,11 @@ import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -84,14 +88,36 @@ public class TestFileStore extends TestHadoop {
     assertNotNull(st);
     Assert.assertNotNull(st.name());
     Assert.assertNotNull(st.type());
-    
+
     Assert.assertFalse(st.isReadOnly());
-    
+
     Assert.assertNotEquals(0, st.getTotalSpace());
     Assert.assertNotEquals(0, st.getUnallocatedSpace());
     Assert.assertNotEquals(0, st.getUsableSpace());
 
-    Assert.assertTrue(st.supportsFileAttributeView(BasicFileAttributeView.class));
+    Assert
+        .assertTrue(st.supportsFileAttributeView(BasicFileAttributeView.class));
     Assert.assertTrue(st.supportsFileAttributeView("basic"));
+
+    st.getAttribute("test");
+  }
+
+  /**
+   * Test: File and FileStore attributes
+   */
+  @Test
+  public void testFileStoreAttributes() throws URISyntaxException, IOException {
+    FileStore store1 = getFileStoreForTest();
+    assertNotNull(store1);
+    assertTrue(store1.supportsFileAttributeView("basic"));
+    assertTrue(store1.supportsFileAttributeView(BasicFileAttributeView.class));
+    assertTrue(store1.supportsFileAttributeView("posix") == store1
+        .supportsFileAttributeView(PosixFileAttributeView.class));
+    assertTrue(store1.supportsFileAttributeView("dos") == store1
+        .supportsFileAttributeView(DosFileAttributeView.class));
+    assertTrue(store1.supportsFileAttributeView("acl") == store1
+        .supportsFileAttributeView(AclFileAttributeView.class));
+    assertTrue(store1.supportsFileAttributeView("user") == store1
+        .supportsFileAttributeView(UserDefinedFileAttributeView.class));
   }
 }

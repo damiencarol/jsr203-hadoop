@@ -17,9 +17,12 @@ package hdfs.jsr203;
 
 import java.io.IOException;
 import java.nio.file.FileStore;
+import java.nio.file.attribute.AttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
 
 import org.apache.hadoop.fs.FsStatus;
 
@@ -69,7 +72,10 @@ public class HadoopFileStore extends FileStore {
   public boolean supportsFileAttributeView(
       Class<? extends FileAttributeView> type) {
     if (type == BasicFileAttributeView.class) {
-      return true;
+      return this.system.supportedFileAttributeViews().contains("basic");
+    }
+    if (type == PosixFileAttributeView.class) {
+      return this.system.supportedFileAttributeViews().contains("posix");
     }
     // FIXME Implements all FileAttributeView checks
     return false;
