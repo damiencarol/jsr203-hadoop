@@ -89,8 +89,11 @@ public class HadoopFileStore extends FileStore {
   @Override
   public <V extends FileStoreAttributeView> V getFileStoreAttributeView(
       Class<V> type) {
-    // TODO Auto-generated method stub
-    return null;
+    if (type == HadoopFileStoreAttributeView.class) {
+      return (V) new HadoopFileStoreAttributeView();
+    } else {
+      return null;
+    }
   }
 
   @Override

@@ -70,7 +70,8 @@ public class TestFileStore extends TestHadoop {
     return hdfsCluster;
   }
 
-  private FileStore getFileStoreForTest() throws IOException {
+  @Test
+  public void testFileStore() throws URISyntaxException, IOException {
     URI uri = clusterUri.resolve("/tmp/testFileStore");
     Path path = Paths.get(uri);
     if (Files.exists(path))
@@ -79,12 +80,6 @@ public class TestFileStore extends TestHadoop {
     Files.createFile(path);
     assertTrue(Files.exists(path));
     FileStore st = Files.getFileStore(path);
-    return st;
-  }
-
-  @Test
-  public void testFileStore() throws URISyntaxException, IOException {
-    FileStore st = getFileStoreForTest();
     assertNotNull(st);
     Assert.assertNotNull(st.name());
     Assert.assertNotNull(st.type());
@@ -107,7 +102,14 @@ public class TestFileStore extends TestHadoop {
    */
   @Test
   public void testFileStoreAttributes() throws URISyntaxException, IOException {
-    FileStore store1 = getFileStoreForTest();
+    URI uri = clusterUri.resolve("/tmp/testFileStore");
+    Path path = Paths.get(uri);
+    if (Files.exists(path))
+      Files.delete(path);
+    assertFalse(Files.exists(path));
+    Files.createFile(path);
+    assertTrue(Files.exists(path));
+    FileStore store1 = Files.getFileStore(path);
     assertNotNull(store1);
     assertTrue(store1.supportsFileAttributeView("basic"));
     assertTrue(store1.supportsFileAttributeView(BasicFileAttributeView.class));
@@ -119,5 +121,21 @@ public class TestFileStore extends TestHadoop {
         .supportsFileAttributeView(AclFileAttributeView.class));
     assertTrue(store1.supportsFileAttributeView("user") == store1
         .supportsFileAttributeView(UserDefinedFileAttributeView.class));
+  }
+  
+  @Test
+  public void testHadoopFileStoreAttributeView() throws IOException {
+    URI uri = clusterUri.resolve("/tmp/testFileStore");
+    Path path = Paths.get(uri);
+    if (Files.exists(path))
+      Files.delete(path);
+    assertFalse(Files.exists(path));
+    Files.createFile(path);
+    assertTrue(Files.exists(path));
+    FileStore store1 = Files.getFileStore(path);
+    assertNotNull(store1);
+    HadoopFileStoreAttributeView view = store1.getFileStoreAttributeView(HadoopFileStoreAttributeView.class);
+    Assert.assertNotNull(view);
+    Assert.assertEquals("hadoop", view.name());
   }
 }
