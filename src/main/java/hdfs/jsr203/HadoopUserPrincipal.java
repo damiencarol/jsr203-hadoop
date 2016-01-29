@@ -25,12 +25,10 @@ public class HadoopUserPrincipal implements UserPrincipal {
 
   private org.apache.hadoop.security.UserGroupInformation ugi;
   private final String name;
-  // private HadoopFileSystem hdfs;
 
   public HadoopUserPrincipal(HadoopFileSystem hdfs, String name) {
     this.ugi = org.apache.hadoop.security.UserGroupInformation
         .createRemoteUser(name);
-    // this.hdfs = hdfs;
     this.name = name;
   }
 
@@ -45,8 +43,10 @@ public class HadoopUserPrincipal implements UserPrincipal {
       return true;
     } else if (obj == null || getClass() != obj.getClass()) {
       return false;
-    } else if (!this.ugi.getUserName().equals(((HadoopUserPrincipal)obj).ugi.getUserName()) ||
-        !Arrays.equals(this.ugi.getGroupNames(), ((HadoopUserPrincipal)obj).ugi.getGroupNames())) {
+    } else if (!this.ugi.getUserName()
+        .equals(((HadoopUserPrincipal) obj).ugi.getUserName())
+        || !Arrays.equals(this.ugi.getGroupNames(),
+            ((HadoopUserPrincipal) obj).ugi.getGroupNames())) {
       return false;
     } else {
       return true;
@@ -55,9 +55,7 @@ public class HadoopUserPrincipal implements UserPrincipal {
 
   @Override
   public int hashCode() {
-    int hash = 948;
-    hash = hash * ugi.hashCode();
-    return hash;
+    return name.hashCode();
   }
 
   @Override

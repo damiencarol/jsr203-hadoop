@@ -106,7 +106,7 @@ public class TestUserPrincipalLookupService extends TestHadoop {
     assertNotNull(user2);
 
     Assert.assertTrue(user.equals(user));
-    Assert.assertTrue(user.equals(user2));
+    Assert.assertTrue(user.equals(user2) && user2.equals(user));
 
     Assert.assertFalse(user.equals(null));
     Assert.assertFalse(user.equals(new Double(-1)));
@@ -114,6 +114,20 @@ public class TestUserPrincipalLookupService extends TestHadoop {
     UserPrincipal userTest = rootPath.getFileSystem()
         .getUserPrincipalLookupService().lookupPrincipalByName("test");
     Assert.assertFalse(user.equals(userTest));
+  }
+  
+  @Test
+  public void testHashcode() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    UserPrincipal user = Files.getOwner(rootPath);
+    assertNotNull(user);
+
+    // Get the same user
+    UserPrincipal user2 = Files.getOwner(rootPath);
+    assertNotNull(user2);
+    // Test hash code
+    Assert.assertTrue(user.hashCode() == user2.hashCode());
   }
 
   @Test
