@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.DosFileAttributeView;
+import java.nio.file.attribute.FileStoreAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 
@@ -122,7 +123,15 @@ public class TestFileStore extends TestHadoop {
     assertTrue(store1.supportsFileAttributeView("user") == store1
         .supportsFileAttributeView(UserDefinedFileAttributeView.class));
   }
-  
+
+  public class FakeFileStoreAttributeView implements FileStoreAttributeView {
+    @Override
+    public String name() {
+      return "fake";
+    }
+
+  }
+
   @Test
   public void testHadoopFileStoreAttributeView() throws IOException {
     URI uri = clusterUri.resolve("/tmp/testFileStore");
@@ -134,8 +143,12 @@ public class TestFileStore extends TestHadoop {
     assertTrue(Files.exists(path));
     FileStore store1 = Files.getFileStore(path);
     assertNotNull(store1);
-    HadoopFileStoreAttributeView view = store1.getFileStoreAttributeView(HadoopFileStoreAttributeView.class);
+    HadoopFileStoreAttributeView view = store1
+        .getFileStoreAttributeView(HadoopFileStoreAttributeView.class);
     Assert.assertNotNull(view);
     Assert.assertEquals("hadoop", view.name());
+
+    Assert.assertNull(
+        store1.getFileStoreAttributeView(FakeFileStoreAttributeView.class));
   }
 }
