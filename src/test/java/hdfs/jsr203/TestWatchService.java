@@ -37,6 +37,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -69,13 +70,13 @@ public class TestWatchService extends TestHadoop {
     hdfsCluster.waitActive();
     return hdfsCluster;
   }
-  
+ /* 
   static void checkKey(WatchKey key, Path dir) {
     if (!key.isValid())
         throw new RuntimeException("Key is not valid");
     if (key.watchable() != dir)
         throw new RuntimeException("Unexpected watchable");
-}
+}*/
 
 static void takeExpectedKey(WatchService watcher, WatchKey expected) {
     System.out.println("take events...");
@@ -87,6 +88,7 @@ static void takeExpectedKey(WatchService watcher, WatchKey expected) {
         // not expected
         throw new RuntimeException(x);
     }
+    System.out.println("expected key: " + expected);
     if (key != expected) {
         throw new RuntimeException("removed unexpected key");
     }
@@ -112,7 +114,6 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
    * TODO split this one in 3 test (create/modify/delete).
    */
   @Test
-  @Ignore
   public void testEvents() throws IOException {
     Path dir = Paths.get(clusterUri);
     System.out.println("-- Standard Events --");
@@ -128,7 +129,8 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
       System.out.format("register %s for ENTRY_CREATE\n", dir);
       WatchKey myKey = dir.register(watcher,
           new WatchEvent.Kind<?>[] { ENTRY_CREATE });
-      checkKey(myKey, dir);
+      Assert.assertTrue(myKey.isValid());
+      Assert.assertEquals(dir, myKey.watchable());
 
       // create file
       Path file = dir.resolve("foo");
@@ -153,7 +155,8 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
           new WatchEvent.Kind<?>[] { ENTRY_DELETE });
       if (deleteKey != myKey)
         throw new RuntimeException("register did not return existing key");
-      checkKey(deleteKey, dir);
+      Assert.assertTrue(deleteKey.isValid());
+      Assert.assertEquals(dir, deleteKey.watchable());
 
       System.out.format("delete %s\n", file);
       Files.delete(file);
@@ -177,7 +180,8 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
           new WatchEvent.Kind<?>[] { ENTRY_MODIFY });
       if (newKey != myKey)
         throw new RuntimeException("register did not return existing key");
-      checkKey(newKey, dir);
+      Assert.assertTrue(newKey.isValid());
+      Assert.assertEquals(dir, newKey.watchable());
 
       System.out.format("update: %s\n", file);
       try (OutputStream out = Files.newOutputStream(file,
