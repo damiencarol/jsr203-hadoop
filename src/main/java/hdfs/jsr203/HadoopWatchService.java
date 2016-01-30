@@ -16,32 +16,57 @@
 package hdfs.jsr203;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.hadoop.hdfs.DFSInotifyEventInputStream;
+import org.apache.hadoop.hdfs.client.HdfsAdmin;
 
 /**
  * Implement {@link WatchService}.
  */
 public class HadoopWatchService implements WatchService {
 
+  private DFSInotifyEventInputStream stream;
+  public DFSInotifyEventInputStream getStream() {
+    return stream;
+  }
+
+  public void setStream(DFSInotifyEventInputStream stream) {
+    this.stream = stream;
+  }
+
+  private boolean isClosed;
   private HadoopFileSystem fileSystem;
 
-  public HadoopWatchService(HadoopFileSystem fileSystem) {
+  public HadoopWatchService(HadoopFileSystem fileSystem) throws IOException {
     this.fileSystem = fileSystem;
+    HdfsAdmin dfs = new HdfsAdmin(fileSystem.getHDFS().getUri(), fileSystem.getHDFS().getConf());
+    stream = dfs.getInotifyEventStream();
   }
 
   @Override
   public void close() throws IOException {
-    // TODO Auto-generated method stub
-
+    this.isClosed=true;
+  }
+  
+  /**
+   * Checks that the watch service is open, throwing {@link ClosedWatchServiceException} if not.
+   */
+  protected final void checkOpen() {
+    if (isClosed) {
+      throw new ClosedWatchServiceException();
+    }
   }
 
   @Override
   public WatchKey poll() {
+    checkOpen();
     try {
       return new HadoopWatchKey(this,
-          (HadoopPath) this.fileSystem.getPath("/"));
+          (HadoopPath) this.fileSystem.getPath("/"),stream);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -54,7 +79,7 @@ public class HadoopWatchService implements WatchService {
       throws InterruptedException {
     try {
       return new HadoopWatchKey(this,
-          (HadoopPath) this.fileSystem.getPath("/"));
+          (HadoopPath) this.fileSystem.getPath("/"),stream);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -66,7 +91,7 @@ public class HadoopWatchService implements WatchService {
   public WatchKey take() throws InterruptedException {
     try {
       return new HadoopWatchKey(this,
-          (HadoopPath) this.fileSystem.getPath("/"));
+          (HadoopPath) this.fileSystem.getPath("/"),stream);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

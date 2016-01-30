@@ -41,13 +41,11 @@ import org.apache.hadoop.hdfs.inotify.MissingEventsException;
  */
 public class HadoopWatchKey implements WatchKey {
 
-  // private HadoopFileSystem fileSystem;
-  private HdfsAdmin dfs;
-  private DFSInotifyEventInputStream stream;
   private HadoopWatchService watcher;
   private HadoopPath path;
+  private DFSInotifyEventInputStream stream;
 
-  public HadoopWatchKey(HadoopWatchService watcher, HadoopPath path)
+  public HadoopWatchKey(HadoopWatchService watcher, HadoopPath path, DFSInotifyEventInputStream streampar)
       throws IOException {
     assert path != null;
 
@@ -55,8 +53,7 @@ public class HadoopWatchKey implements WatchKey {
     this.path = path;
 
     URI uri = path.getFileSystem().getHDFS().getUri();
-    dfs = new HdfsAdmin(uri, path.getFileSystem().getHDFS().getConf());
-    stream = this.dfs.getInotifyEventStream();
+    stream = streampar;
   }
 
   @Override
@@ -173,5 +170,11 @@ public class HadoopWatchKey implements WatchKey {
 
   public HadoopWatchService getWatcher() {
     return watcher;
+  }
+
+  @Override
+  public String toString() {
+    return "HadoopWatchKey [stream=" + stream + ", watcher="
+        + watcher + ", path=" + path + "]";
   }
 }
