@@ -60,7 +60,7 @@ public class TestFiles extends TestHadoop {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    cluster = startMini(TestFileSystem.class.getName());
+    cluster = startMini(TestFiles.class.getName());
     clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
   }
 
@@ -166,7 +166,7 @@ public class TestFiles extends TestHadoop {
 
     // Get root view
     PosixFileAttributeView view = Files.getFileAttributeView(rootPath,
-        PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS);
+        PosixFileAttributeView.class);
 
     assertNotNull(view);
     assertNotNull(view.readAttributes());
