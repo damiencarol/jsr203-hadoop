@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -105,5 +106,31 @@ public class TestDirectoryStream extends TestHadoop {
       // This one throws the exception
       it.remove();
     }
+  }
+
+  /**
+   * According to Java documentation of NIO API, if we try to call
+   * <code>next</code> on iterator of closed directory stream, there should be
+   * an {@see NoSuchElementException} exception.
+   * 
+   * @throws IOException
+   *           if we can't get the DirectoryStream
+   */
+  @Test(expected = NoSuchElementException.class)
+  public void testNextOnClosedDirectoryStreamIterator() throws IOException {
+    Path dir = Paths.get(clusterUri);
+    // create file
+    Path file = dir.resolve("foo");
+    if (Files.exists(file)) {
+      Files.delete(file);
+    }
+    Files.createFile(file);
+
+    DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
+    Iterator<Path> it = stream.iterator();
+    stream.close();
+    Assert.assertFalse(it.hasNext());
+    // This one throws the exception
+    it.next();
   }
 }
