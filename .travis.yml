@@ -1,7 +1,7 @@
 sudo: false
 
 language: java
-install: mvn install -Dgpg.skip=true
+install: mvn install -Dgpg.skip=true -X
 jdk:
   - oraclejdk7
   - oraclejdk8
