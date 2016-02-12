@@ -64,12 +64,13 @@ public class TestDirectoryStream extends TestHadoop {
   }
 
   /**
-   * According to Java documentation of NIO API, if we try to get an iterator two times,
-   * there should be an <code>IllegalStateException</code>.
+   * According to Java documentation of NIO API, if we try to get an iterator
+   * two times, there should be an <code>IllegalStateException</code>.
    * 
-   * @throws IOException if we can't get the DirectoryStream
+   * @throws IOException
+   *           if we can't get the DirectoryStream
    */
-  @Test(expected=IllegalStateException.class)
+  @Test(expected = IllegalStateException.class)
   public void testGetIteratorTwoTimes() throws IOException {
     Path dir = Paths.get(clusterUri);
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
@@ -80,14 +81,15 @@ public class TestDirectoryStream extends TestHadoop {
   }
 
   /**
-   * According to Java documentation of NIO API, if we try to call <code>remove</code> on iterator,
-   * there should be an exception.
+   * According to Java documentation of NIO API, if we try to call
+   * <code>remove</code> on iterator, there should be an exception.
    * <p>
    * Currently we use {@see UnsupportedOperationException} like OpenJDK.
    * 
-   * @throws IOException if we can't get the DirectoryStream
+   * @throws IOException
+   *           if we can't get the DirectoryStream
    */
-  @Test(expected=UnsupportedOperationException.class)
+  @Test(expected = UnsupportedOperationException.class)
   public void testRemoveOnIterator() throws IOException {
     Path dir = Paths.get(clusterUri);
     // create file
@@ -96,13 +98,11 @@ public class TestDirectoryStream extends TestHadoop {
       Files.delete(file);
     }
     Files.createFile(file);
-    
+
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-      Assert.assertNotNull(stream.iterator());
-      // This one throws the exception
-      Assert.assertNotNull(stream.iterator());
       Iterator<Path> it = stream.iterator();
       it.next();
+      // This one throws the exception
       it.remove();
     }
   }
