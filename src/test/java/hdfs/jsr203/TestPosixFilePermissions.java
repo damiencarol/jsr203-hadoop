@@ -46,7 +46,7 @@ public class TestPosixFilePermissions extends TestHadoop {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		cluster = startMini(TestFileSystem.class.getName());
+		cluster = startMini(TestPosixFilePermissions.class.getName());
 		clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
 	}
 

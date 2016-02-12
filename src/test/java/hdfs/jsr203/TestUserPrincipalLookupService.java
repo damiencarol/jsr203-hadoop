@@ -43,14 +43,14 @@ public class TestUserPrincipalLookupService extends TestHadoop {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    cluster = startMini(TestFileSystem.class.getName());
+    cluster = startMini(TestUserPrincipalLookupService.class.getName());
     clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
   }
 
   @AfterClass
   public static void teardownClass() throws Exception {
     if (cluster != null) {
-      cluster.shutdown();
+      cluster.shutdown(true);
     }
   }
 
