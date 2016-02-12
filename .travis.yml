@@ -7,6 +7,8 @@ jdk:
   - oraclejdk8
   - openjdk7
 
+after_success: mvn -Ptravis -DrepoToken=$RP_TOK clean test  jacoco:report coveralls:jacoco
+
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
