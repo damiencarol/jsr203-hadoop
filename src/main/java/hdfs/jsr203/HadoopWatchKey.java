@@ -73,7 +73,7 @@ public class HadoopWatchKey implements WatchKey {
        * raw_batch.getEvents()) { buildFromHadoop(raw_event, ls); } }
        */
       // Hadoop 2.6.0
-      Event rawEvent = null;
+      Event rawEvent;
       while ((rawEvent = this.stream.poll()) != null) {
         buildFromHadoop(rawEvent, ls);
       }
