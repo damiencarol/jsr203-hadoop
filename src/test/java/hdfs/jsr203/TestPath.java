@@ -143,6 +143,50 @@ public class TestPath extends TestHadoop {
     }
 
     @Test
+    public void testSubpathInvalid() throws IOException, URISyntaxException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+
+        assertEquals("tmp/testNormalize", p.subpath(0, p.getNameCount() - 1).toString());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testSubpathIllegalArgumentException() throws IOException, URISyntaxException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+        // These line throw exception
+        p.subpath(-5, p.getNameCount() - 1).toString();
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testSubpathIllegalArgumentException2() throws IOException, URISyntaxException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+        // These line throw exception
+        p.subpath(p.getNameCount(), p.getNameCount()).toString();
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testSubpathIllegalArgumentException3() throws IOException, URISyntaxException {
+        Path rootPath = Paths.get(clusterUri);
+
+        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+
+        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+        // These line throw exception
+        p.subpath(0, p.getNameCount()+1).toString();
+    }
+
+    @Test
     public void testGetNameCount() throws IOException {
         Path rootPath = Paths.get(clusterUri);
 
