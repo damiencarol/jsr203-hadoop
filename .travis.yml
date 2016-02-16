@@ -7,7 +7,7 @@ jdk:
   - oraclejdk8
   - openjdk7
 
-after_success: mvn -Ptravis -DrepoToken=$RP_TOK clean test  jacoco:report coveralls:jacoco
+after_success: mvn -Ptravis -DrepoToken=$RP_TOK clean test  jacoco:report coveralls:report
 
 env:
   global:
