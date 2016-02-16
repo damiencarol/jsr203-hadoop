@@ -301,6 +301,30 @@ public class TestFileSystem extends TestHadoop {
    *
    * @throws IOException
    */
+  @Test(expected = IllegalArgumentException.class)
+  public void getPathMatcherInvalid() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    pathToTest.getFileSystem().getPathMatcher("gloubiboulga");
+  }
+
+  /**
+   * Simple test to check {@link PathMatcher} support.
+   *
+   * @throws IOException
+   */
+  @Test(expected = UnsupportedOperationException.class)
+  public void getPathMatcherUnsupported() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    pathToTest.getFileSystem().getPathMatcher("gloubiboulga:.*\\.java");
+  }
+  
+  /**
+   * Simple test to check {@link PathMatcher} support.
+   *
+   * @throws IOException
+   */
   @Test
   public void getPathMatcherMask() throws IOException {
     Path pathToTest = Paths.get(clusterUri);
