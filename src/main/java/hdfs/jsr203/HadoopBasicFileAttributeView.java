@@ -28,31 +28,47 @@ import org.apache.hadoop.fs.Path;
 /**
  * Implement {@link BasicFileAttributeView}.
  */
-public class HadoopBasicFileAttributeView implements BasicFileAttributeView,
-    IAttributeReader, IAttributeWriter {
+public class HadoopBasicFileAttributeView
+    implements BasicFileAttributeView, IAttributeReader, IAttributeWriter {
 
   private enum AttrID {
-        size,
-        creationTime,
-        lastAccessTime,
-        lastModifiedTime,
-        isDirectory,
-        isRegularFile,
-        isSymbolicLink,
-        isOther,
-        fileKey,
+    size,
 
-        accessTime,
-        blockSize,
-        group,
-        len,
-        modificationTime,
-        owner,
-        replication,
-        //isDirectory,
-        isEncrypted,
-        isFile,
-        isSymLink
+    creationTime,
+
+    lastAccessTime,
+
+    lastModifiedTime,
+
+    isDirectory,
+
+    isRegularFile,
+
+    isSymbolicLink,
+
+    isOther,
+
+    fileKey,
+
+    accessTime,
+
+    blockSize,
+
+    group,
+
+    len,
+
+    modificationTime,
+
+    owner,
+
+    replication,
+
+    isEncrypted,
+
+    isFile,
+
+    isSymLink
   };
 
   private final HadoopPath path;
@@ -122,18 +138,12 @@ public class HadoopBasicFileAttributeView implements BasicFileAttributeView,
     LinkedHashMap<String, Object> map = new LinkedHashMap<>();
     if ("*".equals(attributes)) {
       for (AttrID id : AttrID.values()) {
-        try {
-          map.put(id.name(), attribute(id, zfas));
-        } catch (IllegalArgumentException x) {
-        }
+        map.put(id.name(), attribute(id, zfas));
       }
     } else {
       String[] as = attributes.split(",");
       for (String a : as) {
-        try {
-          map.put(a, attribute(AttrID.valueOf(a), zfas));
-        } catch (IllegalArgumentException x) {
-        }
+        map.put(a, attribute(AttrID.valueOf(a), zfas));
       }
     }
     return map;
