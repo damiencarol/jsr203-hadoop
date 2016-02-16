@@ -143,10 +143,6 @@ public class TestFileStore extends TestHadoop {
     assertTrue(Files.exists(path));
     FileStore store1 = Files.getFileStore(path);
     assertNotNull(store1);
-    HadoopFileStoreAttributeView view = store1
-        .getFileStoreAttributeView(HadoopFileStoreAttributeView.class);
-    Assert.assertNotNull(view);
-    Assert.assertEquals("hadoop", view.name());
 
     Assert.assertNull(
         store1.getFileStoreAttributeView(FakeFileStoreAttributeView.class));

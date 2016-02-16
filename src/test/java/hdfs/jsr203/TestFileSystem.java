@@ -286,6 +286,22 @@ public class TestFileSystem extends TestHadoop {
    * @throws IOException
    */
   @Test
+  public void getPathMatcherRegex() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    PathMatcher matcher = pathToTest.getFileSystem()
+        .getPathMatcher("regex:.*\\.java");
+
+    assertTrue(
+        matcher.matches(pathToTest.getFileSystem().getPath("test.java")));
+  }
+
+  /**
+   * Simple test to check {@link PathMatcher} support.
+   *
+   * @throws IOException
+   */
+  @Test
   public void getPathMatcherMask() throws IOException {
     Path pathToTest = Paths.get(clusterUri);
 

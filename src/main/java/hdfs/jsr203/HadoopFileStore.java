@@ -17,9 +17,7 @@ package hdfs.jsr203;
 
 import java.io.IOException;
 import java.nio.file.FileStore;
-import java.nio.file.attribute.AttributeView;
 import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
@@ -89,16 +87,11 @@ public class HadoopFileStore extends FileStore {
   @Override
   public <V extends FileStoreAttributeView> V getFileStoreAttributeView(
       Class<V> type) {
-    if (type == HadoopFileStoreAttributeView.class) {
-      return (V) new HadoopFileStoreAttributeView();
-    } else {
-      return null;
-    }
+    return null;
   }
 
   @Override
   public Object getAttribute(String attribute) throws IOException {
-    // TODO Auto-generated method stub
     return null;
   }
 
