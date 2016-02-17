@@ -151,4 +151,12 @@ public class TestAttributes extends TestHadoop {
     // Set invalid attribute
     Files.setAttribute(pathToTest, "basic:isNotValid", "foo");
   }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void testReadAttributeAcl() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    // Read all basic-file-attributes.
+    assertNotNull(Files.getAttribute(pathToTest, "acl:acl"));
+  }
 }
