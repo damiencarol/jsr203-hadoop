@@ -79,19 +79,6 @@ public class HadoopBasicFileAttributeView
     this.isHadoopView = isHadoopView;
   }
 
-  static HadoopBasicFileAttributeView get(HadoopPath path, String type) {
-    if (type == null) {
-      throw new NullPointerException();
-    }
-    if (type.equals("basic")) {
-      return new HadoopBasicFileAttributeView(path, false);
-    }
-    if (type.equals("hadoop")) {
-      return new HadoopBasicFileAttributeView(path, true);
-    }
-    return null;
-  }
-
   @Override
   public String name() {
     return isHadoopView ? "hadoop" : "basic";
