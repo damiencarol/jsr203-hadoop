@@ -25,6 +25,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -126,11 +127,28 @@ public class TestAttributes extends TestHadoop {
     assertNotNull(Files.getAttribute(pathToTest, "basic:size"));
   }
 
+  @Test
+  public void testSetAttribute() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    Files.setAttribute(pathToTest, "basic:creationTime", FileTime.fromMillis(0));
+    Files.setAttribute(pathToTest, "basic:lastAccessTime", FileTime.fromMillis(0));
+    Files.setAttribute(pathToTest, "basic:lastModifiedTime", FileTime.fromMillis(0));
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void testReadInvalidAttribute() throws IOException {
     Path pathToTest = Paths.get(clusterUri);
 
     // Read invalid attribute
     Files.getAttribute(pathToTest, "basic:isNotValid");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSetInvalidAttribute() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+
+    // Set invalid attribute
+    Files.setAttribute(pathToTest, "basic:isNotValid", "foo");
   }
 }

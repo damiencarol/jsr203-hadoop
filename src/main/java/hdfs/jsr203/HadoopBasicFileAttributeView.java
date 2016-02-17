@@ -101,21 +101,16 @@ public class HadoopBasicFileAttributeView
   @Override
   public void setAttribute(String attribute, Object value, LinkOption[] options)
       throws IOException {
-    try {
-      if (AttrID.valueOf(attribute) == AttrID.lastModifiedTime) {
-        setTimes((FileTime) value, null, null);
-      }
-      if (AttrID.valueOf(attribute) == AttrID.lastAccessTime) {
-        setTimes(null, (FileTime) value, null);
-      }
-      if (AttrID.valueOf(attribute) == AttrID.creationTime) {
-        setTimes(null, null, (FileTime) value);
-      }
-      return;
-    } catch (IllegalArgumentException x) {
+    if (AttrID.valueOf(attribute) == AttrID.lastModifiedTime) {
+      setTimes((FileTime) value, null, null);
     }
-    throw new UnsupportedOperationException(
-        "'" + attribute + "' is unknown or read-only attribute");
+    if (AttrID.valueOf(attribute) == AttrID.lastAccessTime) {
+      setTimes(null, (FileTime) value, null);
+    }
+    if (AttrID.valueOf(attribute) == AttrID.creationTime) {
+      setTimes(null, null, (FileTime) value);
+    }
+    return;
   }
 
   @Override
