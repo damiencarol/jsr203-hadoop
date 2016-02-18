@@ -866,8 +866,8 @@ public class HadoopFileSystem extends FileSystem {
 		/*public Map<String, Object> readAttributes(String attributes,
 				LinkOption[] options) throws IOException {*/
 		
-		String view = null;
-        String attrs = null;
+		String view;
+        String attrs;
         int colonPos = attributes.indexOf(':');
         if (colonPos == -1) {
             view = "basic";
@@ -891,8 +891,8 @@ public class HadoopFileSystem extends FileSystem {
 	    /*void setAttribute(String attribute, Object value, LinkOption... options)
 	            throws IOException
 		{*/
-		    String type = null;
-		    String attr = null;
+		    String type;
+		    String attr;
 		    int colonPos = attribute.indexOf(':');
 		    if (colonPos == -1) {
 		        type = "basic";

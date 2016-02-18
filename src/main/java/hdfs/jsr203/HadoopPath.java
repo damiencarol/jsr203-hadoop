@@ -310,13 +310,13 @@ public class HadoopPath implements Path {
 
   private boolean equalsNameAt(HadoopPath other, int index) {
     int mbegin = offsets[index];
-    int mlen = 0;
+    int mlen;
     if (index == (offsets.length - 1))
       mlen = path.length - mbegin;
     else
       mlen = offsets[index + 1] - mbegin - 1;
     int obegin = other.offsets[index];
-    int olen = 0;
+    int olen;
     if (index == (other.offsets.length - 1))
       olen = other.path.length - obegin;
     else
@@ -375,7 +375,7 @@ public class HadoopPath implements Path {
     final HadoopPath o = checkPath(other);
     if (o.isAbsolute())
       return o;
-    byte[] resolved = null;
+    byte[] resolved;
     if (this.path.length == 0) {
       // this method contract explicitly specifies this behavior in the case of
       // an empty path
@@ -460,7 +460,7 @@ public class HadoopPath implements Path {
       byte[] defaultdir = "/".getBytes(); // this.hdfs.getDefaultDir().path;
       int defaultlen = defaultdir.length;
       boolean endsWith = (defaultdir[defaultlen - 1] == '/');
-      byte[] t = null;
+      byte[] t;
       if (endsWith)
         t = new byte[defaultlen + path.length];
       else
