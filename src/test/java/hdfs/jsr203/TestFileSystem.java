@@ -319,7 +319,7 @@ public class TestFileSystem extends TestHadoop {
 
     pathToTest.getFileSystem().getPathMatcher("gloubiboulga:.*\\.java");
   }
-  
+
   /**
    * Simple test to check {@link PathMatcher} support.
    *
@@ -410,4 +410,13 @@ public class TestFileSystem extends TestHadoop {
   public void isOpen() {
     Paths.get(clusterUri).getFileSystem().isOpen();
   }
+
+  @Test(expected=NullPointerException.class)
+  public void invalidWatchService() throws IOException {
+    Path pathToTest = Paths.get(clusterUri);
+    // Register with null should throw exception
+    WatchService watcher = null;
+    pathToTest.register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
+  }
+
 }
