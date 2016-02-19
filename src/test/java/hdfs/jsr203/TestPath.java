@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -41,231 +41,246 @@ import static org.junit.Assert.assertTrue;
 
 public class TestPath extends TestHadoop {
 
-    private static MiniDFSCluster cluster;
-    private static URI clusterUri;
+  private static MiniDFSCluster cluster;
+  private static URI clusterUri;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        cluster = startMini(TestPath.class.getName());
-        clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    cluster = startMini(TestPath.class.getName());
+    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+  }
+
+  @AfterClass
+  public static void teardownClass() throws Exception {
+    if (cluster != null) {
+      cluster.shutdown();
     }
+  }
 
-    @AfterClass
-    public static void teardownClass() throws Exception {
-        if (cluster != null) {
-            cluster.shutdown();
-        }
-    }
+  private static MiniDFSCluster startMini(String testName) throws IOException {
+    File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
+    FileUtil.fullyDelete(baseDir);
+    Configuration conf = new Configuration();
+    conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
+    MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
+    MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
+    hdfsCluster.waitActive();
+    return hdfsCluster;
+  }
 
-    private static MiniDFSCluster startMini(String testName) throws IOException {
-        File baseDir = new File("./target/hdfs/" + testName).getAbsoluteFile();
-        FileUtil.fullyDelete(baseDir);
-        Configuration conf = new Configuration();
-        conf.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, baseDir.getAbsolutePath());
-        MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(conf);
-        MiniDFSCluster hdfsCluster = builder.clusterId(testName).build();
-        hdfsCluster.waitActive();
-        return hdfsCluster;
-    }
+  @Test
+  public void testNormalize() {
+    Path rootPath = Paths.get(clusterUri);
+    Path start = rootPath.resolve("/tmp/testNormalize/dir1/../file.txt");
+    Path expected = rootPath.resolve("/tmp/testNormalize/file.txt");
 
-    @Test
-    public void testNormalize() {
-        Path rootPath = Paths.get(clusterUri);
-        Path start = rootPath.resolve("/tmp/testNormalize/dir1/../file.txt");
-        Path expected = rootPath.resolve("/tmp/testNormalize/file.txt");
+    assertEquals("Normalized path is incorrect.", expected.toString(),
+        start.normalize().toString());
+  }
 
-        assertEquals("Normalized path is incorrect.", expected.toString(), start.normalize().toString());
-    }
+  /**
+   * Assertion to check that : <code>p.relativize(p.resolve(q)).equals(q)</code>
+   */
+  @Test
+  public void testRelativizeResolveCombination() {
+    Path p = Paths.get(clusterUri).resolve("/a/b");
+    Path q = p.getFileSystem().getPath("c", "d");
 
-    /**
-     * Assertion to check that :
-     * <code>p.relativize(p.resolve(q)).equals(q)</code>
-     */
-    @Test
-    public void testRelativizeResolveCombination() {
-        Path p = Paths.get(clusterUri).resolve("/a/b");
-        Path q = p.getFileSystem().getPath("c", "d");
+    assertEquals(q, p.relativize(p.resolve(q)));
+  }
 
-        assertEquals(q, p.relativize(p.resolve(q)));
-    }
+  @Test(expected = UnsupportedOperationException.class)
+  public void testToFile() {
+    Path rootPath = Paths.get(clusterUri);
+    Path file = rootPath.resolve("/tmp/testToFile/file.txt");
+    file.toFile();
+  }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testToFile() {
-        Path rootPath = Paths.get(clusterUri);
-        Path file = rootPath.resolve("/tmp/testToFile/file.txt");
-        file.toFile();
-    }
+  @Test
+  public void testCompareTo() {
+    Path rootPath = Paths.get(clusterUri);
+    Path path1 = rootPath.resolve("file1.txt");
+    Path path2 = rootPath.resolve("file2.txt");
 
-    @Test
-    public void testCompareTo() {
-        Path rootPath = Paths.get(clusterUri);
-        Path path1 = rootPath.resolve("file1.txt");
-        Path path2 = rootPath.resolve("file2.txt");
+    assertThat(path2, Matchers.greaterThan(path1));
+  }
 
-        assertThat(path2, Matchers.greaterThan(path1));
-    }
+  /**
+   * Assertion to check that :
+   * <code>Paths.get(p.toUri()).equals(p.toAbsolutePath()) </code>
+   * 
+   * @throws IOException
+   */
+  @Test
+  public void testToURItoAbsolutePathCombination() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    /**
-     * Assertion to check that :
-     * <code>Paths.get(p.toUri()).equals(p.toAbsolutePath()) </code>
-     * 
-     * @throws IOException
-     */
-    @Test
-    public void testToURItoAbsolutePathCombination() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Files.createFile(rootPath.resolve("tmp/testNormalize/file.txt"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
-        Files.createFile(rootPath.resolve("tmp/testNormalize/file.txt"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/../file.txt");
+    assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/../file.txt");
-        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
+    p = rootPath.resolve("tmp/testNormalize/");
+    assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
+    p = rootPath.resolve("tmp/testNormalize");
+    assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
+    p = rootPath.resolve("tmp/testNormalize/dir1");
+    assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
+    p = rootPath.resolve("tmp/testNormalize/dir1/");
+    assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
+  }
 
-        p = rootPath.resolve("tmp/testNormalize/");
-        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
-        p = rootPath.resolve("tmp/testNormalize");
-        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
-        p = rootPath.resolve("tmp/testNormalize/dir1");
-        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
-        p = rootPath.resolve("tmp/testNormalize/dir1/");
-        assertTrue(Paths.get(p.toUri()).equals(p.toAbsolutePath()));
-    }
+  @Test
+  public void testSubpath() throws IOException, URISyntaxException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void testSubpath() throws IOException, URISyntaxException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    assertEquals("tmp/testNormalize",
+        p.subpath(0, p.getNameCount() - 1).toString());
+  }
 
-        assertEquals("tmp/testNormalize", p.subpath(0, p.getNameCount() - 1).toString());
-    }
+  @Test
+  public void testSubpathInvalid() throws IOException, URISyntaxException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void testSubpathInvalid() throws IOException, URISyntaxException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    assertEquals("tmp/testNormalize",
+        p.subpath(0, p.getNameCount() - 1).toString());
+  }
 
-        assertEquals("tmp/testNormalize", p.subpath(0, p.getNameCount() - 1).toString());
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testSubpathIllegalArgumentException()
+      throws IOException, URISyntaxException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testSubpathIllegalArgumentException() throws IOException, URISyntaxException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    // These line throw exception
+    p.subpath(-5, p.getNameCount() - 1).toString();
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
-        // These line throw exception
-        p.subpath(-5, p.getNameCount() - 1).toString();
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testSubpathIllegalArgumentException2()
+      throws IOException, URISyntaxException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testSubpathIllegalArgumentException2() throws IOException, URISyntaxException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    // These line throw exception
+    p.subpath(p.getNameCount(), p.getNameCount()).toString();
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
-        // These line throw exception
-        p.subpath(p.getNameCount(), p.getNameCount()).toString();
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void testSubpathIllegalArgumentException3()
+      throws IOException, URISyntaxException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testSubpathIllegalArgumentException3() throws IOException, URISyntaxException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    // These line throw exception
+    p.subpath(0, p.getNameCount() + 1).toString();
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
-        // These line throw exception
-        p.subpath(0, p.getNameCount()+1).toString();
-    }
+  @Test
+  public void testGetNameCount() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void testGetNameCount() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/dir1/");
 
-        Path p = rootPath.resolve("tmp/testNormalize/dir1/");
+    assertEquals(0, rootPath.getNameCount());
+    assertEquals(3, p.getNameCount());
+  }
 
-        assertEquals(0, rootPath.getNameCount());
-        assertEquals(3, p.getNameCount());
-    }
+  @Test
+  public void testResolveSibling() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void testResolveSibling() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
 
-        Files.createDirectories(rootPath.resolve("tmp/testNormalize/dir1/"));
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    assertEquals(p, p.resolveSibling(p.getFileName()));
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertEquals(p, p.resolveSibling(p.getFileName()));
-    }
+  @Test
+  public void getName() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void getName() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    assertEquals("tmp", p.getName(0).toString());
+    assertEquals("testNormalize", p.getName(1).toString());
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertEquals("tmp", p.getName(0).toString());
-        assertEquals("testNormalize", p.getName(1).toString());
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void getNameInvalidIndex() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void getNameInvalidIndex() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    p.getName(-1);
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        p.getName(-1);
-    }
+  @Test(expected = IllegalArgumentException.class)
+  public void getNameInvalidIndex2() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void getNameInvalidIndex2() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    p.getName(p.getNameCount());
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        p.getName(p.getNameCount());
-    }
+  @Test
+  public void startsWith() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void startsWith() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    assertTrue(p.startsWith("/tmp"));
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertTrue(p.startsWith("/tmp"));
-    }
+  @Test
+  public void endsWith() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void endsWith() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    assertTrue(p.endsWith("test"));
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertTrue(p.endsWith("test"));
-    }
+  @Test
+  public void getRoot() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void getRoot() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    assertEquals(rootPath, p.getRoot());
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        assertEquals(rootPath, p.getRoot());
-    }
+  @Test
+  public void iterator() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
 
-    @Test
-    public void iterator() throws IOException {
-        Path rootPath = Paths.get(clusterUri);
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    Iterator<Path> it = p.iterator();
+    assertNotNull(it);
+    assertEquals("tmp", it.next().toString());
+    assertEquals("testNormalize", it.next().toString());
+    assertEquals("test", it.next().toString());
+  }
 
-        Path p = rootPath.resolve("tmp/testNormalize/test");
-        Iterator<Path> it = p.iterator();
-        assertNotNull(it);
-        assertEquals("tmp", it.next().toString());
-        assertEquals("testNormalize", it.next().toString());
-        assertEquals("test", it.next().toString());
-    }
+  @Test
+  public void gethashCode() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    Path p = rootPath.resolve("tmp/testNormalize/test");
+    Path p2 = rootPath.resolve("tmp/testNormalize/test");
+
+    assertEquals(p.hashCode(), p2.hashCode());
+  }
 }
