@@ -293,4 +293,12 @@ public class TestPath extends TestHadoop {
 
     assertEquals(p2, p.resolveSibling("bar"));
   }
+
+  @Test
+  public void toURI() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    Path p = rootPath.resolve("dir1/dir2/foo");
+    assertTrue(Paths.get(p.toUri()).equals(p .toAbsolutePath()));
+  }
 }
