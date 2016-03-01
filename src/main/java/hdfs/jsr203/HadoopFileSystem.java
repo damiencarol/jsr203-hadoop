@@ -22,7 +22,6 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
@@ -73,8 +72,6 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.permission.AclEntry;
-import org.apache.hadoop.security.AccessControlException;
 
 public class HadoopFileSystem extends FileSystem {
 	
@@ -919,35 +916,7 @@ public class HadoopFileSystem extends FileSystem {
 		if (!path.getFileSystem().getHDFS().getConf().getBoolean("dfs.namenode.acls.enabled", false)) {
 			return;
 		}
-		// For each modes
-		try {
-			for (AccessMode mode : modes) {
-				switch (mode) {
-				case READ:
-					// TODO Evaluate using 2.6.0 to use access()
-					//this.hdfs.getHDFS().access(hdfs_path, action);
-					for (AclEntry entry : path.getFileSystem().getHDFS().getAclStatus(hdfs_path).getEntries()) {
-						System.out.println("entry=" + entry);
-					}
-					//checkAccessCatch(hdfs_path, FsAction.READ);
-					break;
-				case WRITE:
-					//checkAccessCatch(hdfs_path, FsAction.WRITE);
-					break;
-				case EXECUTE:
-					//checkAccessCatch(hdfs_path, FsAction.EXECUTE);
-					break;
-				default:
-					throw new UnsupportedOperationException();
-				}
-			}
-		} catch (AccessControlException e) {
-			throw new AccessDeniedException(path.toString(), "", e.getMessage());
-		} catch (FileNotFoundException e) {
-			throw new NoSuchFileException(path.toString(), "", e.getMessage());
-		} catch (IOException e) {
-			throw new IOException(e);
-		}
+		// TODO implement check access
 	}
 
 	@Override

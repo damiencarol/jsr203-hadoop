@@ -196,11 +196,4 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
     toHadoopPath(path).getFileSystem().setAttribute(toHadoopPath(path),
         attribute, value, options);
   }
-
-  @Override
-  public void createLink(Path link, Path existing) throws IOException {
-    toHadoopPath(existing).getFileSystem().getHDFS()
-      .createSymlink(toHadoopPath(existing).getRawResolvedPath(), 
-          toHadoopPath(existing).getRawResolvedPath(), false);
-  }
 }
