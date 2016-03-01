@@ -201,6 +201,7 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
   }
   
   @Test
+  @Ignore
   public void testSimple() throws IOException {
     Path rootPath = Paths.get(clusterUri);
     
@@ -211,6 +212,7 @@ static void checkExpectedEvent(Iterable<WatchEvent<?>> events,
   }
 
   @Test(expected=ClosedWatchServiceException.class)
+  @Ignore
   public void testSimpleEx() throws IOException {
     Path rootPath = Paths.get(clusterUri);
     
