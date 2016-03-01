@@ -38,6 +38,7 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.hadoop.fs.PathFilter;
 
 /**
@@ -46,6 +47,7 @@ import org.apache.hadoop.fs.PathFilter;
  * This provider implements the actual {@code META-INF/services/} entry.
  */
 public class HadoopFileSystemProvider extends FileSystemProvider {
+
   public static final String SCHEME = "hdfs";
 
   // Copy-cat of
@@ -193,5 +195,12 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
       LinkOption... options) throws IOException {
     toHadoopPath(path).getFileSystem().setAttribute(toHadoopPath(path),
         attribute, value, options);
+  }
+
+  @Override
+  public void createLink(Path link, Path existing) throws IOException {
+    toHadoopPath(existing).getFileSystem().getHDFS()
+      .createSymlink(toHadoopPath(existing).getRawResolvedPath(), 
+          toHadoopPath(existing).getRawResolvedPath(), false);
   }
 }

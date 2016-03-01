@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<hadoop.version>2.6.0</hadoop.version>
+		<hadoop.version>2.7.2</hadoop.version>
 	</properties>
 
 	<licenses>
@@ -87,7 +87,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>create-source-jar</id>

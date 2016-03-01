@@ -304,8 +304,9 @@ public class HadoopPath implements Path {
       throw new NullPointerException();
     }
 
-    HadoopWatchService hws = (HadoopWatchService) watcher;
-    return new HadoopWatchKey(hws, this, hws.getStream());
+    // Not implemented now
+    // The Hadoop API for notification is not stable
+    throw new IOException("Not implemented");
   }
 
   private boolean equalsNameAt(HadoopPath other, int index) {
