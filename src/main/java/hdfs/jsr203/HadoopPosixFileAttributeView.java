@@ -41,17 +41,31 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
   private final boolean isPosixView;
 
   private enum AttrID {
-    owner,
-    creationTime,
-    lastAccessTime,
-    lastModifiedTime,
-    isDirectory,
-    isRegularFile,
-    isSymbolicLink,
+    // file
+    lastModifiedTime, 
+    
+    lastAccessTime, 
+    
+    creationTime, 
+    
+    size,
+    
+    isRegularFile, 
+    
+    isDirectory, 
+    
+    isSymbolicLink, 
+    
     isOther, 
-    fileKey,
-    group,
-    permissions
+    
+    fileKey, 
+    
+    // fileowner
+    owner,
+
+    // posix
+    permissions,
+    group
   };
 
   public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {
@@ -63,8 +77,7 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
   @Override
   public void setTimes(FileTime lastModifiedTime, FileTime lastAccessTime,
       FileTime createTime) throws IOException {
-    // TODO Auto-generated method stub
-
+    throw new IOException("Not implemented");
   }
 
   @Override
@@ -104,18 +117,12 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
     LinkedHashMap<String, Object> map = new LinkedHashMap<>();
     if ("*".equals(attributes)) {
       for (AttrID id : AttrID.values()) {
-        try {
-          map.put(id.name(), attribute(id, zfas));
-        } catch (IllegalArgumentException x) {
-        }
+        map.put(id.name(), attribute(id, zfas));
       }
     } else {
       String[] as = attributes.split(",");
       for (String a : as) {
-        try {
-          map.put(a, attribute(AttrID.valueOf(a), zfas));
-        } catch (IllegalArgumentException x) {
-        }
+        map.put(a, attribute(AttrID.valueOf(a), zfas));
       }
     }
     return map;
