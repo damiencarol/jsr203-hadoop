@@ -64,8 +64,6 @@ public class HadoopBasicFileAttributeView
 
     replication,
 
-    isEncrypted,
-
     isFile,
 
     isSymLink
@@ -150,8 +148,6 @@ public class HadoopBasicFileAttributeView
         return hfas.getFileStatus().getReplication();
       case isDirectory:
         return hfas.getFileStatus().isDirectory();
-      case isEncrypted:
-        return hfas.getFileStatus().isEncrypted();
       case isFile:
         return hfas.getFileStatus().isFile();
       case isSymLink:

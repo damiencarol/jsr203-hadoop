@@ -332,7 +332,6 @@ public class TestFiles extends TestHadoop {
     Assert.assertNotNull(Files.getAttribute(path, "hadoop:owner"));
     Assert.assertNotNull(Files.getAttribute(path, "hadoop:replication"));
     Assert.assertNotNull(Files.getAttribute(path, "hadoop:isDirectory"));
-    Assert.assertNotNull(Files.getAttribute(path, "hadoop:isEncrypted"));
     Assert.assertNotNull(Files.getAttribute(path, "hadoop:isFile"));
     Assert.assertNotNull(Files.getAttribute(path, "hadoop:isSymLink"));
   }
