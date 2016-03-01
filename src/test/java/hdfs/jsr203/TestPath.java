@@ -17,6 +17,10 @@
  */
 package hdfs.jsr203;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -29,15 +33,10 @@ import java.util.Iterator;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
-import org.hamcrest.Matchers;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class TestPath extends TestHadoop {
 
@@ -102,7 +101,9 @@ public class TestPath extends TestHadoop {
     Path path1 = rootPath.resolve("file1.txt");
     Path path2 = rootPath.resolve("file2.txt");
 
-    assertThat(path2, Matchers.greaterThan(path1));
+    Assert.assertTrue(path2.compareTo(path1)>0);
+    Assert.assertTrue(path2.compareTo(path2)==0);
+    Assert.assertTrue(path1.compareTo(path2)<0);
   }
 
   /**
