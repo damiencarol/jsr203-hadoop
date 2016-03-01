@@ -50,7 +50,7 @@ public class TestUserPrincipalLookupService extends TestHadoop {
   @AfterClass
   public static void teardownClass() throws Exception {
     if (cluster != null) {
-      cluster.shutdown(true);
+      cluster.shutdown();
     }
   }
 
