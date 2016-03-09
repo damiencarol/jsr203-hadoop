@@ -35,6 +35,7 @@ import org.apache.hadoop.hdfs.inotify.Event.CreateEvent;
 import org.apache.hadoop.hdfs.inotify.Event.MetadataUpdateEvent;
 import org.apache.hadoop.hdfs.inotify.Event.RenameEvent;
 import org.apache.hadoop.hdfs.inotify.Event.UnlinkEvent;
+import org.apache.hadoop.hdfs.inotify.EventBatch;
 import org.apache.hadoop.hdfs.inotify.MissingEventsException;
 
 public class HadoopWatchKey implements WatchKey {
@@ -68,10 +69,12 @@ public class HadoopWatchKey implements WatchKey {
 		
 		ArrayList<WatchEvent<?>> ls = new ArrayList<WatchEvent<?>>();
 		try {
-			Event raw_event = null;
+			EventBatch raw_event = null;
 			while ((raw_event = this.stream.poll())!=null)
 			{
-				buildFromHadoop(raw_event, ls);
+				for (Event event : raw_event.getEvents()) {
+					buildFromHadoop(event, ls);
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
