@@ -11,7 +11,7 @@ public class PathDetailHdfs {
 		initial();
 	}
 	private static void initial() {
-		String configPath = "config.properties";
+		String configPath = "HdpXmlLocation";
 		InputStream in = PathDetailHdfs.class.getClassLoader().getResourceAsStream(configPath);
 		properties = new Properties();
 		try {
