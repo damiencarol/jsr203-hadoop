@@ -43,8 +43,8 @@ import org.apache.hadoop.fs.PathFilter;
 
 /**
  * {@link FileSystemProvider} implementation for HDFS.
- * <p>
- * This provider implements the actual {@code META-INF/services/} entry.
+ *
+ * <p> This provider implements the actual {@code META-INF/services/} entry.
  */
 public class HadoopFileSystemProvider extends FileSystemProvider {
 

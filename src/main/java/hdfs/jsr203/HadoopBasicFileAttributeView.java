@@ -108,7 +108,6 @@ public class HadoopBasicFileAttributeView
     if (AttrID.valueOf(attribute) == AttrID.creationTime) {
       setTimes(null, null, (FileTime) value);
     }
-    return;
   }
 
   @Override

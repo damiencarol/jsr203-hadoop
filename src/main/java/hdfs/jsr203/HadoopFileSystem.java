@@ -75,7 +75,10 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileUtil;
 
 public class HadoopFileSystem extends FileSystem {
-	
+
+  private static final String GLOB_SYNTAX = "glob";
+  private static final String REGEX_SYNTAX = "regex";
+
 	private org.apache.hadoop.fs.FileSystem fs;
 	private FileSystemProvider provider;
 	private boolean readOnly;
@@ -88,8 +91,9 @@ public class HadoopFileSystem extends FileSystem {
 		this.provider = provider;
 		
 		int port = uriPort;
-        if (port == -1)
-            port = 8020; // Default Hadoop port
+		if (port == -1) {
+		  port = 8020; // Default Hadoop port
+		}
 
 		// Create dynamic configuration
 		Configuration conf = new Configuration();
@@ -138,8 +142,9 @@ public class HadoopFileSystem extends FileSystem {
             sb.append(first);
             for (String segment: more) {
                 if (segment.length() > 0) {
-                    if (sb.length() > 0)
+                    if (sb.length() > 0) {
                         sb.append('/');
+                    }
                     sb.append(segment);
                 }
             }
@@ -147,9 +152,6 @@ public class HadoopFileSystem extends FileSystem {
         }
 		return new HadoopPath(this, getBytes(path));
 	}
-
-    private static final String GLOB_SYNTAX = "glob";
-    private static final String REGEX_SYNTAX = "regex";
 
 	@Override
 	public PathMatcher getPathMatcher(String syntaxAndPattern) {
