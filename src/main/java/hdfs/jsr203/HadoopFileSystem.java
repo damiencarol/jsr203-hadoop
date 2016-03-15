@@ -242,7 +242,7 @@ public class HadoopFileSystem extends FileSystem {
 		return this.fs;
 	}
 	
-	void createDirectory(final byte[] directory, FileAttribute<?>... attrs) throws IOException
+	public void createDirectory(final byte[] directory, FileAttribute<?>... attrs) throws IOException
 	{		
 		checkWritable();
     byte[] dirPath = HadoopUtils.toDirectoryPath(directory);
@@ -490,11 +490,11 @@ public class HadoopFileSystem extends FileSystem {
 	}
 	
 	// Returns an output stream for writing the contents into the specified
-    // entry.
-    OutputStream newOutputStream(org.apache.hadoop.fs.Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+  // entry.
+  public OutputStream newOutputStream(org.apache.hadoop.fs.Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
         throws IOException
-    {
-        checkWritable();
+  {
+    checkWritable();
         boolean hasCreateNew = false;
         boolean hasCreate = false;
         boolean hasAppend = false;
@@ -648,21 +648,24 @@ public class HadoopFileSystem extends FileSystem {
         }
     }
     
-    boolean exists(byte[] path)
-            throws IOException
-        {
-    	beginRead();
-        try {
-            ensureOpen();
-            return this.fs.exists(new HadoopPath(this, path).getRawResolvedPath());
-        } finally {
-            endRead();
-        }
-        }
-    
-    FileStore getFileStore(HadoopPath path) {
-        return new HadoopFileStore(path);
+  private boolean exists(byte[] path)
+      throws IOException
+  {
+    beginRead();
+    try 
+    {
+      ensureOpen();
+      return this.fs.exists(new HadoopPath(this, path).getRawResolvedPath());
     }
+    finally
+    {
+      endRead();
+    }
+  }
+    
+  public FileStore getFileStore(final HadoopPath path) {
+    return new HadoopFileStore(path);
+  }
 
 	public boolean sameCluster(HadoopFileSystem hdfs) {
 		return (this.fs.getUri().equals(hdfs.fs.getUri()));
@@ -818,31 +821,27 @@ public class HadoopFileSystem extends FileSystem {
 	}
 	
 	public IAttributeReader getView(HadoopPath path, String type) {
-		if (type == null)
-            throw new NullPointerException();
-		if (type.equals("basic"))
-            return new HadoopBasicFileAttributeView(path, false);
-		if (type.equals("hadoop"))
-            return new HadoopBasicFileAttributeView(path, true);
-		if (type.equals("owner"))
-            return new HadoopPosixFileAttributeView(path, false);
-		if (type.equals("posix"))
-            return new HadoopPosixFileAttributeView(path, true);
-        return null;
+    if ("basic".equals(type))
+      return new HadoopBasicFileAttributeView(path, false);
+    if ("hadoop".equals(type))
+      return new HadoopBasicFileAttributeView(path, true);
+    if ("owner".equals(type))
+      return new HadoopPosixFileAttributeView(path, false);
+    if ("posix".equals(type))
+      return new HadoopPosixFileAttributeView(path, true);
+    return null;
 	}
 	
 	public IAttributeWriter getAttributeWriter(HadoopPath path, String type) {
-		if (type == null)
-            throw new NullPointerException();
-		if (type.equals("basic"))
-            return new HadoopBasicFileAttributeView(path, false);
-		if (type.equals("hadoop"))
-            return new HadoopBasicFileAttributeView(path, true);
-		if (type.equals("owner"))
-            return new HadoopPosixFileAttributeView(path, false);
-		if (type.equals("posix"))
-            return new HadoopPosixFileAttributeView(path, true);
-        return null;
+    if ("basic".equals(type))
+      return new HadoopBasicFileAttributeView(path, false);
+    if ("hadoop".equals(type))
+      return new HadoopBasicFileAttributeView(path, true);
+    if ("owner".equals(type))
+      return new HadoopPosixFileAttributeView(path, false);
+    if ("posix".equals(type))
+      return new HadoopPosixFileAttributeView(path, true);
+    return null;
 	}
 	
     @SuppressWarnings("unchecked")
