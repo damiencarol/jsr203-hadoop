@@ -129,7 +129,7 @@ public class HadoopBasicFileAttributeView
     return map;
   }
 
-  Object attribute(AttrID id, HadoopBasicFileAttributes hfas) {
+  private Object attribute(AttrID id, HadoopBasicFileAttributes hfas) {
     if (isHadoopView) {
       switch (id) {
       case accessTime:

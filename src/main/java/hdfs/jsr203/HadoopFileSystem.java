@@ -21,6 +21,7 @@ import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -241,20 +242,20 @@ public class HadoopFileSystem extends FileSystem {
 		return this.fs;
 	}
 	
-	void createDirectory(byte[] dir, FileAttribute<?>... attrs) throws IOException
+	void createDirectory(final byte[] directory, FileAttribute<?>... attrs) throws IOException
 	{		
 		checkWritable();
-        dir = HadoopUtils.toDirectoryPath(dir);
-        beginWrite();
-        try {
-            ensureOpen();
-            if (dir.length == 0 || exists(dir))  // root dir, or exiting dir
-                throw new FileAlreadyExistsException(getString(dir));
-            //checkParents(dir);
-            this.fs.mkdirs(new HadoopPath(this, dir).getRawResolvedPath());
-        } finally {
-            endWrite();
-        }
+    byte[] dirPath = HadoopUtils.toDirectoryPath(directory);
+    beginWrite();
+    try {
+        ensureOpen();
+        if (dirPath.length == 0 || exists(dirPath))  // root directory, or existing directory
+            throw new FileAlreadyExistsException(getString(dirPath));
+        //checkParents(dir);
+        this.fs.mkdirs(new HadoopPath(this, dirPath).getRawResolvedPath());
+    } finally {
+        endWrite();
+    }
 	}
 
 	public Iterator<Path> iteratorOf(HadoopPath path,
@@ -341,7 +342,7 @@ public class HadoopFileSystem extends FileSystem {
 	    checkOptions(options);
         
         // Check that file not exists
-        if (options.contains(StandardOpenOption.CREATE_NEW) && 
+        if (options.contains(CREATE_NEW) && 
                 this.fs.exists(path)) {
             throw new FileAlreadyExistsException(path.toString());
         }
@@ -362,21 +363,21 @@ public class HadoopFileSystem extends FileSystem {
 		checkOptions(options);
 		
 		// Check that file not exists
-		if (options.contains(StandardOpenOption.CREATE_NEW) && 
+		if (options.contains(CREATE_NEW) && 
 				this.fs.exists(path)) {
 			throw new FileAlreadyExistsException(path.toString());
 		}
 				
 		
-		if (options.contains(StandardOpenOption.WRITE) ||
-            options.contains(StandardOpenOption.APPEND)) {
+		if (options.contains(WRITE) ||
+            options.contains(APPEND)) {
             checkWritable();
             beginRead();
             try {
                 final WritableByteChannel wbc = Channels.newChannel(
                     newOutputStream(path, options, attrs));
                 long leftover = 0;
-                if (options.contains(StandardOpenOption.APPEND)) {
+                if (options.contains(APPEND)) {
                     /*Entry e = getEntry0(path);
                     if (e != null && e.size >= 0)
                         leftover = e.size;*/
@@ -634,17 +635,18 @@ public class HadoopFileSystem extends FileSystem {
             throw new ClosedFileSystemException();
     }
     
-    boolean exists(org.apache.hadoop.fs.Path path)
+    public boolean exists(org.apache.hadoop.fs.Path path)
             throws IOException
-        {
-            beginRead();
-            try {
-                ensureOpen();
-                return this.fs.exists(path);
-            } finally {
-                endRead();
-            }
+    {
+      beginRead();
+      try {
+        ensureOpen();
+        return this.fs.exists(path);
+        } 
+      finally {
+        endRead();
         }
+    }
     
     boolean exists(byte[] path)
             throws IOException
