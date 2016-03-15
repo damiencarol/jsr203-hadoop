@@ -135,7 +135,7 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
     throw new UnsupportedOperationException();
   }
 
-  Object attribute(AttrID id, PosixFileAttributes hfas) {
+  private Object attribute(AttrID id, PosixFileAttributes hfas) {
     switch (id) {
     case owner:
       return hfas.owner().getName();

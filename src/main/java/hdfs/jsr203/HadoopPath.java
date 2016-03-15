@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
@@ -503,7 +505,8 @@ public class HadoopPath implements Path {
 
   @Override
   public String toString() {
-    return new String(this.path);
+    // TODO add char set management
+    return new String(this.path, StandardCharsets.UTF_8);
   }
 
   DirectoryStream<Path> newDirectoryStream(Filter<? super Path> filter)

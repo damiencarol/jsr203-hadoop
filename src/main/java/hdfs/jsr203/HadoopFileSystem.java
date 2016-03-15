@@ -92,7 +92,7 @@ public class HadoopFileSystem extends FileSystem {
             port = 8020; // Default Hadoop port
 
 		// Create dynamic configuration
-		Configuration conf = new org.apache.hadoop.conf.Configuration();
+		Configuration conf = new Configuration();
 		conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
 
         this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
