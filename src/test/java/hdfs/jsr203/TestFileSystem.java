@@ -239,16 +239,6 @@ public class TestFileSystem extends TestHadoop {
     assertNotNull(st);
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testNullPath() {
-    HadoopFileSystemProvider.toHadoopPath(null);
-  }
-
-  @Test(expected = ProviderMismatchException.class)
-  public void testMismatchedPath() {
-    HadoopFileSystemProvider.toHadoopPath(Paths.get("my_file"));
-  }
-
   /**
    * Simple test to check {@link PathMatcher} support.
    *

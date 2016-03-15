@@ -44,7 +44,7 @@ import org.apache.hadoop.fs.PathFilter;
 /**
  * {@link FileSystemProvider} implementation for HDFS.
  *
- * <p> This provider implements the actual {@code META-INF/services/} entry.
+ * <p>This provider implements the actual {@code META-INF/services/} entry.
  */
 public class HadoopFileSystemProvider extends FileSystemProvider {
 
@@ -60,7 +60,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
   };
 
   // Checks that the given file is a HadoopPath
-  static final HadoopPath toHadoopPath(Path path) {
+  private static final HadoopPath toHadoopPath(Path path) {
     if (path == null) {
       throw new NullPointerException();
     }
