@@ -97,10 +97,9 @@ public class HadoopFileStore extends FileStore {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("/");
-    sb.append(" (");
+    StringBuilder sb = new StringBuilder("/ (");
     sb.append(system.getHDFS().getCanonicalServiceName());
-    sb.append(")");
+    sb.append(')');
     return sb.toString();
   }
 
