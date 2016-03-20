@@ -16,6 +16,7 @@
 package hdfs.jsr203;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
@@ -77,10 +78,17 @@ public class HadoopPath implements Path {
   }
 
   HadoopBasicFileAttributes getAttributes() throws IOException {
+
     org.apache.hadoop.fs.Path resolvedPath = this.getRawResolvedPath();
-    FileStatus fileStatus = hdfs.getHDFS().getFileStatus(resolvedPath);
-    String fileKey = resolvedPath.toString();
-    return new HadoopBasicFileAttributes(fileKey, fileStatus);
+
+    try {
+      FileStatus fileStatus = hdfs.getHDFS().getFileStatus(resolvedPath);
+      String fileKey = resolvedPath.toString();
+      return new HadoopBasicFileAttributes(fileKey, fileStatus);
+    } catch(FileNotFoundException e) {
+      // rethrow as nio Exception
+      throw new NoSuchFileException(resolvedPath.toString());
+    }
   }
 
   PosixFileAttributes getPosixAttributes() throws IOException {
@@ -515,7 +523,7 @@ public class HadoopPath implements Path {
 
   /**
    * Helper to get the raw interface of HDFS path.
-   * 
+   *
    * @return raw HDFS path object
    */
   public org.apache.hadoop.fs.Path getRawResolvedPath() {
