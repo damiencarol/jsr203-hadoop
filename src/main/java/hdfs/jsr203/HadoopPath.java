@@ -60,6 +60,9 @@ public class HadoopPath implements Path {
   private final HadoopFileSystem hdfs;
   private int hashcode = 0; // cached hash code (created lazily)
 
+  // the result path does not contain ./ and .. components
+  private volatile byte[] resolved = null;
+
   HadoopPath(HadoopFileSystem hdfs, byte[] path) {
     this(hdfs, path, false);
   }
@@ -558,9 +561,6 @@ public class HadoopPath implements Path {
     return this.hdfs.newFileChannel(getRawResolvedPath(), options, attrs);
   }
 
-  // the result path does not contain ./ and .. components
-  private volatile byte[] resolved = null;
-
   byte[] getResolvedPath() {
     byte[] r = resolved;
     if (r == null) {
@@ -658,7 +658,8 @@ public class HadoopPath implements Path {
   // create offset list if not already created
   private void initOffsets() {
     if (offsets == null) {
-      int count, index;
+      int count;
+      int index;
       // count names
       count = 0;
       index = 0;

@@ -19,31 +19,34 @@ import java.util.Arrays;
 import java.util.regex.PatternSyntaxException;
 
 public class HadoopUtils {
-    
-    /* Keep private the constructor for this utility class */
-    private HadoopUtils() {
-    }
+
+  private static final String regexMetaChars = ".^$+{[]|()";
+  private static final String globMetaChars = "\\*?[{";
+  private static char EOL = 0;  //TBD
+
+  /* Keep private the constructor for this utility class */
+  private HadoopUtils() {
+  }
 
 	/**
-     * Append a slash at the end, if it does not have one yet
-     */
-    static byte[] toDirectoryPath(byte[] dir) {
+	 * Append a slash at the end, if it does not have one yet
+	 */
+  static byte[] toDirectoryPath(byte[] dir) {
         if (dir.length != 0 && dir[dir.length - 1] != '/') {
             dir = Arrays.copyOf(dir, dir.length + 1);
             dir[dir.length - 1] = '/';
         }
         return dir;
     }
-    
-    private static final String regexMetaChars = ".^$+{[]|()";
-    private static final String globMetaChars = "\\*?[{";
+
     private static boolean isRegexMeta(char c) {
         return regexMetaChars.indexOf(c) != -1;
     }
+
     private static boolean isGlobMeta(char c) {
         return globMetaChars.indexOf(c) != -1;
     }
-    private static char EOL = 0;  //TBD
+
     private static char next(String glob, int i) {
         if (i < glob.length()) {
             return glob.charAt(i);

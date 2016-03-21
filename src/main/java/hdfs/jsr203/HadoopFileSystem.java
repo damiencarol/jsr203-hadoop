@@ -85,6 +85,11 @@ public class HadoopFileSystem extends FileSystem {
 	private volatile boolean isOpen = true;
 	private UserPrincipalLookupService userPrincipalLookupService;
     private int hashcode = 0;  // cached hash code (created lazily)
+  
+
+
+  private static final Set<String> supportedFileAttributeViews =
+      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("basic", "hadoop", "owner", "posix")));
 
 	public HadoopFileSystem(FileSystemProvider provider, String host, int uriPort) throws IOException {
 		
@@ -220,15 +225,11 @@ public class HadoopFileSystem extends FileSystem {
 	public FileSystemProvider provider() {
 		return this.provider;
 	}
-
-	private static final Set<String> supportedFileAttributeViews =
-            Collections.unmodifiableSet(
-                new HashSet<String>(Arrays.asList("basic", "hadoop", "owner", "posix")));
-
-    @Override
-    public Set<String> supportedFileAttributeViews() {
-        return supportedFileAttributeViews;
-    }
+	
+	@Override
+	public Set<String> supportedFileAttributeViews() {
+	  return supportedFileAttributeViews;
+	}
 	
 	public String getHost()
 	{
