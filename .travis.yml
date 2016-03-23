@@ -8,6 +8,8 @@ jdk:
 after_success: 
   - mvn -Ptravis -DrepoToken=$RP_TOK clean cobertura:cobertura coveralls:report
   - curl https://www.jpm4j.org/install/script | sh
+  - jpm install com.codacy:codacy-coverage-reporter:assembly
+  - codacy-coverage-reporter -l Java -r target/site/cobertura/coverage.xml
 env:
   global:
   - secure: G+7yVa6O/2/cUs9Sd0wIqudCUE+T8X0J2yxodmsn8Y7htr81dqLzgmzoBF2h/9+rvorEIOVFHlL+TldgzNzOQBmEsPLQpD3cewuWtXtL31F8tVI3b8ooqlevY8jjOXqWEjBjzA9WpemN7N6Mri/H2AiiygM4fn+jP1HBO/Cy0no=
