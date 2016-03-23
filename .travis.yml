@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: java
 install: mvn clean install -Dgpg.skip=true
 jdk:
@@ -7,9 +7,11 @@ jdk:
 - openjdk7
 after_success: 
   - mvn -Ptravis -DrepoToken=$RP_TOK clean cobertura:cobertura coveralls:report
-  - sudo curl https://www.jpm4j.org/install/script | sh
-  - jpm install com.codacy:codacy-coverage-reporter:assembly
-  - codacy-coverage-reporter -l Java -r target/site/cobertura/coverage.xml
+  - git clone --depth=5 https://github.com/codacy/codacy-coverage-reporter
+  - cd codacy-coverage-reporter
+  - sbt assembly
+  - cd ..
+  - java -cp ./codacy-coverage-reporter/target/codacy-coverage-reporter-assembly-1.0.4.jar com.codacy.CodacyCoverageReporter -l Java -r target/site/cobertura/coverage.xml
 env:
   global:
   - secure: G+7yVa6O/2/cUs9Sd0wIqudCUE+T8X0J2yxodmsn8Y7htr81dqLzgmzoBF2h/9+rvorEIOVFHlL+TldgzNzOQBmEsPLQpD3cewuWtXtL31F8tVI3b8ooqlevY8jjOXqWEjBjzA9WpemN7N6Mri/H2AiiygM4fn+jP1HBO/Cy0no=
