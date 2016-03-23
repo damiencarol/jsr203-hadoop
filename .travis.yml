@@ -11,7 +11,7 @@ after_success:
   - cd codacy-coverage-reporter
   - sbt assembly
   - cd ..
-  - java -cp ./codacy-coverage-reporter/target/codacy-coverage-reporter-assembly-1.0.4.jar com.codacy.CodacyCoverageReporter -l Java -r target/site/cobertura/coverage.xml
+  - java -cp ./codacy-coverage-reporter/target/codacy-coverage-reporter-assembly-*.jar com.codacy.CodacyCoverageReporter -l Java -r target/site/cobertura/coverage.xml
 env:
   global:
   - secure: G+7yVa6O/2/cUs9Sd0wIqudCUE+T8X0J2yxodmsn8Y7htr81dqLzgmzoBF2h/9+rvorEIOVFHlL+TldgzNzOQBmEsPLQpD3cewuWtXtL31F8tVI3b8ooqlevY8jjOXqWEjBjzA9WpemN7N6Mri/H2AiiygM4fn+jP1HBO/Cy0no=
