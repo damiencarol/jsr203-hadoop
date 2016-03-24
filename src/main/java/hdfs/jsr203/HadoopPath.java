@@ -17,8 +17,10 @@ package hdfs.jsr203;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOError;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -500,12 +502,12 @@ public class HadoopPath implements Path {
   }
 
   @Override
-  public URI toUri() {
+  public URI toUri() throws IOError {
     try {
       return new URI(HadoopFileSystemProvider.SCHEME, null, hdfs.getHost(),
-          hdfs.getPort(), new String(toAbsolutePath().path), null, null);
-    } catch (Exception ex) {
-      throw new AssertionError(ex);
+          hdfs.getPort(), toAbsolutePath().toString(), null, null);
+    } catch (URISyntaxException e) {
+      throw new IOError(e);
     }
   }
 
