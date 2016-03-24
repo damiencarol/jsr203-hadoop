@@ -936,11 +936,11 @@ public class HadoopFileSystem extends FileSystem {
 
 	@Override
 	public int hashCode() {
-		int h = hashcode;
-        if (h == 0)
-            hashcode = h = this.fs.hashCode();
-        return h;
-    }
+	  if (hashcode == 0) {
+	    hashcode = this.fs.hashCode();
+	  }
+	  return hashcode;
+  } 
 
     @Override
     public boolean equals(Object obj) {
