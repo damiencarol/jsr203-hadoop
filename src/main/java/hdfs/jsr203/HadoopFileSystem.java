@@ -247,7 +247,13 @@ public class HadoopFileSystem extends FileSystem {
 	public void createDirectory(final byte[] directory, FileAttribute<?>... attrs) throws IOException
 	{		
 		checkWritable();
-    byte[] dirPath = HadoopUtils.toDirectoryPath(directory);
+		byte[] dirPath;
+		if (directory.length != 0 && directory[directory.length - 1] != '/') {
+		  dirPath = Arrays.copyOf(directory, directory.length + 1);
+		  dirPath[dirPath.length - 1] = '/';
+		} else {
+		  dirPath = Arrays.copyOf(directory, directory.length);
+		}
     beginWrite();
     try {
         ensureOpen();
