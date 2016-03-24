@@ -85,7 +85,6 @@ public class HadoopFileSystem extends FileSystem {
 	private volatile boolean isOpen = true;
 	private UserPrincipalLookupService userPrincipalLookupService;
     private int hashcode = 0;  // cached hash code (created lazily)
-  
 
 
   private static final Set<String> supportedFileAttributeViews =
@@ -793,20 +792,26 @@ public class HadoopFileSystem extends FileSystem {
             endWrite();
         }
     }
-	
+
 	public void setTimes(byte[] bs, FileTime mtime, FileTime atime, FileTime ctime) throws IOException
 	{
-		HadoopPath hp = new HadoopPath(this, bs);
-		org.apache.hadoop.fs.Path path = new org.apache.hadoop.fs.Path("hdfs://"
-				+ this.getHost() + ":" + this.getPort() + new String(hp.getResolvedPath()));
-		// Get actual value
+		org.apache.hadoop.fs.Path hp = new HadoopPath(this, bs).getRawResolvedPath();
+		long mtime_millis = 0;
+		long atime_millis = 0;
+    // Get actual value
 		if (mtime == null || atime == null)
 		{
-			FileStatus stat = this.fs.getFileStatus(path);
-			atime = FileTime.fromMillis(stat.getAccessTime());
-			mtime = FileTime.fromMillis(stat.getModificationTime());
+			FileStatus stat = this.fs.getFileStatus(hp);
+      mtime_millis = stat.getModificationTime();
+			atime_millis = stat.getAccessTime();
 		}
-		this.fs.setTimes(path, mtime.toMillis(), atime.toMillis());
+    if (mtime != null) {
+      mtime_millis = mtime.toMillis();
+    }
+    if (atime != null) {
+      atime_millis = atime.toMillis();
+    }
+		this.fs.setTimes(hp, mtime_millis, atime_millis);
 	}
 
 	PosixFileAttributes getPosixFileAttributes(HadoopPath path) throws IOException

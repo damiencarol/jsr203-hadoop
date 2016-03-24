@@ -42,8 +42,10 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
@@ -129,6 +131,20 @@ public class TestFiles extends TestHadoop {
 
     assertNotNull(ft);
 
+  }
+  
+
+  @Test
+  public void testSetLastModifiedTime() throws IOException {
+    Path rootPath = Paths.get(clusterUri);
+
+    // Get today - 5 days
+    FileTime fileTime = FileTime.from(new Date().getTime() - TimeUnit.DAYS.toMillis(5),
+            TimeUnit.MILLISECONDS);
+
+    Files.setLastModifiedTime(rootPath, fileTime);
+    
+    Assert.assertEquals(fileTime, Files.getLastModifiedTime(rootPath));
   }
 
   /**
