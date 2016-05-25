@@ -10,15 +10,22 @@ import org.apache.hadoop.fs.Path;
 public class HdfsConfInitiator {
 	private static Configuration conf;
 	private static FileSystem fs;
-	private static String hadoophome = System.getenv("HADOOP_HOME");
+	private static String hadoophome;
 	static {
 		initialContext();
 	
 	}
 	
 	private static void initialContext() {
+		hadoophome = System.getenv("HADOOP_HOME");
+		if (hadoophome == null) {
+			hadoophome = "/home/novelbio/software/hadoop/";
+		} else {
+			hadoophome = addSep(hadoophome);
+		}
+		
 		if (!hadoophome.endsWith("/") && !hadoophome.endsWith("\\")) {
-			hadoophome = hadoophome + File.pathSeparator;
+			hadoophome = hadoophome + File.separator;
 		}
 		
 		conf = new Configuration();
@@ -42,5 +49,15 @@ public class HdfsConfInitiator {
 	
 	public static FileSystem getHdfs() {
 		return fs;
+	}
+	
+	private static String addSep(String path) {
+		path = path.trim();
+		if (!path.endsWith(File.separator)) {
+			if (!path.equals("")) {
+				path = path + File.separator;
+            }
+		}
+		return path;
 	}
 }
