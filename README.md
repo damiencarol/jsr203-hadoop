@@ -8,6 +8,7 @@ JSR 203 Implementation for Hadoop Distributed File System
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jsr203hadoop/jsr203hadoop/)
 [![Dependency Status](https://www.versioneye.com/user/projects/56c2fdbc18b2710036c8d4af/badge.svg)](https://www.versioneye.com/user/projects/56c2fdbc18b2710036c8d4af)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/24aa7d876cac493e89512b88df3887ab)](https://www.codacy.com/app/damien-carol/jsr203-hadoop)
+[![](https://jitpack.io/v/damiencarol/jsr203-hadoop.svg)](https://jitpack.io/#damiencarol/jsr203-hadoop)
 
 #### Maven artifact
 
