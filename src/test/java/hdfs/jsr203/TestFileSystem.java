@@ -408,4 +408,10 @@ public class TestFileSystem extends TestHadoop {
     pathToTest.register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
   }
 
+  @Test(expected=NullPointerException.class)
+  public void testNullHost() throws URISyntaxException, IOException {
+    URI uri = URI.create("hdfs:///tmp/testNullHost");
+    Paths.get(uri);
+  }
+
 }
