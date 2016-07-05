@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.jsr203hadoop</groupId>
 	<artifactId>jsr203hadoop</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<name>jsr203hadoop</name>
 	<description>A Java NIO file system provider for HDFS</description>
 	<url>https://github.com/damiencarol/jsr203-hadoop</url>
