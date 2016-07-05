@@ -101,7 +101,16 @@ public class HadoopFileSystem extends FileSystem {
 
 		// Create dynamic configuration
 		Configuration conf = new Configuration();
-		conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
+    if (host == null) {
+      String defaultScheme =
+          org.apache.hadoop.fs.FileSystem.getDefaultUri(conf).getScheme();
+      if (!"hdfs".equals(defaultScheme)) {
+        throw new NullPointerException("Null host not permitted if default " +
+            "Hadoop filesystem is not HDFS.");
+      }
+    } else {
+      conf.set("fs.defaultFS", "hdfs://" + host + ":" + port + "/");
+    }
 
         this.fs = org.apache.hadoop.fs.FileSystem.get(conf);
         
