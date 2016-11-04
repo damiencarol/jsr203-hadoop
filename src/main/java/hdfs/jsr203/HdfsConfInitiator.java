@@ -43,6 +43,10 @@ public class HdfsConfInitiator {
         }
 	}
 	
+	public static String getHadoopHome() {
+		return hadoophome;
+	}
+	
 	public static Configuration getConf() {
 		return conf;
 	}
