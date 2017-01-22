@@ -7,6 +7,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import com.google.common.base.Strings;
+
 public class HdfsConfInitiator {
 	private static Configuration conf;
 	private static FileSystem fs;
@@ -18,7 +20,7 @@ public class HdfsConfInitiator {
 	
 	private static void initialContext() {
 		hadoophome = System.getenv("HADOOP_HOME");
-		if (hadoophome == null) {
+		if (Strings.isNullOrEmpty(hadoophome)) {
 			hadoophome = "/home/novelbio/software/hadoop/";
 		} else {
 			hadoophome = addSep(hadoophome);
