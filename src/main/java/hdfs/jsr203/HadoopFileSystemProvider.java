@@ -106,7 +106,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public Path getPath(URI uri) {
-		return getFileSystem(uri).getPath(uri.getPath());
+		return getFileSystem(uri).getPath(uri.toString());
 	}
 
 	@Override
