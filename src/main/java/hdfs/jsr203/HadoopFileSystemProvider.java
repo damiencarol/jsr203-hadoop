@@ -106,9 +106,28 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public Path getPath(URI uri) {
-		return getFileSystem(uri).getPath(uri.toString());
+		String path = uri.getPath();
+		if (!isRealNull(path)) {
+			String sub = uri.toString().split(path, 2)[1];
+			if (!isRealNull(sub)) {
+				path += sub;
+			}
+		}
+		return getFileSystem(uri).getPath(path);
 	}
-
+	
+	private boolean isRealNull(String string) {
+		if (string == null) {
+			return true;
+		}else  if(string.trim().equals("")) {
+			return true;
+		}else if(string.equals("null")){
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
 	@Override
 	public String getScheme() {
 		return SCHEME;
