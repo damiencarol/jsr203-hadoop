@@ -106,6 +106,12 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
 	@Override
 	public Path getPath(URI uri) {
+		/**
+		 * some path may like hdfs:/home/hadoop/path/file1#file.txt
+		 * if just use uri.getPath(), it may like /home/hadoop/path/file1
+		 * but what we want is /home/hadoop/path/file1#file.txt
+		 * so it change like this.
+		 */
 		String path = uri.getPath();
 		if (!isRealNull(path)) {
 			String sub = uri.toString().split(path, 2)[1];
