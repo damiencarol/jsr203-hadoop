@@ -115,6 +115,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		String path = uri.getPath();
 		if (!isRealNull(path)) {
 			String[] splits = uri.toString().split(path, 2);
+			//if path contains blank, splits.length eq 1. because uri encode blank
 			String sub = splits.length > 1 ? splits[1] : null;
 			if (!isRealNull(sub)) {
 				path += sub;
