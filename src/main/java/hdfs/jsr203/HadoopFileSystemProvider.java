@@ -114,7 +114,8 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 		 */
 		String path = uri.getPath();
 		if (!isRealNull(path)) {
-			String sub = uri.toString().split(path, 2)[1];
+			String[] splits = uri.toString().split(path, 2);
+			String sub = splits.length > 1 ? splits[1] : null;
 			if (!isRealNull(sub)) {
 				path += sub;
 			}
