@@ -343,8 +343,8 @@ public class HadoopFileSystem extends FileSystem {
 			if (stat.isDirectory()) {
 				FileStatus[] stats = this.fs.listStatus(hadoopPath);
 				this.fs.delete(hadoopPath, true);
-				if (stats.length > 0)
-					throw new DirectoryNotEmptyException(hadoopPath.toString());
+//				if (stats.length > 0)
+//					throw new DirectoryNotEmptyException(hadoopPath.toString());
 			} else {
 				// Try to delete with no recursion
 				this.fs.delete(hadoopPath, false);
