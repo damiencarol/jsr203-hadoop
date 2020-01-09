@@ -6,10 +6,13 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
 public class HdfsConfInitiator {
+	private static final Logger logger = LoggerFactory.getLogger(HdfsConfInitiator.class);
 	private static Configuration conf;
 	private static FileSystem fs;
 	private static String hadoophome;
@@ -29,7 +32,7 @@ public class HdfsConfInitiator {
 		if (!hadoophome.endsWith("/") && !hadoophome.endsWith("\\")) {
 			hadoophome = hadoophome + File.separator;
 		}
-		
+		logger.info("hadoophome: " + hadoophome);
 		conf = new Configuration();
 		conf.addResource(new Path( hadoophome + "etc/hadoop/hdfs-site.xml"));
 		conf.addResource(new Path( hadoophome + "etc/hadoop/core-site.xml"));

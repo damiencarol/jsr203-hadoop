@@ -332,14 +332,24 @@ public class HadoopFileSystem extends FileSystem {
 		}
 		else
 		{
-			FileStatus stat = this.fs.getFileStatus(hadoopPath);
+			FileStatus stat = null;
+			try {
+				stat = this.fs.getFileStatus(hadoopPath);
+			} catch (FileNotFoundException e) {
+				this.fs.delete(hadoopPath, false);
+				return;
+			}
+	
 			if (stat.isDirectory()) {
 				FileStatus[] stats = this.fs.listStatus(hadoopPath);
+				this.fs.delete(hadoopPath, true);
 				if (stats.length > 0)
 					throw new DirectoryNotEmptyException(hadoopPath.toString());
+			} else {
+				// Try to delete with no recursion
+				this.fs.delete(hadoopPath, false);
 			}
-			// Try to delete with no recursion
-			this.fs.delete(hadoopPath, false);
+		
 		}
 		
         /*IndexNode inode = getInode(hadoopPath);
