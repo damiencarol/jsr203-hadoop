@@ -23,9 +23,9 @@ JSR 203 Implementation for Hadoop Distributed File System
 #### Prerequisites
 
 `jsr203-hadoop` requires:
-* Git,
-* Maven (3.0.4 or later)
-* JDK 1.7 or later.
+* Git
+* Maven 3.0.4 (or higher)
+* JDK 1.7 (or higher)
 
 #### Download and build
 
