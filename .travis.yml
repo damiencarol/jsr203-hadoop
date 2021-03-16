@@ -2,9 +2,9 @@ sudo: false
 language: java
 install: mvn clean install -Dgpg.skip=true
 jdk:
-- oraclejdk7
-- oraclejdk8
-- openjdk7
+  - oraclejdk8
+  - oraclejdk9
+  - openjdk8
 after_success: 
   - mvn -Ptravis -DrepoToken=$RP_TOK clean cobertura:cobertura coveralls:report
   #- git clone --depth=5 https://github.com/codacy/codacy-coverage-reporter
