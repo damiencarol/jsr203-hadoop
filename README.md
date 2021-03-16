@@ -14,15 +14,18 @@ JSR 203 Implementation for Hadoop Distributed File System
 
 ```xml
     <dependency>
-  		<groupId>com.github.jsr203hadoop</groupId>
-  		<artifactId>jsr203hadoop</artifactId>
-  		<version>1.0.1</version>
-  	</dependency>
+        <groupId>com.github.jsr203hadoop</groupId>
+        <artifactId>jsr203hadoop</artifactId>
+        <version>1.0.3</version>
+    </dependency>
 ```
 
 #### Prerequisites
 
-jsr203-hadoop requires git, maven (3.0.4 or later), and JDK 1.7 or later.
+`jsr203-hadoop` requires:
+* Git
+* Maven 3.0.4 (or higher)
+* JDK 1.7 (or higher)
 
 #### Download and build
 
@@ -36,7 +39,7 @@ Use `mvn -DskipTests` if you do not want to execute the tests.
 
 #### Example
 
-jsr203-hadoop provide NIO 2 access to your HDFS cluster. For
+`jsr203-hadoop` provide NIO 2 access to your HDFS cluster. For
 example, you can build URI starts with `hdfs://<namebode>:<port>` and use standard NIO API :
 
 ```java
