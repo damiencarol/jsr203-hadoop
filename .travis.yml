@@ -2,7 +2,6 @@ sudo: false
 language: java
 install: mvn clean install -Dgpg.skip=true
 jdk:
-  - oraclejdk9
   - openjdk9
 after_success: 
   - mvn -Ptravis -DrepoToken=$RP_TOK clean cobertura:cobertura coveralls:report
