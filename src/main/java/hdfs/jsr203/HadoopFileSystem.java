@@ -776,10 +776,6 @@ public class HadoopFileSystem extends FileSystem {
             FileStatus eSrc = this.fs.getFileStatus(eSrc_path);
             if (!this.fs.exists(eSrc_path))
                 throw new NoSuchFileException(getString(src));
-            if (eSrc.isDirectory()) {    // specification says to create dst directory
-                createDirectory(dst);
-                return;
-            }
             boolean hasReplace = false;
             boolean hasCopyAttrs = false;
             for (CopyOption opt : options) {

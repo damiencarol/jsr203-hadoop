@@ -383,6 +383,29 @@ public class TestFileSystem extends TestHadoop {
   }
 
   @Test
+  public void testMoveDirectory() throws IOException {
+    Path pathSrcDir = Paths.get(clusterUri.resolve("/tmp/testSrcDir"));
+    Path pathSrcFile = pathSrcDir.resolve("test.txt");
+    Path pathDstDir = Paths.get(clusterUri.resolve("/tmp/testDstDir"));
+    Path pathDstFile = pathDstDir.resolve("test.txt");
+
+    OutputStream os = Files.newOutputStream(pathSrcFile);
+    os.write("write \n several \n things\n".getBytes());
+    os.close();
+
+    long size = Files.size(pathSrcFile);
+    Files.move(pathSrcDir, pathDstDir);
+    assertFalse(Files.exists(pathSrcDir));
+    assertTrue(Files.exists(pathDstFile));
+    assertEquals(size, Files.size(pathDstFile));
+
+    Files.deleteIfExists(pathSrcFile);
+    Files.deleteIfExists(pathSrcDir);
+    Files.deleteIfExists(pathDstFile);
+    Files.deleteIfExists(pathDstDir);
+  }
+
+  @Test
   @Ignore
   public void newWatchService() throws IOException {
     Path pathToTest = Paths.get(clusterUri);
