@@ -62,7 +62,7 @@ public class TestFileSystem extends TestHadoop {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cluster = startMini(TestFileSystem.class.getName());
-    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+    clusterUri = formalizeClusterURI(cluster.getURI());
   }
 
   @AfterClass

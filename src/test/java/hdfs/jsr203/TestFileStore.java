@@ -50,7 +50,7 @@ public class TestFileStore extends TestHadoop {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cluster = startMini(TestFileStore.class.getName());
-    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+    clusterUri = formalizeClusterURI(cluster.getURI());
   }
 
   @AfterClass
