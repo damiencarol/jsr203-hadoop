@@ -61,6 +61,12 @@
     <module name="FileLength"/>
     <module name="FileTabCharacter"/>
 
+    <!-- Checks for Size Violations.                    -->
+    <!-- See http://checkstyle.sf.net/config_sizes.html -->
+    <module name="LineLength">
+        <property name="ignorePattern" value="^import"/>
+    </module>
+
     <module name="TreeWalker">
 
         <!-- Checks for Javadoc comments.                     -->
@@ -109,11 +115,6 @@
         <module name="UnusedImports"/>
 
 
-        <!-- Checks for Size Violations.                    -->
-        <!-- See http://checkstyle.sf.net/config_sizes.html -->
-        <module name="LineLength">
-          <property name="ignorePattern" value="^import"/>
-        </module>
         <module name="MethodLength"/>
         <module name="ParameterNumber"/>
 

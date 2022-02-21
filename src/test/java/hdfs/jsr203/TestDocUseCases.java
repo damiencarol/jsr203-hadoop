@@ -46,7 +46,7 @@ public class TestDocUseCases extends TestHadoop {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		cluster = startMini(TestDocUseCases.class.getName());
-		clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+		clusterUri = formalizeClusterURI(cluster.getURI());
 	}
 
 	@AfterClass
