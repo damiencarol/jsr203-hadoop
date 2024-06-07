@@ -15,6 +15,8 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.FileStatus;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOError;
@@ -48,18 +50,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.hadoop.fs.FileStatus;
-
 /**
  * Implement {@link Path}.
  */
 public class HadoopPath implements Path {
 
-  private byte[] path;
-  /** Store offsets of '/' chars. */
-  private volatile int[] offsets;
-  private String internalPath;
   private final HadoopFileSystem hdfs;
+  private final byte[] path;
+  /**
+   * Store offsets of '/' chars.
+   */
+  private volatile int[] offsets;
+  private final String internalPath;
   private int hashcode = 0; // cached hash code (created lazily)
 
   // the result path does not contain ./ and .. components
@@ -90,7 +92,7 @@ public class HadoopPath implements Path {
       FileStatus fileStatus = hdfs.getHDFS().getFileStatus(resolvedPath);
       String fileKey = resolvedPath.toString();
       return new HadoopBasicFileAttributes(fileKey, fileStatus);
-    } catch(FileNotFoundException e) {
+    } catch (FileNotFoundException e) {
       // rethrow as nio Exception
       throw new NoSuchFileException(resolvedPath.toString());
     }
@@ -222,7 +224,7 @@ public class HadoopPath implements Path {
   @Override
   public Path getRoot() {
     if (this.isAbsolute())
-      return new HadoopPath(this.hdfs, new byte[] { path[0] });
+      return new HadoopPath(this.hdfs, new byte[]{path[0]});
     else
       return null;
   }
@@ -313,7 +315,7 @@ public class HadoopPath implements Path {
 
   @Override
   public WatchKey register(WatchService watcher, Kind<?>[] events,
-      Modifier... modifiers) throws IOException {
+                           Modifier... modifiers) throws IOException {
     if (watcher == null || events == null || modifiers == null) {
       throw new NullPointerException();
     }
@@ -353,7 +355,7 @@ public class HadoopPath implements Path {
     if (o.equals(this))
       return new HadoopPath(getFileSystem(), new byte[0], true);
     if (/* this.getFileSystem() != o.getFileSystem() || */
-    this.isAbsolute() != o.isAbsolute()) {
+        this.isAbsolute() != o.isAbsolute()) {
       throw new IllegalArgumentException();
     }
     int mc = this.getNameCount();
@@ -560,12 +562,12 @@ public class HadoopPath implements Path {
   }
 
   SeekableByteChannel newByteChannel(Set<? extends OpenOption> options,
-      FileAttribute<?>... attrs) throws IOException {
+                                     FileAttribute<?>... attrs) throws IOException {
     return this.hdfs.newByteChannel(getRawResolvedPath(), options, attrs);
   }
 
   FileChannel newFileChannel(Set<? extends OpenOption> options,
-      FileAttribute<?>[] attrs) throws IOException {
+                             FileAttribute<?>[] attrs) throws IOException {
     return this.hdfs.newFileChannel(getRawResolvedPath(), options, attrs);
   }
 

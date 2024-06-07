@@ -15,6 +15,8 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.PathFilter;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.FileChannel;
@@ -38,8 +40,6 @@ import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.hadoop.fs.PathFilter;
 
 /**
  * {@link FileSystemProvider} implementation for HDFS.
@@ -94,7 +94,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
   @Override
   public <V extends FileAttributeView> V getFileAttributeView(Path path,
-      Class<V> type, LinkOption... options) {
+                                                              Class<V> type, LinkOption... options) {
     return toHadoopPath(path).getFileSystem().getView(toHadoopPath(path),
         type);
   }
@@ -141,21 +141,21 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
   @Override
   public SeekableByteChannel newByteChannel(Path path,
-      Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+                                            Set<? extends OpenOption> options, FileAttribute<?>... attrs)
       throws IOException {
     return toHadoopPath(path).newByteChannel(options, attrs);
   }
 
   @Override
   public FileChannel newFileChannel(Path path,
-      Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+                                    Set<? extends OpenOption> options, FileAttribute<?>... attrs)
       throws IOException {
     return toHadoopPath(path).newFileChannel(options, attrs);
   }
 
   @Override
   public DirectoryStream<Path> newDirectoryStream(Path dir,
-      Filter<? super Path> filter) throws IOException {
+                                                  Filter<? super Path> filter) throws IOException {
     return toHadoopPath(dir).newDirectoryStream(filter);
   }
 
@@ -168,7 +168,7 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
   @SuppressWarnings("unchecked")
   @Override
   public <A extends BasicFileAttributes> A readAttributes(Path path,
-      Class<A> type, LinkOption... options)
+                                                          Class<A> type, LinkOption... options)
       throws IOException {
 
     if (type == BasicFileAttributes.class ||
@@ -185,14 +185,14 @@ public class HadoopFileSystemProvider extends FileSystemProvider {
 
   @Override
   public Map<String, Object> readAttributes(Path path, String attributes,
-      LinkOption... options) throws IOException {
+                                            LinkOption... options) throws IOException {
     return toHadoopPath(path).getFileSystem().readAttributes(
         toHadoopPath(path), attributes, options);
   }
 
   @Override
   public void setAttribute(Path path, String attribute, Object value,
-      LinkOption... options) throws IOException {
+                           LinkOption... options) throws IOException {
     toHadoopPath(path).getFileSystem().setAttribute(toHadoopPath(path),
         attribute, value, options);
   }

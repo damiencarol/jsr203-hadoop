@@ -15,6 +15,9 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.permission.FsPermission;
+
 import java.io.IOException;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -22,9 +25,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Set;
-
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.permission.FsPermission;
 
 /**
  * Implement {@link PosixFileAttributes}.
@@ -37,7 +37,7 @@ public class HadoopPosixFileAttributes extends HadoopBasicFileAttributes
   private final Set<PosixFilePermission> permissions;
 
   public HadoopPosixFileAttributes(HadoopFileSystem hdfs, Object fileKey,
-      FileStatus fileStatus) throws IOException {
+                                   FileStatus fileStatus) throws IOException {
     super(fileKey, fileStatus);
     this.owner = hdfs.getUserPrincipalLookupService()
         .lookupPrincipalByGroupName(fileStatus.getOwner());

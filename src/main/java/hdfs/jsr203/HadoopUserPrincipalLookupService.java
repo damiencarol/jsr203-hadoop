@@ -26,7 +26,7 @@ import java.nio.file.attribute.UserPrincipalLookupService;
 public class HadoopUserPrincipalLookupService
     extends UserPrincipalLookupService {
 
-  private HadoopFileSystem hdfs;
+  private final HadoopFileSystem hdfs;
 
   public HadoopUserPrincipalLookupService(HadoopFileSystem hadoopFileSystem) {
     this.hdfs = hadoopFileSystem;

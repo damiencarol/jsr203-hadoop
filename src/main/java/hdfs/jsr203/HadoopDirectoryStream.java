@@ -34,8 +34,8 @@ public class HadoopDirectoryStream implements DirectoryStream<Path> {
   private volatile Iterator<Path> itr;
 
   HadoopDirectoryStream(HadoopPath hadoopPath,
-      DirectoryStream.Filter<? super java.nio.file.Path> filter)
-          throws IOException {
+                        DirectoryStream.Filter<? super java.nio.file.Path> filter)
+      throws IOException {
     this.hadoopfs = hadoopPath.getFileSystem();
     this.path = hadoopPath;
     this.filter = filter;

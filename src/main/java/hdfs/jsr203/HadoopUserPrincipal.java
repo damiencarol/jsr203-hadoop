@@ -23,8 +23,8 @@ import java.util.Arrays;
  */
 public class HadoopUserPrincipal implements UserPrincipal {
 
-  private org.apache.hadoop.security.UserGroupInformation ugi;
   private final String name;
+  private final org.apache.hadoop.security.UserGroupInformation ugi;
 
   public HadoopUserPrincipal(HadoopFileSystem hdfs, String name) {
     this.ugi = org.apache.hadoop.security.UserGroupInformation
@@ -43,14 +43,10 @@ public class HadoopUserPrincipal implements UserPrincipal {
       return true;
     } else if (obj == null || getClass() != obj.getClass()) {
       return false;
-    } else if (!this.ugi.getUserName()
+    } else return this.ugi.getUserName()
         .equals(((HadoopUserPrincipal) obj).ugi.getUserName())
-        || !Arrays.equals(this.ugi.getGroupNames(),
-            ((HadoopUserPrincipal) obj).ugi.getGroupNames())) {
-      return false;
-    } else {
-      return true;
-    }
+        && Arrays.equals(this.ugi.getGroupNames(),
+        ((HadoopUserPrincipal) obj).ugi.getGroupNames());
   }
 
   @Override

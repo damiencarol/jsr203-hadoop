@@ -50,7 +50,8 @@ public class TestWatchService extends TestHadoop {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     cluster = startMini(TestWatchService.class.getName());
-    clusterUri = formalizeClusterURI(cluster.getFileSystem().getUri());
+    org.apache.hadoop.hdfs.DistributedFileSystem dfs = cluster.getFileSystem();
+    clusterUri = formalizeClusterURI(dfs.getUri());
   }
 
   @AfterClass

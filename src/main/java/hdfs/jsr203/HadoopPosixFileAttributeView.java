@@ -15,6 +15,10 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.FileTime;
@@ -26,10 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-
 /**
  * Implementation of {@link PosixFileAttributeView}.
  */
@@ -37,35 +37,10 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
     implements PosixFileAttributeView, IAttributeReader, IAttributeWriter {
 
   private final HadoopPath path;
-  /** posix or owner ? */
+  /**
+   * posix or owner ?
+   */
   private final boolean isPosixView;
-
-  private enum AttrID {
-    // file
-    lastModifiedTime,
-
-    lastAccessTime,
-
-    creationTime,
-
-    size,
-
-    isRegularFile,
-
-    isDirectory,
-
-    isSymbolicLink,
-
-    isOther,
-
-    fileKey,
-
-    // fileowner
-    owner,
-
-    // posix
-    permissions, group
-  };
 
   public HadoopPosixFileAttributeView(HadoopPath path, boolean isPosixView) {
     super(path);
@@ -75,7 +50,7 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
 
   @Override
   public void setTimes(FileTime lastModifiedTime, FileTime lastAccessTime,
-      FileTime createTime) throws IOException {
+                       FileTime createTime) throws IOException {
     throw new IOException("Not implemented");
   }
 
@@ -111,7 +86,7 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
 
   @Override
   public Map<String, Object> readAttributes(String attributes,
-      LinkOption[] options) throws IOException {
+                                            LinkOption[] options) throws IOException {
     PosixFileAttributes zfas = readAttributes();
     LinkedHashMap<String, Object> map = new LinkedHashMap<>();
     if ("*".equals(attributes)) {
@@ -136,14 +111,41 @@ public class HadoopPosixFileAttributeView extends HadoopFileOwnerAttributeView
 
   private Object attribute(AttrID id, PosixFileAttributes hfas) {
     switch (id) {
-    case owner:
-      return hfas.owner().getName();
-    case group:
-      return hfas.owner().getName();
-    case permissions:
-      return hfas.owner().getName();
-    default:
-      return null;
+      case owner:
+        return hfas.owner().getName();
+      case group:
+        return hfas.owner().getName();
+      case permissions:
+        return hfas.owner().getName();
+      default:
+        return null;
     }
+  }
+
+  private enum AttrID {
+    // file
+    lastModifiedTime,
+
+    lastAccessTime,
+
+    creationTime,
+
+    size,
+
+    isRegularFile,
+
+    isDirectory,
+
+    isSymbolicLink,
+
+    isOther,
+
+    fileKey,
+
+    // fileowner
+    owner,
+
+    // posix
+    permissions, group
   }
 }

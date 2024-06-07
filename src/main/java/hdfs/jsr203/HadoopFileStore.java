@@ -15,6 +15,8 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.FsStatus;
+
 import java.io.IOException;
 import java.nio.file.FileStore;
 import java.nio.file.attribute.BasicFileAttributeView;
@@ -22,14 +24,12 @@ import java.nio.file.attribute.FileAttributeView;
 import java.nio.file.attribute.FileStoreAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
 
-import org.apache.hadoop.fs.FsStatus;
-
 /**
  * Implements {@link FileStore}.
  */
 public class HadoopFileStore extends FileStore {
 
-  private HadoopFileSystem system;
+  private final HadoopFileSystem system;
 
   public HadoopFileStore(HadoopPath path) {
     this.system = path.getFileSystem();
@@ -97,10 +97,9 @@ public class HadoopFileStore extends FileStore {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("/ (");
-    sb.append(system.getHDFS().getCanonicalServiceName());
-    sb.append(')');
-    return sb.toString();
+    String sb = "/ (" + system.getHDFS().getCanonicalServiceName() +
+        ')';
+    return sb;
   }
 
 }

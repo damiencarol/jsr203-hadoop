@@ -15,11 +15,11 @@
  */
 package hdfs.jsr203;
 
+import org.apache.hadoop.fs.FileStatus;
+
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.hadoop.fs.FileStatus;
 
 /**
  * Implementation of {@link BasicFileAttributes}.
@@ -30,7 +30,7 @@ public class HadoopBasicFileAttributes implements BasicFileAttributes {
   private final Object fileKey;
 
   public HadoopBasicFileAttributes(final Object fileKey,
-      final FileStatus fileStatus) {
+                                   final FileStatus fileStatus) {
     this.fileKey = fileKey;
     this.fileStatus = fileStatus;
   }

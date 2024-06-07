@@ -23,8 +23,8 @@ import java.nio.file.WatchEvent;
  */
 public class HadoopCreateWatchEvent implements WatchEvent<Path> {
 
-  private Path path;
-  private WatchEvent.Kind<Path> kind;
+  private final Path path;
+  private final WatchEvent.Kind<Path> kind;
 
   HadoopCreateWatchEvent(Path path, WatchEvent.Kind<Path> kind) {
     this.path = path;
